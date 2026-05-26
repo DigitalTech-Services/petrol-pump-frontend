@@ -1,9 +1,9 @@
 {
 <<<<<<< HEAD
-  "name": "petrol",
-=======
   "name": "pump",
->>>>>>> 39d4f5e (Setup For Frontend)
+=======
+  "name": "petrol",
+>>>>>>> fb57953 (Setup)
   "version": "0.0.0",
   "private": true,
   "type": "module",
