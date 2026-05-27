@@ -19,7 +19,7 @@
     <nav class="flex-1 overflow-y-auto py-3 px-3">
       <div class="mb-1">
         <div class="nav-label">Main</div>
-        <NavItem to="/dashboard"    icon="./assents/dashboard.svg" label="Dashboard" />
+        <NavItem to="/dashboard"    icon="📊" label="Dashboard" />
       </div>
 
       <div class="mb-1">
