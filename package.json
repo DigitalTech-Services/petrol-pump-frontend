@@ -1,15 +1,6 @@
 {
-<<<<<<< HEAD
-<<<<<<< HEAD
-  "name": "pump",
-=======
-  "name": "petrol",
->>>>>>> fb57953 (Setup)
-  "version": "0.0.0",
-=======
   "name": "petromines-management",
   "version": "1.0.0",
->>>>>>> f13c80d (Claude.ai setup)
   "private": true,
   "scripts": {
     "dev": "vite",

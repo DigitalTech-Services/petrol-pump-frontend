@@ -1,15 +1,4 @@
 <template>
-<<<<<<< HEAD
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-<<<<<<< HEAD
-    documentation dakds
-=======
-    documentation
->>>>>>> fb57953 (Setup)
-  </p>
-=======
   <RouterView />
   <!-- Global Toast Notifications -->
   <Teleport to="body">
@@ -27,7 +16,6 @@
       </TransitionGroup>
     </div>
   </Teleport>
->>>>>>> f13c80d (Claude.ai setup)
 </template>
 
 <script setup>
