@@ -34,7 +34,7 @@ const routes = [
         path: 'dashboard',
         name: 'Dashboard',
         component: DashboardView,
-        meta: { title: 'Dashboard', icon: '🏠', breadcrumb: ['Dashboard'] }
+        meta: { title: 'Dashboard', icon: '📊', breadcrumb: ['Dashboard'] }
       },
       {
         path: 'sales',

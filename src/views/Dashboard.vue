@@ -12,7 +12,7 @@
         <div class="kpi-label">MS Sold (Litres)</div>
         <div class="kpi-value">{{ fmt(store.totalMS, 0) }}</div>
         <div class="kpi-sub"><span class="up">↑ 5.2%</span> growth</div>
-        <div class="kpi-icon">🔴</div>
+        <div class="kpi-icon">🟠</div>
       </div>
       <div class="kpi-card" style="--kpi-c:var(--hsd)">
         <div class="kpi-label">HSD Sold (Litres)</div>
