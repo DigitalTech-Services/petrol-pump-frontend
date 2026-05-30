@@ -236,12 +236,13 @@ import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard    from '@/components/ui/KpiCard.vue'
 import BaseChart  from '@/components/charts/BaseChart.vue'
 import { fmt, chartColors } from '@/utils/format'
+import { exportCSV, printTable } from '@/utils/export'
 
 const tab = ref('summary')
 const ui  = useUiStore()
 
-const exportPdf   = () => ui.success('PDF export — connect to salesApi.exportPdf()')
-const exportExcel = () => ui.success('Excel export — connect to salesApi.exportExcel()')
+const exportPdf   = () => { printTable('Monthly P&L Report — April 2026', ['Metric','Value'], plRows.map(r=>[r.label,r.value])); ui.success('Print dialog opened!') }
+const exportExcel = () => { exportCSV('Monthly_Report_April2026', ['Metric','Value'], plRows.map(r=>[r.label,r.value])); ui.success('CSV exported!') }
 const printReport = () => window.print()
 
 const LABELS = ['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15',
