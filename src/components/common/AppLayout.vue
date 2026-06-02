@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-screen overflow-hidden" style="background:#0a0c10">
+   <div class="flex h-screen overflow-hidden" style="background:#0a0c10">
 
     <!-- Mobile overlay -->
     <Transition name="fade">

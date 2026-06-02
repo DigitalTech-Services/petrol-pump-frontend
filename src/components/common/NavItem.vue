@@ -5,7 +5,11 @@
     :class="{ active: isActive }"
     @click="ui.closeSidebar()"
   >
-    <span class="text-base w-5 text-center flex-shrink-0">{{ icon }}</span>
+    <component
+  :is="icon"
+  :size="18"
+  class="flex-shrink-0"
+/>
     <span class="truncate flex-1">{{ label }}</span>
     <slot name="badge" />
   </RouterLink>
@@ -16,7 +20,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUiStore } from '@/stores/ui'
 
-const props  = defineProps({ to: String, icon: String, label: String })
+const props  = defineProps({ to: String, icon: Object, label: String })
 const route  = useRoute()
 const ui     = useUiStore()
 

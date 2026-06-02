@@ -21,44 +21,107 @@
     <!-- Nav -->
     <nav class="flex-1 overflow-y-auto py-3 px-3">
 
-      <div class="mb-1">
-        <div class="nav-label">Main</div>
-        <NavItem to="/dashboard"    icon="🏠" label="Dashboard" />
-      </div>
+  <div class="mb-1">
+    <div class="nav-label">Main</div>
 
-      <div class="mb-1">
-        <div class="nav-label">Operations</div>
-        <NavItem to="/sales"        icon="⛽" label="Petrol Sales">
-          <template #badge><span class="ml-auto text-[10px] font-bold bg-[#f59e0b]/20 text-[#f59e0b] px-1.5 py-0.5 rounded-full">Daily</span></template>
-        </NavItem>
-        <NavItem to="/sales/new"    icon="➕" label="New Sale Entry" />
-        <NavItem to="/stock"        icon="🛢️" label="Stock Summary" />
-        <NavItem to="/meter"        icon="📊" label="Meter Readings" />
-      </div>
+    <NavItem
+      to="/dashboard"
+      :icon="LayoutDashboard"
+      label="Dashboard"
+    />
+  </div>
 
-      <div class="mb-1">
-        <div class="nav-label">Finance</div>
-        <NavItem to="/transactions" icon="💳" label="Card Transactions" />
-        <NavItem to="/expenses"     icon="💸" label="Expenses" />
-      </div>
+  <div class="mb-1">
+    <div class="nav-label">Operations</div>
 
-      <div class="mb-1">
-        <div class="nav-label">HR</div>
-        <NavItem to="/staff"        icon="👥" label="Staff & Salary" />
-        <NavItem to="/timesheet"    icon="🕐" label="Time Sheet" />
-      </div>
+    <NavItem
+      to="/sales"
+      :icon="Fuel"
+      label="Petrol Sales"
+    >
+      <template #badge>
+        <span
+          class="ml-auto text-[10px] font-bold
+          bg-[#f59e0b]/20 text-[#f59e0b]
+          px-1.5 py-0.5 rounded-full"
+        >
+          Daily
+        </span>
+      </template>
+    </NavItem>
 
-      <div class="mb-1">
-        <div class="nav-label">Analytics</div>
-        <NavItem to="/reports"      icon="📋" label="Reports" />
-      </div>
+    <NavItem
+      to="/sales/new"
+      :icon="CirclePlus"
+      label="New Sale Entry"
+    />
 
-      <div>
-        <div class="nav-label">System</div>
-        <NavItem to="/settings"     icon="⚙️" label="Settings" />
-      </div>
+    <NavItem
+      to="/stock"
+      :icon="Warehouse"
+      label="Stock Summary"
+    />
 
-    </nav>
+    <NavItem
+      to="/meter"
+      :icon="Gauge"
+      label="Meter Readings"
+    />
+  </div>
+
+  <div class="mb-1">
+    <div class="nav-label">Finance</div>
+
+    <NavItem
+      to="/transactions"
+      :icon="CreditCard"
+      label="Card Transactions"
+    />
+
+    <NavItem
+      to="/expenses"
+      :icon="Receipt"
+      label="Expenses"
+    />
+  </div>
+
+  <div class="mb-1">
+    <div class="nav-label">HR</div>
+
+    <NavItem
+      to="/staff"
+      :icon="Users"
+      label="Staff & Salary"
+    />
+
+    <NavItem
+      to="/timesheet"
+      :icon="Clock3"
+      label="Time Sheet"
+    />
+  </div>
+
+  <div class="mb-1">
+    <div class="nav-label">Analytics</div>
+
+    <NavItem
+      to="/reports"
+      :icon="BarChart3"
+      label="Reports"
+    />
+  </div>
+
+  <div>
+    <div class="nav-label">System</div>
+
+    <NavItem
+      to="/settings"
+      :icon="Settings"
+      label="Settings"
+    />
+  </div>
+
+</nav>
 
     <!-- User card -->
     <div class="px-3 py-3" style="border-top:1px solid #242d3e">
@@ -73,9 +136,11 @@
         </div>
         <button
           @click="handleLogout"
-          class="text-[#5a6a82] hover:text-[#ef4444] transition-colors text-[12px] flex-shrink-0"
+          class="text-[#5a6a82] hover:text-[#ef4444] transition-colors flex-shrink-0"
           title="Logout"
-        >⏻</button>
+        >
+          <LogOut :size="16" />
+        </button>
       </div>
     </div>
 
@@ -86,16 +151,36 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useUiStore }   from '@/stores/ui'
+import { useUiStore } from '@/stores/ui'
 import NavItem from './NavItem.vue'
 
-const auth   = useAuthStore()
-const ui     = useUiStore()
+import {
+  LayoutDashboard,
+  Fuel,
+  CirclePlus,
+  Warehouse,
+  Gauge,
+  CreditCard,
+  Receipt,
+  Users,
+  Clock3,
+  BarChart3,
+  Settings,
+  LogOut
+} from 'lucide-vue-next'
+
+const auth = useAuthStore()
+const ui = useUiStore()
 const router = useRouter()
 
 const initials = computed(() => {
   const n = auth.fullName || 'Admin'
-  return n.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+  return n
+    .split(' ')
+    .map(w => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 })
 
 async function handleLogout() {
