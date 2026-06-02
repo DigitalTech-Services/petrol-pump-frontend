@@ -1,14 +1,11 @@
 <template>
-  <aside
-    class="fixed top-0 left-0 h-full z-50 flex flex-col transition-transform duration-300"
-    :class="[
-      ui.sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-    ]"
-    style="width:248px; background:#0f1218; border-right:1px solid #242d3e;"
-  >
+  <aside class="fixed top-0 left-0 h-full z-50 flex flex-col transition-transform duration-300" :class="[
+    ui.sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+  ]" style="width:248px; background:#0f1218; border-right:1px solid #242d3e;">
     <!-- Logo -->
     <div class="flex items-center gap-3 px-5 py-[18px]" style="border-bottom:1px solid #242d3e">
-      <div class="w-9 h-9 rounded-[10px] flex items-center justify-center font-display font-bold text-[18px] text-[#0a0c10] flex-shrink-0"
+      <div
+        class="w-9 h-9 rounded-[10px] flex items-center justify-center font-display font-bold text-[18px] text-[#0a0c10] flex-shrink-0"
         style="background:linear-gradient(135deg,#f59e0b,#d97706); box-shadow:0 0 20px rgba(245,158,11,0.3)">
         K
       </div>
@@ -21,112 +18,67 @@
     <!-- Nav -->
     <nav class="flex-1 overflow-y-auto py-3 px-3">
 
-  <div class="mb-1">
-    <div class="nav-label">Main</div>
+      <div class="mb-1">
+        <div class="nav-label">Main</div>
 
-    <NavItem
-      to="/dashboard"
-      :icon="LayoutDashboard"
-      label="Dashboard"
-    />
-  </div>
+        <NavItem to="/dashboard" :icon="LayoutDashboard" label="Dashboard" />
+      </div>
 
-  <div class="mb-1">
-    <div class="nav-label">Operations</div>
+      <div class="mb-1">
+        <div class="nav-label">Operations</div>
 
-    <NavItem
-      to="/sales"
-      :icon="Fuel"
-      label="Petrol Sales"
-    >
-      <template #badge>
-        <span
-          class="ml-auto text-[10px] font-bold
+        <NavItem to="/sales" :icon="Fuel" label="Petrol Sales">
+          <template #badge>
+            <span class="ml-auto text-[10px] font-bold
           bg-[#f59e0b]/20 text-[#f59e0b]
-          px-1.5 py-0.5 rounded-full"
-        >
-          Daily
-        </span>
-      </template>
-    </NavItem>
+          px-1.5 py-0.5 rounded-full">
+              Daily
+            </span>
+          </template>
+        </NavItem>
 
-    <NavItem
-      to="/sales/new"
-      :icon="CirclePlus"
-      label="New Sale Entry"
-    />
+        <NavItem to="/sales/new" :icon="CirclePlus" label="New Sale Entry" />
 
-    <NavItem
-      to="/stock"
-      :icon="Warehouse"
-      label="Stock Summary"
-    />
+        <NavItem to="/stock" :icon="Warehouse" label="Stock Summary" />
 
-    <NavItem
-      to="/meter"
-      :icon="Gauge"
-      label="Meter Readings"
-    />
-  </div>
+        <NavItem to="/meter" :icon="Gauge" label="Meter Readings" />
+      </div>
 
-  <div class="mb-1">
-    <div class="nav-label">Finance</div>
+      <div class="mb-1">
+        <div class="nav-label">Finance</div>
 
-    <NavItem
-      to="/transactions"
-      :icon="CreditCard"
-      label="Card Transactions"
-    />
+        <NavItem to="/transactions" :icon="CreditCard" label="Card Transactions" />
 
-    <NavItem
-      to="/expenses"
-      :icon="Receipt"
-      label="Expenses"
-    />
-  </div>
+        <NavItem to="/expenses" :icon="Receipt" label="Expenses" />
+      </div>
 
-  <div class="mb-1">
-    <div class="nav-label">HR</div>
+      <div class="mb-1">
+        <div class="nav-label">HR</div>
 
-    <NavItem
-      to="/staff"
-      :icon="Users"
-      label="Staff & Salary"
-    />
+        <NavItem to="/staff" :icon="Users" label="Staff & Salary" />
 
-    <NavItem
-      to="/timesheet"
-      :icon="Clock3"
-      label="Time Sheet"
-    />
-  </div>
+        <NavItem to="/timesheet" :icon="Clock3" label="Time Sheet" />
+      </div>
 
-  <div class="mb-1">
-    <div class="nav-label">Analytics</div>
+      <div class="mb-1">
+        <div class="nav-label">Analytics</div>
 
-    <NavItem
-      to="/reports"
-      :icon="BarChart3"
-      label="Reports"
-    />
-  </div>
+        <NavItem to="/reports" :icon="BarChart3" label="Reports" />
+      </div>
 
-  <div>
-    <div class="nav-label">System</div>
+      <div>
+        <div class="nav-label">System</div>
 
-    <NavItem
-      to="/settings"
-      :icon="Settings"
-      label="Settings"
-    />
-  </div>
+        <NavItem to="/settings" :icon="Settings" label="Settings" />
+      </div>
 
-</nav>
+    </nav>
 
     <!-- User card -->
     <div class="px-3 py-3" style="border-top:1px solid #242d3e">
       <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-[#161b24] transition-colors">
-        <div class="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold font-display text-white flex-shrink-0"
+        <div
+          class="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold font-display text-white flex-shrink-0"
           style="background:linear-gradient(135deg,#f59e0b,#6366f1)">
           {{ initials }}
         </div>
@@ -134,11 +86,8 @@
           <div class="text-[13px] font-semibold text-white truncate">{{ auth.fullName }}</div>
           <div class="text-[11px] text-[#5a6a82] capitalize">{{ auth.role }}</div>
         </div>
-        <button
-          @click="handleLogout"
-          class="text-[#5a6a82] hover:text-[#ef4444] transition-colors flex-shrink-0"
-          title="Logout"
-        >
+        <button @click="handleLogout" class="text-[#5a6a82] hover:text-[#ef4444] transition-colors flex-shrink-0"
+          title="Logout">
           <LogOut :size="16" />
         </button>
       </div>
