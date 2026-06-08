@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // ── Base Axios instance ───────────────────────────────────────────
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
+  baseURL: 'http://127.0.0.1:8000/api',
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
 })
@@ -18,10 +18,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res.data,
   (err) => {
-    if (err.response?.status === 401) {
+    if (err.response?.status !== 200) {
       localStorage.removeItem('pm_token')
       localStorage.removeItem('pm_user')
-      window.location.href = '/login'
+      // window.location.href = '/login'
     }
     return Promise.reject(err.response?.data || { message: err.message })
   }
@@ -31,11 +31,10 @@ api.interceptors.response.use(
 // AUTH
 // ──────────────────────────────────────────────────────────────────
 export const authApi = {
-  login:   (creds) => api.post('/auth/login', creds),
-  logout:  ()      => api.post('/auth/logout'),
-  me:      ()      => api.get('/auth/me'),
-  refresh: ()      => api.post('/auth/refresh'),
-  changePassword: (data) => api.put('/auth/change-password', data),
+  login:   (creds) => api.post('/user/login', creds),
+  logout:  ()      => api.post('/user/logout'),
+  me:      ()      => api.post('/user/profile'),
+  changePassword: (data) => api.post('/user/change-password', data),
 }
 
 // ──────────────────────────────────────────────────────────────────
