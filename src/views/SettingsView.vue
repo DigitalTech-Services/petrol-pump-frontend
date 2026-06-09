@@ -107,46 +107,178 @@
           </div>
         </template>
 
-        <!-- Users -->
+        <!-- Users (owner only) -->
         <template v-if="activeSection === 'users'">
           <div class="card">
             <div class="card-header">
               <span class="text-lg">👤</span>
-              <div><div class="font-display font-bold text-[15px] text-white">User Management</div><div class="text-[11.5px] text-[#5a6a82] mt-0.5">Control login access and roles</div></div>
-              <button class="btn btn-primary ml-auto text-[12px] py-1">＋ Add User</button>
+              <div>
+                <div class="font-display font-bold text-[15px] text-white">User Management</div>
+                <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Manage manager accounts for this station</div>
+              </div>
+              <button class="btn btn-primary ml-auto text-[12px] py-1" @click="openAddManager">＋ Add Manager</button>
             </div>
-            <div class="overflow-x-auto">
+
+            <!-- Loading -->
+            <div v-if="managersLoading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
+              <span class="animate-spin inline-block mr-2">⟳</span>Loading…
+            </div>
+
+            <!-- Error -->
+            <div v-else-if="managersError" class="card-body text-center py-8">
+              <p class="text-[#ef4444] text-[13px] mb-2">{{ managersError }}</p>
+              <button class="text-[#f59e0b] text-[12px] hover:underline" @click="loadManagers">Retry</button>
+            </div>
+
+            <!-- Table -->
+            <div v-else class="overflow-x-auto">
               <table class="data-table">
-                <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last Login</th><th>Status</th><th>Action</th></tr></thead>
+                <thead>
+                  <tr><th>Name</th><th>Email</th><th>Contact</th><th>Role</th><th>Created</th><th>Action</th></tr>
+                </thead>
                 <tbody>
-                  <tr v-for="u in users" :key="u.email">
+                  <!-- Logged-in owner row -->
+                  <tr>
                     <td>
                       <div class="flex items-center gap-2.5">
                         <div class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold font-display text-white"
-                          :style="{ background: u.color }">{{ u.name.slice(0,2).toUpperCase() }}</div>
-                        <span class="font-medium text-white">{{ u.name }}</span>
+                          style="background:linear-gradient(135deg,#f59e0b,#d97706)">
+                          {{ initials(auth.fullName) }}
+                        </div>
+                        <span class="font-medium text-white">{{ auth.fullName }}</span>
                       </div>
                     </td>
-                    <td class="font-mono-custom text-[12px] text-[#8a9ab5]">{{ u.email }}</td>
+                    <td class="font-mono-custom text-[12px] text-[#8a9ab5]">{{ auth.user?.email }}</td>
+                    <td class="text-[12px] text-[#8a9ab5]">{{ auth.user?.contact || '—' }}</td>
+                    <td><span class="badge badge-ms">Owner</span></td>
+                    <td class="text-[12px] text-[#5a6a82]">—</td>
+                    <td><span class="text-[11px] text-[#5a6a82]">Current account</span></td>
+                  </tr>
+                  <!-- Sub-user (manager) rows -->
+                  <tr v-for="m in managers" :key="m.id">
                     <td>
-                      <span class="badge"
-                        :class="u.role === 'Admin' ? 'badge-ms' : u.role === 'Manager' ? 'badge-blue' : 'badge-gray'">
-                        {{ u.role }}
-                      </span>
+                      <div class="flex items-center gap-2.5">
+                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold font-display text-white"
+                          :style="{ background: avatarColor(m.name) }">
+                          {{ initials(m.name) }}
+                        </div>
+                        <span class="font-medium text-white">{{ m.name }}</span>
+                      </div>
                     </td>
-                    <td class="text-[12px] text-[#5a6a82]">{{ u.lastLogin }}</td>
-                    <td><span class="badge" :class="u.active ? 'badge-green' : 'badge-red'">{{ u.active ? 'Active' : 'Inactive' }}</span></td>
+                    <td class="font-mono-custom text-[12px] text-[#8a9ab5]">{{ m.email }}</td>
+                    <td class="text-[12px] text-[#8a9ab5]">{{ m.contact || '—' }}</td>
+                    <td><span class="badge badge-blue">Manager</span></td>
+                    <td class="text-[12px] text-[#5a6a82]">{{ formatDate(m.created_at) }}</td>
                     <td>
                       <div class="flex gap-1.5">
-                        <button class="btn btn-ghost py-0.5 px-2 text-[11px]">✏️ Edit</button>
-                        <button class="btn btn-danger py-0.5 px-2 text-[11px]" v-if="u.role !== 'Admin'">🗑</button>
+                        <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditManager(m)">✏️ Edit</button>
+                        <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDeleteManager(m)">🗑</button>
                       </div>
+                    </td>
+                  </tr>
+                  <tr v-if="!managers.length">
+                    <td colspan="6" class="text-center text-[12.5px] text-[#5a6a82] py-6">
+                      No managers added yet. Click <strong class="text-white">+ Add Manager</strong> to create one.
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
+
+          <!-- Add / Edit Manager Modal -->
+          <Transition name="modal-fade">
+            <div v-if="managerModal.open"
+              class="fixed inset-0 z-50 flex items-center justify-center px-4"
+              style="background:rgba(0,0,0,0.7); backdrop-filter:blur(4px)"
+              @mousedown.self="managerModal.open = false">
+              <div class="w-full max-w-[420px] rounded-2xl p-6" style="background:#0f1218; border:1px solid #242d3e">
+                <h3 class="font-display font-bold text-[17px] text-white mb-1">
+                  {{ managerModal.mode === 'add' ? 'Add Manager' : 'Edit Manager' }}
+                </h3>
+                <p class="text-[12px] text-[#5a6a82] mb-5">
+                  {{ managerModal.mode === 'add' ? 'Create a new manager account.' : 'Update manager details.' }}
+                </p>
+                <form @submit.prevent="submitManager">
+                  <div class="mb-4">
+                    <label class="field-label">Full Name</label>
+                    <input v-model="managerForm.name" type="text" class="form-input w-full" placeholder="Shaikh Ahmed" required />
+                  </div>
+                  <div class="mb-4">
+                    <label class="field-label">Email</label>
+                    <input v-model="managerForm.email" type="email" class="form-input w-full" placeholder="manager@example.com" required />
+                  </div>
+                  <template v-if="managerModal.mode === 'add'">
+                    <div class="mb-4">
+                      <label class="field-label">Contact</label>
+                      <input v-model="managerForm.contact" type="text" class="form-input w-full" placeholder="9876543210" maxlength="10" required />
+                    </div>
+                    <div class="mb-5">
+                      <label class="field-label">Password</label>
+                      <div class="relative">
+                        <input v-model="managerForm.password" :type="showManagerPass ? 'text' : 'password'"
+                          class="form-input w-full pr-10" placeholder="••••••••" required />
+                        <button type="button" @click="showManagerPass = !showManagerPass"
+                          class="absolute right-3 top-1/2 -translate-y-1/2 text-[#5a6a82] hover:text-white text-sm">
+                          {{ showManagerPass ? '🙈' : '👁' }}
+                        </button>
+                      </div>
+                    </div>
+                  </template>
+                  <Transition name="fade">
+                    <div v-if="managerSubmitError" class="mb-4 px-3 py-2.5 rounded-lg text-[12px]"
+                      style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444">
+                      ⚠️ {{ managerSubmitError }}
+                    </div>
+                  </Transition>
+                  <div class="flex gap-3 justify-end">
+                    <button type="button" @click="managerModal.open = false"
+                      class="px-4 py-2 rounded-xl text-[12.5px] font-medium text-[#8a9ab5] hover:text-white"
+                      style="background:#161b24; border:1px solid #242d3e">Cancel</button>
+                    <button type="submit"
+                      class="btn btn-primary px-5 py-2 flex items-center gap-2"
+                      :disabled="managerSubmitting">
+                      <span v-if="managerSubmitting" class="animate-spin">⟳</span>
+                      {{ managerSubmitting ? 'Saving…' : (managerModal.mode === 'add' ? 'Add Manager' : 'Save Changes') }}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </Transition>
+
+          <!-- Delete Confirmation Modal -->
+          <Transition name="modal-fade">
+            <div v-if="deleteModal.open"
+              class="fixed inset-0 z-50 flex items-center justify-center px-4"
+              style="background:rgba(0,0,0,0.7); backdrop-filter:blur(4px)"
+              @mousedown.self="deleteModal.open = false">
+              <div class="w-full max-w-[360px] rounded-2xl p-6" style="background:#0f1218; border:1px solid #242d3e">
+                <h3 class="font-display font-bold text-[17px] text-white mb-1">Remove Manager</h3>
+                <p class="text-[13px] text-[#5a6a82] mb-5">
+                  Remove <strong class="text-white">{{ deleteModal.manager?.name }}</strong> as manager?
+                  They will lose access immediately.
+                </p>
+                <Transition name="fade">
+                  <div v-if="deleteError" class="mb-4 px-3 py-2.5 rounded-lg text-[12px]"
+                    style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444">
+                    ⚠️ {{ deleteError }}
+                  </div>
+                </Transition>
+                <div class="flex gap-3 justify-end">
+                  <button @click="deleteModal.open = false"
+                    class="px-4 py-2 rounded-xl text-[12.5px] font-medium text-[#8a9ab5] hover:text-white"
+                    style="background:#161b24; border:1px solid #242d3e">Cancel</button>
+                  <button @click="confirmDeleteManager"
+                    class="btn btn-danger px-5 py-2 flex items-center gap-2"
+                    :disabled="deleting">
+                    <span v-if="deleting" class="animate-spin">⟳</span>
+                    {{ deleting ? 'Removing…' : 'Remove' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Transition>
         </template>
 
         <!-- Notifications -->
@@ -182,20 +314,23 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useUiStore } from '@/stores/ui'
+import { useAuthStore } from '@/stores/auth'
+import { userApi } from '@/services/api'
 import PageHeader from '@/components/ui/PageHeader.vue'
 
-const ui = useUiStore()
+const ui   = useUiStore()
+const auth = useAuthStore()
 const activeSection = ref('station')
 
-const sections = [
+const sections = computed(() => [
   { key:'station',       icon:'🏪', label:'Station Details' },
   { key:'fuel',          icon:'⛽', label:'Fuel Rates' },
   { key:'nozzles',       icon:'🔧', label:'Nozzle Config' },
-  { key:'users',         icon:'👤', label:'User Access' },
+  ...(auth.isOwner ? [{ key:'users', icon:'👤', label:'User Access' }] : []),
   { key:'notifications', icon:'🔔', label:'Notifications' },
-]
+])
 
 const settings = reactive({
   stationName: 'Kailas Petromines',
@@ -228,12 +363,117 @@ const nozzles = [
   { id:'SP-02', pump:'Pump 5', fuel:'Speed', active:true,  lastReading:'12,450.22'  },
 ]
 
-const users = [
-  { name:'Kailas Patil', email:'admin@petromines.com',   role:'Admin',   lastLogin:'Today, 9:12 AM', active:true,  color:'#f59e0b' },
-  { name:'Shaikh Ahmed', email:'manager@petromines.com',  role:'Manager', lastLogin:'Today, 8:45 AM', active:true,  color:'#6366f1' },
-  { name:'Ajay Kumar',   email:'ajay@petromines.com',     role:'Staff',   lastLogin:'Yesterday',      active:true,  color:'#10b981' },
-  { name:'Santosh R',   email:'santosh@petromines.com',   role:'Staff',   lastLogin:'2 days ago',     active:false, color:'#ef4444' },
-]
+// ── Manager (sub-user) management ────────────────────────────────
+const managers        = ref([])
+const managersLoading = ref(false)
+const managersError   = ref('')
+
+const managerModal = reactive({ open: false, mode: 'add', userId: null })
+const managerForm  = reactive({ name: '', email: '', contact: '', password: '' })
+const showManagerPass    = ref(false)
+const managerSubmitting  = ref(false)
+const managerSubmitError = ref('')
+
+const deleteModal = reactive({ open: false, manager: null })
+const deleting    = ref(false)
+const deleteError = ref('')
+
+const AVATAR_COLORS = ['#6366f1','#f59e0b','#10b981','#3b82f6','#ec4899','#8b5cf6']
+function avatarColor(name) {
+  return AVATAR_COLORS[(name?.charCodeAt(0) || 0) % AVATAR_COLORS.length]
+}
+function initials(name) {
+  if (!name) return '?'
+  return name.trim().split(/\s+/).map(w => w[0].toUpperCase()).slice(0, 2).join('')
+}
+function formatDate(d) {
+  if (!d) return '—'
+  return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+async function loadManagers() {
+  managersLoading.value = true
+  managersError.value   = ''
+  try {
+    const res = await userApi.getSubUsers()
+    managers.value = res.data?.sub_users || []
+  } catch (e) {
+    managersError.value = e?.message || 'Failed to load managers.'
+  } finally {
+    managersLoading.value = false
+  }
+}
+
+function openAddManager() {
+  managerModal.mode   = 'add'
+  managerModal.userId = null
+  managerForm.name    = ''
+  managerForm.email   = ''
+  managerForm.contact = ''
+  managerForm.password= ''
+  managerSubmitError.value = ''
+  showManagerPass.value    = false
+  managerModal.open   = true
+}
+
+function openEditManager(m) {
+  managerModal.mode   = 'edit'
+  managerModal.userId = m.id
+  managerForm.name    = m.name
+  managerForm.email   = m.email
+  managerForm.contact = m.contact || ''
+  managerForm.password= ''
+  managerSubmitError.value = ''
+  managerModal.open   = true
+}
+
+function openDeleteManager(m) {
+  deleteModal.manager = m
+  deleteError.value   = ''
+  deleteModal.open    = true
+}
+
+async function submitManager() {
+  managerSubmitting.value  = true
+  managerSubmitError.value = ''
+  try {
+    if (managerModal.mode === 'add') {
+      await userApi.addSubUser({
+        name: managerForm.name, email: managerForm.email,
+        contact: managerForm.contact, password: managerForm.password,
+      })
+      ui.success('Manager added successfully.')
+    } else {
+      await userApi.updateSubUser({ user_id: managerModal.userId, name: managerForm.name, email: managerForm.email })
+      ui.success('Manager updated.')
+    }
+    managerModal.open = false
+    await loadManagers()
+  } catch (e) {
+    managerSubmitError.value = e?.message || 'Operation failed.'
+  } finally {
+    managerSubmitting.value = false
+  }
+}
+
+async function confirmDeleteManager() {
+  deleting.value    = true
+  deleteError.value = ''
+  try {
+    await userApi.deleteSubUser({ user_id: deleteModal.manager.id })
+    deleteModal.open = false
+    ui.success('Manager removed.')
+    await loadManagers()
+  } catch (e) {
+    deleteError.value = e?.message || 'Delete failed.'
+  } finally {
+    deleting.value = false
+  }
+}
+
+// Load managers when the users section becomes active
+watch(activeSection, (val) => { if (val === 'users') loadManagers() })
+onMounted(() => { if (activeSection.value === 'users') loadManagers() })
 
 const notifications = reactive([
   { key:'daily',   icon:'📊', label:'Daily Sales Summary',    sub:'Get end-of-day summary via WhatsApp', enabled:true  },
@@ -255,4 +495,8 @@ const saveAll = () => ui.success('Settings saved successfully!')
   letter-spacing: 0.06em;
   margin-bottom: 6px;
 }
+.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.2s; }
+.modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>

@@ -20,7 +20,7 @@
       </div>
 
       <!-- Demo Accounts Banner -->
-      <div class="mb-5 p-4 rounded-xl" style="background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.2)">
+      <!-- <div class="mb-5 p-4 rounded-xl" style="background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.2)">
         <div class="flex items-center gap-2 mb-3">
           <span class="text-[#f59e0b] text-base">🔑</span>
           <span class="font-display font-bold text-[14px] text-[#f59e0b]">Demo Accounts — Click to Fill</span>
@@ -41,18 +41,18 @@
             </div>
           </button>
         </div>
-      </div>
+      </div> -->
 
       <!-- Login Card -->
       <div class="card p-7">
         <h2 class="font-display font-bold text-[20px] text-white mb-0.5">Sign In</h2>
-        <p class="text-[13px] text-[#5a6a82] mb-5">Enter your credentials or use a demo account</p>
+        <p class="text-[13px] text-[#5a6a82] mb-5">Enter your credentials</p>
 
         <form @submit.prevent="handleLogin">
 
           <!-- Email -->
           <div class="mb-4">
-            <label class="field-label">Email / Username</label>
+            <label class="field-label">Email</label>
             <input
               v-model="form.email"
               type="text"
@@ -84,13 +84,13 @@
           </div>
 
           <!-- Remember -->
-          <div class="flex items-center justify-between mb-5 text-[12.5px]">
+          <!-- <div class="flex items-center justify-between mb-5 text-[12.5px]">
             <label class="flex items-center gap-2 cursor-pointer text-[#8a9ab5]">
               <input type="checkbox" v-model="form.remember" class="accent-[#f59e0b] rounded" />
               Remember me
             </label>
             <a href="#" class="text-[#f59e0b] hover:text-[#fbbf24] transition-colors">Forgot password?</a>
-          </div>
+          </div> -->
 
           <!-- Submit -->
           <button
@@ -114,14 +114,14 @@
       </div>
 
       <!-- Credentials cheatsheet -->
-      <div class="mt-4 p-3 rounded-lg text-[11.5px] text-[#5a6a82]" style="background:#0f1218; border:1px solid #1c2230">
+      <!-- <div class="mt-4 p-3 rounded-lg text-[11.5px] text-[#5a6a82]" style="background:#0f1218; border:1px solid #1c2230">
         <div class="font-semibold text-[#8a9ab5] mb-1.5">Quick credentials:</div>
         <div class="grid grid-cols-1 gap-0.5 font-mono-custom">
           <div>admin@petromines.com / <span class="text-[#f59e0b]">admin123</span></div>
           <div>manager@petromines.com / <span class="text-[#3b82f6]">manager123</span></div>
           <div>staff@petromines.com / <span class="text-[#10b981]">staff123</span></div>
         </div>
-      </div>
+      </div> -->
 
       <p class="text-center text-[11.5px] text-[#5a6a82] mt-5">
         Petromines Management v1.0 · No backend required for demo
@@ -144,20 +144,20 @@ const errorMsg = ref('')
 
 const form = reactive({ email: '', password: '', remember: false })
 
-const demoAccounts = [
-  { label:'Admin',   role:'admin',   email:'admin@petromines.com',   password:'admin123',   initials:'KP', color:'#f59e0b' },
-  { label:'Manager', role:'manager', email:'manager@petromines.com', password:'manager123', initials:'SA', color:'#6366f1' },
-  { label:'Staff',   role:'staff',   email:'staff@petromines.com',   password:'staff123',   initials:'AK', color:'#10b981' },
-]
+// const demoAccounts = [
+//   { label:'Admin',   role:'admin',   email:'admin@petromines.com',   password:'admin123',   initials:'KP', color:'#f59e0b' },
+//   { label:'Manager', role:'manager', email:'manager@petromines.com', password:'manager123', initials:'SA', color:'#6366f1' },
+//   { label:'Staff',   role:'staff',   email:'staff@petromines.com',   password:'staff123',   initials:'AK', color:'#10b981' },
+// ]
 
-function fillDemo(demo) {
-  form.email    = demo.email
-  form.password = demo.password
-  errorMsg.value = ''
-}
+// function fillDemo(demo) {
+//   form.email    = demo.email
+//   form.password = demo.password
+//   errorMsg.value = ''
+// }
 
 async function handleLogin() {
-  if (!form.email || !form.password) return
+  // if (!form.email || !form.password) return
   loading.value  = true
   errorMsg.value = ''
   try {
@@ -165,7 +165,7 @@ async function handleLogin() {
     const redirect = route.query.redirect || '/dashboard'
     router.push(redirect)
   } catch (e) {
-    errorMsg.value = e?.message || 'Login failed. Try the demo accounts above.'
+    errorMsg.value = e?.message || 'Login failed.'
   } finally {
     loading.value = false
   }

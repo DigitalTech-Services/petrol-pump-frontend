@@ -2,19 +2,21 @@ import axios from 'axios'
 
 // ── Base Axios instance ───────────────────────────────────────────
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
+  baseURL: 'http://127.0.0.1:8000/api',
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
 })
 
-// ── Request interceptor: attach JWT token ─────────────────────────
+// ── Request interceptor: attach Bearer token (skip login) ────────
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('pm_token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
+  if (!config.url?.endsWith('/login')) {
+    const token = localStorage.getItem('pm_token')
+    if (token) config.headers.Authorization = `Bearer ${token}`
+  }
   return config
 })
 
-// ── Response interceptor: unwrap data, handle 401 ────────────────
+// ── Response interceptor: unwrap data, redirect on 401 ───────────
 api.interceptors.response.use(
   (res) => res.data,
   (err) => {
@@ -31,11 +33,10 @@ api.interceptors.response.use(
 // AUTH
 // ──────────────────────────────────────────────────────────────────
 export const authApi = {
-  login:   (creds) => api.post('/auth/login', creds),
-  logout:  ()      => api.post('/auth/logout'),
-  me:      ()      => api.get('/auth/me'),
-  refresh: ()      => api.post('/auth/refresh'),
-  changePassword: (data) => api.put('/auth/change-password', data),
+  login:   (creds) => api.post('/user/login', creds),
+  logout:  ()      => api.post('/user/logout'),
+  me:      ()      => api.post('/user/profile'),
+  changePassword: (data) => api.post('/user/change-password', data),
 }
 
 // ──────────────────────────────────────────────────────────────────
@@ -157,6 +158,56 @@ export const settingsApi = {
   createUser:    (data)   => api.post('/settings/users', data),
   updateUser:    (id, d)  => api.put(`/settings/users/${id}`, d),
   deleteUser:    (id)     => api.delete(`/settings/users/${id}`),
+}
+
+// ──────────────────────────────────────────────────────────────────
+// USER — sub-user (manager) management
+// ──────────────────────────────────────────────────────────────────
+export const userApi = {
+  getSubUsers:   ()      => api.post('/user/sub-users'),
+  addSubUser:    (data)  => api.post('/user/add-sub-user', data),
+  getSubUser:    (data)  => api.post('/user/sub-users-details', data),
+  updateSubUser: (data)  => api.post('/user/update-sub-user', data),
+  deleteSubUser: (data)  => api.post('/user/delete-sub-user', data),
+}
+
+// ──────────────────────────────────────────────────────────────────
+// ADMIN (separate axios instance — uses pm_admin_token)
+// ──────────────────────────────────────────────────────────────────
+const adminAxios = axios.create({
+  baseURL: 'http://127.0.0.1:8000/api',
+  timeout: 15000,
+  headers: { 'Content-Type': 'application/json' },
+})
+
+adminAxios.interceptors.request.use((config) => {
+  if (!config.url?.endsWith('/login')) {
+    const token = localStorage.getItem('pm_admin_token')
+    if (token) config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
+adminAxios.interceptors.response.use(
+  (res) => res.data,
+  (err) => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem('pm_admin_token')
+      localStorage.removeItem('pm_admin')
+      window.location.href = '/admin/login'
+    }
+    return Promise.reject(err.response?.data || { message: err.message })
+  }
+)
+
+export const adminApi = {
+  login:          (creds) => adminAxios.post('/admin/login', creds),
+  logout:         ()      => adminAxios.post('/admin/logout'),
+  getUsers:       ()      => adminAxios.post('/admin/users'),
+  addUser:        (data)  => adminAxios.post('/admin/add-user', data),
+  getUserDetails: (data)  => adminAxios.post('/admin/get-user-details', data),
+  updateUser:     (data)  => adminAxios.post('/admin/update-user', data),
+  deleteUser:     (data)  => adminAxios.post('/admin/delete-user', data),
 }
 
 export default api

@@ -1,8 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useAdminAuthStore } from '@/stores/adminAuth'
 
 // ── Lazy-loaded views ──────────────────────────────────────────────
 const LoginView       = () => import('@/views/LoginView.vue')
+const AdminLoginView  = () => import('@/views/AdminLoginView.vue')
+const AdminUsersView  = () => import('@/views/AdminUsersView.vue')
 const DashboardView   = () => import('@/views/DashboardView.vue')
 const SalesView       = () => import('@/views/SalesView.vue')
 const SaleEntryView   = () => import('@/views/SaleEntryView.vue')
@@ -23,6 +26,22 @@ const routes = [
     name: 'Login',
     component: LoginView,
     meta: { public: true, title: 'Login — Kailas Petromines' }
+  },
+  {
+    path: '/admin/login',
+    name: 'AdminLogin',
+    component: AdminLoginView,
+    meta: { public: true, title: 'Admin Login — Kailas Petromines' }
+  },
+  {
+    path: '/admin/users',
+    name: 'AdminUsers',
+    component: AdminUsersView,
+    meta: { requiresAdminAuth: true, title: 'Manage Users — Admin' }
+  },
+  {
+    path: '/admin',
+    redirect: '/admin/users'
   },
   {
     path: '/',
@@ -113,13 +132,17 @@ const router = createRouter({
 })
 
 // ── Navigation Guard ──────────────────────────────────────────────
-router.beforeEach((to, from, next) => {
-  const auth = useAuthStore()
+router.beforeEach((to, _from, next) => {
+  const auth      = useAuthStore()
+  const adminAuth = useAdminAuthStore()
 
-  // Update page title
   if (to.meta.title) document.title = `${to.meta.title} — Kailas Petromines`
 
-  if (to.meta.requiresAuth && !auth.isLoggedIn) {
+  if (to.meta.requiresAdminAuth && !adminAuth.isLoggedIn) {
+    next({ name: 'AdminLogin', query: { redirect: to.fullPath } })
+  } else if (to.name === 'AdminLogin' && adminAuth.isLoggedIn) {
+    next({ name: 'AdminUsers' })
+  } else if (to.meta.requiresAuth && !auth.isLoggedIn) {
     next({ name: 'Login', query: { redirect: to.fullPath } })
   } else if (to.name === 'Login' && auth.isLoggedIn) {
     next({ name: 'Dashboard' })
