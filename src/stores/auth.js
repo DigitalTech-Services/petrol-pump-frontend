@@ -31,10 +31,12 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('pm_token') || null)
   const user = ref(JSON.parse(localStorage.getItem('pm_user') || 'null'))
 
-  const isLoggedIn = computed(() => !!token.value)
-  const role = computed(() => user.value?.type || 'Admin')
+  const isLoggedIn  = computed(() => !!token.value)
+  const isOwner     = computed(() => user.value?.type === 'user')
+  const isManager   = computed(() => user.value?.type === 'sub_user')
+  const role        = computed(() => user.value?.type === 'sub_user' ? 'Manager' : 'Owner')
   const stationName = computed(() => user.value?.stationName || 'Kailas Petromines')
-  const fullName = computed(() => user.value?.name || 'Kailas Petromines')
+  const fullName    = computed(() => user.value?.name || 'Kailas Petromines')
 
   async function login(credentials) {
     // const { email, password } = credentials
@@ -58,9 +60,9 @@ export const useAuthStore = defineStore('auth', () => {
       
       if (res.success) {
         token.value = res.data.token
-        user.value = res.data.user
-        localStorage.setItem('pm_token', res.token)
-        localStorage.setItem('pm_user', JSON.stringify(res.user))
+        user.value  = res.data.user
+        localStorage.setItem('pm_token', res.data.token)
+        localStorage.setItem('pm_user', JSON.stringify(res.data.user))
         return res
       }
       
@@ -85,5 +87,5 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('pm_user')
   }
 
-  return { token, user, isLoggedIn, role, stationName, fullName, login, logout }
+  return { token, user, isLoggedIn, isOwner, isManager, role, stationName, fullName, login, logout }
 })
