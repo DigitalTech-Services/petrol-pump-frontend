@@ -120,15 +120,28 @@ export const expenseApi = {
 // STAFF
 // ──────────────────────────────────────────────────────────────────
 export const staffApi = {
+  // Staff CRUD
   getAll:       (params)   => api.get('/staff',              { params }),
   getById:      (id)       => api.get(`/staff/${id}`),
   create:       (data)     => api.post('/staff',               data),
   update:       (id, data) => api.put(`/staff/${id}`,          data),
   delete:       (id)       => api.delete(`/staff/${id}`),
+
+  // Advances
   getAdvances:  (params)   => api.get('/staff/advances',     { params }),
   addAdvance:   (data)     => api.post('/staff/advances',      data),
+
+  // Daily attendance
+  getAttendance:    (params)   => api.get('/staff/attendance',       { params }),
+  markAttendance:   (data)     => api.post('/staff/attendance',        data),
+  bulkAttendance:   (data)     => api.post('/staff/attendance/bulk',   data),
+  getAttendanceById:(id)       => api.get(`/staff/attendance/${id}`),
+  updateAttendance: (id, data) => api.put(`/staff/attendance/${id}`,   data),
+  deleteAttendance: (id)       => api.delete(`/staff/attendance/${id}`),
+
+  // Monthly timesheet summary
   getTimesheet: (params)   => api.get('/staff/timesheet',    { params }),
-  markAttendance:(data)    => api.post('/staff/attendance',    data),
+
   getSalarySlip:(id,params)=> api.get(`/staff/${id}/salary-slip`, { params }),
 }
 

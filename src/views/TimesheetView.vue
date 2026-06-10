@@ -46,8 +46,8 @@
         </div>
         <div class="grid grid-cols-3 gap-2 pt-3" style="border-top:1px solid #1c2230">
           <div class="text-center">
-            <div class="text-[9.5px] text-[#5a6a82] uppercase tracking-wide mb-1">Shift</div>
-            <div class="font-display font-bold text-[13px] text-white">{{ s.shift }}h</div>
+            <div class="text-[9.5px] text-[#5a6a82] uppercase tracking-wide mb-1">Hours/Day</div>
+            <div class="font-display font-bold text-[13px] text-[#3b82f6]">{{ s.totalHours }}h</div>
           </div>
           <div class="text-center">
             <div class="text-[9.5px] text-[#5a6a82] uppercase tracking-wide mb-1">Rate</div>
@@ -74,7 +74,7 @@
       <div class="overflow-x-auto">
         <table class="data-table">
           <thead>
-            <tr><th>#</th><th>Employee</th><th>Role</th><th>Days Present</th><th>Days Absent</th><th>Shift</th><th>Rate/Day</th><th>Gross Salary</th><th>Advance</th><th>Net Payable</th><th>Attendance %</th><th>Actions</th></tr>
+            <tr><th>#</th><th>Employee</th><th>Role</th><th>Days Present</th><th>Days Absent</th><th>In Time</th><th>Out Time</th><th>Hours</th><th>Rate/Day</th><th>Gross Salary</th><th>Advance</th><th>Net Payable</th><th>Attendance %</th><th>Actions</th></tr>
           </thead>
           <tbody>
             <tr v-for="(s,i) in timesheetData" :key="s.name">
@@ -88,7 +88,9 @@
               <td><span class="badge badge-gray">{{ s.role }}</span></td>
               <td><span class="font-display font-bold text-[15px] text-positive">{{ s.daysWorked }}</span> <span class="text-[#5a6a82] text-[11px]">days</span></td>
               <td><span class="font-display font-bold text-[15px]" :class="(30-s.daysWorked)>5?'text-negative':'text-[#5a6a82]'">{{ 30-s.daysWorked }}</span></td>
-              <td class="amt text-[#8a9ab5]">{{ s.shift }}h</td>
+              <td class="font-mono-custom text-[12px] text-[#8a9ab5]">{{ s.inTime }}</td>
+              <td class="font-mono-custom text-[12px] text-[#8a9ab5]">{{ s.outTime }}</td>
+              <td><span class="badge badge-gray text-[#3b82f6]">{{ s.totalHours }}h</span></td>
               <td class="amt text-[#8a9ab5]">₹{{ s.ratePerDay }}</td>
               <td class="amt text-positive font-semibold">₹{{ fmt(s.salary) }}</td>
               <td class="amt text-negative">{{ s.advance>0?'₹'+fmt(s.advance):'—' }}</td>
@@ -112,6 +114,8 @@
               <td>{{ timesheetData.reduce((a,s)=>a+s.daysWorked,0) }} days</td>
               <td>{{ timesheetData.reduce((a,s)=>a+(30-s.daysWorked),0) }}</td>
               <td colspan="2">—</td>
+              <td>{{ (timesheetData.reduce((a,s)=>a+s.totalHours,0)/timesheetData.length).toFixed(1) }}h avg</td>
+              <td>—</td>
               <td>₹{{ fmt(timesheetData.reduce((a,s)=>a+s.salary,0)) }}</td>
               <td>₹{{ fmt(timesheetData.reduce((a,s)=>a+s.advance,0)) }}</td>
               <td>₹{{ fmt(timesheetData.reduce((a,s)=>a+s.netPayable,0)) }}</td>
@@ -130,22 +134,44 @@
       </div>
       <div class="space-y-2">
         <div v-for="s in timesheetData" :key="s.name"
-          class="flex items-center justify-between p-3 rounded-lg"
+          class="p-3 rounded-lg"
           style="background:#161b24;border:1px solid #1c2230">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full flex items-center justify-center font-display font-bold text-[12px] text-white flex-shrink-0" :style="{background:s.color}">{{ s.name.slice(0,2).toUpperCase() }}</div>
-            <div>
-              <div class="font-medium text-white text-[13.5px]">{{ s.name }}</div>
-              <div class="text-[11px] text-[#5a6a82]">{{ s.role }}</div>
+          <!-- Top row: avatar + name + present toggle -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center font-display font-bold text-[12px] text-white flex-shrink-0" :style="{background:s.color}">{{ s.name.slice(0,2).toUpperCase() }}</div>
+              <div>
+                <div class="font-medium text-white text-[13.5px]">{{ s.name }}</div>
+                <div class="text-[11px] text-[#5a6a82]">{{ s.role }}</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-[12px] text-[#5a6a82]">{{ s.daysWorked }}/30 days</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" v-model="attendanceMap[s.name]" class="sr-only peer">
+                <div class="w-10 h-5 rounded-full peer-checked:bg-[#10b981] bg-[#242d3e] transition-colors relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:w-4 after:h-4 after:transition-all peer-checked:after:translate-x-5"></div>
+              </label>
+              <span class="text-[12px] w-14" :class="attendanceMap[s.name]?'text-positive':'text-negative'">{{ attendanceMap[s.name]?'Present':'Absent' }}</span>
             </div>
           </div>
-          <div class="flex items-center gap-3">
-            <span class="text-[12px] text-[#5a6a82]">{{ s.daysWorked }}/30 days</span>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" v-model="attendanceMap[s.name]" class="sr-only peer">
-              <div class="w-10 h-5 rounded-full peer-checked:bg-[#10b981] bg-[#242d3e] transition-colors relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:w-4 after:h-4 after:transition-all peer-checked:after:translate-x-5"></div>
-            </label>
-            <span class="text-[12px] w-14" :class="attendanceMap[s.name]?'text-positive':'text-negative'">{{ attendanceMap[s.name]?'Present':'Absent' }}</span>
+          <!-- In / Out time — only shown when marked Present -->
+          <div v-if="attendanceMap[s.name]" class="grid grid-cols-3 gap-2 mt-2.5 pt-2.5" style="border-top:1px solid #242d3e">
+            <div>
+              <div class="text-[10px] text-[#5a6a82] uppercase mb-1">In Time</div>
+              <input type="time" v-model="attendanceTimeMap[s.name].in" class="form-input w-full text-[12px] py-1" />
+            </div>
+            <div>
+              <div class="text-[10px] text-[#5a6a82] uppercase mb-1">Out Time</div>
+              <input type="time" v-model="attendanceTimeMap[s.name].out" class="form-input w-full text-[12px] py-1" />
+            </div>
+            <div>
+              <div class="text-[10px] text-[#5a6a82] uppercase mb-1">Hours Worked</div>
+              <div class="p-1.5 rounded-lg flex items-center justify-center" style="background:#0f1218;border:1px solid #242d3e;height:34px">
+                <span class="font-display font-bold text-[14px] text-[#3b82f6]">
+                  {{ calcHours(attendanceTimeMap[s.name].in, attendanceTimeMap[s.name].out) }}h
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -182,6 +208,23 @@
               <option value="8">8 Hours</option><option value="10">10 Hours</option>
               <option value="12">12 Hours</option><option value="14">14 Hours</option>
             </select>
+          </div>
+        </div>
+        <!-- In / Out / Total Hours -->
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <label class="field-label">In Time</label>
+            <input type="time" v-model="editAttData.inTime" class="form-input w-full" @change="recalcEdit" />
+          </div>
+          <div>
+            <label class="field-label">Out Time</label>
+            <input type="time" v-model="editAttData.outTime" class="form-input w-full" @change="recalcEdit" />
+          </div>
+          <div>
+            <label class="field-label">Total Hours</label>
+            <div class="p-2.5 rounded-lg flex items-center justify-center" style="background:#161b24;border:1px solid #1c2230;height:42px">
+              <span class="font-display font-bold text-[20px] text-[#3b82f6]">{{ editAttData.totalHours }}h</span>
+            </div>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
@@ -222,7 +265,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive } from 'vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard    from '@/components/ui/KpiCard.vue'
 import AppModal   from '@/components/ui/AppModal.vue'
@@ -238,29 +281,51 @@ const attendanceDate = ref(new Date().toISOString().split('T')[0])
 
 const fmtK = n => Math.abs(n)>=1000 ? (n/1000).toFixed(1)+'K' : String(n)
 
+// Calculate hours worked from HH:MM time strings; returns 0 for invalid/overnight
+function calcHours(inTime, outTime) {
+  if (!inTime || !outTime) return 0
+  const [ih, im] = inTime.split(':').map(Number)
+  const [oh, om] = outTime.split(':').map(Number)
+  const mins = (oh * 60 + om) - (ih * 60 + im)
+  return mins > 0 ? parseFloat((mins / 60).toFixed(1)) : 0
+}
+
+function defaultTimes(shift) {
+  const map = { 8: ['08:00','16:00'], 10: ['08:00','18:00'], 12: ['07:00','19:00'], 14: ['07:00','21:00'] }
+  return map[shift] ?? ['08:00','16:00']
+}
+
+function makeEntry(base) {
+  const [inTime, outTime] = defaultTimes(base.shift)
+  return { ...base, inTime, outTime, totalHours: calcHours(inTime, outTime) }
+}
+
 const timesheetData = reactive([
-  {name:'Ajay',    role:'Senior Staff',daysWorked:30,shift:12,ratePerDay:500,salary:15000,advance:6880, netPayable:8120, color:'#f59e0b'},
-  {name:'Santosh', role:'Senior Staff',daysWorked:27,shift:14,ratePerDay:800,salary:21600,advance:25719,netPayable:-4119,color:'#ef4444'},
-  {name:'Ayaz',    role:'Staff',       daysWorked:30,shift:8, ratePerDay:400,salary:12000,advance:1094, netPayable:10906,color:'#10b981'},
-  {name:'Rizwan',  role:'Staff',       daysWorked:30,shift:8, ratePerDay:400,salary:12000,advance:1517, netPayable:10483,color:'#3b82f6'},
-  {name:'Rehan',   role:'Part-time',   daysWorked:8, shift:10,ratePerDay:458,salary:3666, advance:656,  netPayable:3010, color:'#8b5cf6'},
-  {name:'Kartik',  role:'Staff',       daysWorked:26,shift:10,ratePerDay:410,salary:10666,advance:2415, netPayable:8251, color:'#06b6d4'},
-  {name:'Komal',   role:'Staff',       daysWorked:20,shift:8, ratePerDay:333,salary:6666, advance:725,  netPayable:5941, color:'#f97316'},
-  {name:'Tanmay',  role:'Staff',       daysWorked:15,shift:8, ratePerDay:316,salary:4750, advance:574,  netPayable:4176, color:'#84cc16'},
-  {name:'Vanshika',role:'Staff',       daysWorked:16,shift:8, ratePerDay:316,salary:5066, advance:630,  netPayable:4436, color:'#ec4899'},
-  {name:'Sahil P', role:'Petrol',      daysWorked:6, shift:8, ratePerDay:366,salary:2200, advance:675,  netPayable:1525, color:'#f59e0b'},
-  {name:'Sahil A', role:'Air Machine', daysWorked:24,shift:12,ratePerDay:400,salary:9600, advance:0,    netPayable:9600, color:'#14b8a6'},
-  {name:'Shaikh',  role:'Manager',     daysWorked:30,shift:12,ratePerDay:833,salary:25000,advance:0,    netPayable:25000,color:'#6366f1'},
-  {name:'Dhanu',   role:'Security',    daysWorked:30,shift:12,ratePerDay:500,salary:15000,advance:0,    netPayable:15000,color:'#78716c'},
+  makeEntry({name:'Ajay',    role:'Senior Staff',daysWorked:30,shift:12,ratePerDay:500,salary:15000,advance:6880, netPayable:8120, color:'#f59e0b'}),
+  makeEntry({name:'Santosh', role:'Senior Staff',daysWorked:27,shift:14,ratePerDay:800,salary:21600,advance:25719,netPayable:-4119,color:'#ef4444'}),
+  makeEntry({name:'Ayaz',    role:'Staff',       daysWorked:30,shift:8, ratePerDay:400,salary:12000,advance:1094, netPayable:10906,color:'#10b981'}),
+  makeEntry({name:'Rizwan',  role:'Staff',       daysWorked:30,shift:8, ratePerDay:400,salary:12000,advance:1517, netPayable:10483,color:'#3b82f6'}),
+  makeEntry({name:'Rehan',   role:'Part-time',   daysWorked:8, shift:10,ratePerDay:458,salary:3666, advance:656,  netPayable:3010, color:'#8b5cf6'}),
+  makeEntry({name:'Kartik',  role:'Staff',       daysWorked:26,shift:10,ratePerDay:410,salary:10666,advance:2415, netPayable:8251, color:'#06b6d4'}),
+  makeEntry({name:'Komal',   role:'Staff',       daysWorked:20,shift:8, ratePerDay:333,salary:6666, advance:725,  netPayable:5941, color:'#f97316'}),
+  makeEntry({name:'Tanmay',  role:'Staff',       daysWorked:15,shift:8, ratePerDay:316,salary:4750, advance:574,  netPayable:4176, color:'#84cc16'}),
+  makeEntry({name:'Vanshika',role:'Staff',       daysWorked:16,shift:8, ratePerDay:316,salary:5066, advance:630,  netPayable:4436, color:'#ec4899'}),
+  makeEntry({name:'Sahil P', role:'Petrol',      daysWorked:6, shift:8, ratePerDay:366,salary:2200, advance:675,  netPayable:1525, color:'#f59e0b'}),
+  makeEntry({name:'Sahil A', role:'Air Machine', daysWorked:24,shift:12,ratePerDay:400,salary:9600, advance:0,    netPayable:9600, color:'#14b8a6'}),
+  makeEntry({name:'Shaikh',  role:'Manager',     daysWorked:30,shift:12,ratePerDay:833,salary:25000,advance:0,    netPayable:25000,color:'#6366f1'}),
+  makeEntry({name:'Dhanu',   role:'Security',    daysWorked:30,shift:12,ratePerDay:500,salary:15000,advance:0,    netPayable:15000,color:'#78716c'}),
 ])
 
-const attendanceMap = reactive(
-  Object.fromEntries(timesheetData.map(s => [s.name, true]))
-)
+// Per-staff time inputs used inside the Mark Attendance modal
+const attendanceMap     = reactive(Object.fromEntries(timesheetData.map(s => [s.name, true])))
+const attendanceTimeMap = reactive(Object.fromEntries(timesheetData.map(s => [s.name, { in: s.inTime, out: s.outTime }])))
 
 function openMarkAttendance() {
   attendanceDate.value = new Date().toISOString().split('T')[0]
-  timesheetData.forEach(s => attendanceMap[s.name] = true)
+  timesheetData.forEach(s => {
+    attendanceMap[s.name]      = true
+    attendanceTimeMap[s.name]  = { in: s.inTime, out: s.outTime }
+  })
   showMark.value = true
 }
 
@@ -271,17 +336,22 @@ function openEditAttendance(s) {
 
 function recalcEdit() {
   if (!editAttData.value) return
-  editAttData.value.salary     = editAttData.value.daysWorked * editAttData.value.ratePerDay
-  editAttData.value.netPayable = editAttData.value.salary - editAttData.value.advance
+  const d = editAttData.value
+  d.totalHours = calcHours(d.inTime, d.outTime)
+  d.salary     = d.daysWorked * d.ratePerDay
+  d.netPayable = d.salary - d.advance
 }
 
 function saveAttendance() {
   let count = 0
   timesheetData.forEach(s => {
     if (attendanceMap[s.name]) {
-      s.daysWorked = Math.min(30, s.daysWorked + 1)
-      s.salary     = s.daysWorked * s.ratePerDay
-      s.netPayable = s.salary - s.advance
+      s.daysWorked  = Math.min(30, s.daysWorked + 1)
+      s.inTime      = attendanceTimeMap[s.name]?.in  || s.inTime
+      s.outTime     = attendanceTimeMap[s.name]?.out || s.outTime
+      s.totalHours  = calcHours(s.inTime, s.outTime)
+      s.salary      = s.daysWorked * s.ratePerDay
+      s.netPayable  = s.salary - s.advance
       count++
     }
   })
@@ -293,6 +363,7 @@ function saveEditAtt() {
   const i = timesheetData.findIndex(s => s.name === editAttData.value.name)
   if (i !== -1) {
     const d = editAttData.value
+    d.totalHours = calcHours(d.inTime, d.outTime)
     d.salary     = d.daysWorked * d.ratePerDay
     d.netPayable = d.salary - d.advance
     timesheetData[i] = { ...d }
@@ -302,9 +373,10 @@ function saveEditAtt() {
 }
 
 function doExport() {
-  const headers = ['Name','Role','Days Present','Days Absent','Shift (h)','Rate/Day','Gross Salary','Advance','Net Payable','Attendance %']
+  const headers = ['Name','Role','Days Present','Days Absent','In Time','Out Time','Hours','Rate/Day','Gross Salary','Advance','Net Payable','Attendance %']
   const rows = timesheetData.map(s => [
-    s.name, s.role, s.daysWorked, 30-s.daysWorked, s.shift+'h',
+    s.name, s.role, s.daysWorked, 30-s.daysWorked,
+    s.inTime, s.outTime, s.totalHours+'h',
     '₹'+s.ratePerDay, '₹'+fmt(s.salary), '₹'+fmt(s.advance),
     '₹'+fmt(s.netPayable), Math.round(s.daysWorked/30*100)+'%'
   ])
@@ -313,9 +385,10 @@ function doExport() {
 }
 
 function doPrint() {
-  const headers = ['Name','Role','Days','Absent','Shift','Rate','Gross','Advance','Net','Att%']
+  const headers = ['Name','Role','Days','Absent','In','Out','Hours','Rate','Gross','Adv','Net','Att%']
   const rows = timesheetData.map(s => [
-    s.name, s.role, s.daysWorked, 30-s.daysWorked, s.shift+'h',
+    s.name, s.role, s.daysWorked, 30-s.daysWorked,
+    s.inTime, s.outTime, s.totalHours+'h',
     '₹'+s.ratePerDay, '₹'+fmt(s.salary), '₹'+fmt(s.advance), '₹'+fmt(s.netPayable),
     Math.round(s.daysWorked/30*100)+'%'
   ])
