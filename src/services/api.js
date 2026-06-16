@@ -161,16 +161,23 @@ export const reportsApi = {
 // SETTINGS
 // ──────────────────────────────────────────────────────────────────
 export const settingsApi = {
-  get:           ()       => api.get('/settings'),
-  update:        (data)   => api.put('/settings', data),
-  getFuelRates:  ()       => api.get('/settings/fuel-rates'),
-  updateFuelRate:(data)   => api.put('/settings/fuel-rates', data),
-  getNozzles:    ()       => api.get('/settings/nozzles'),
-  updateNozzle:  (id, d)  => api.put(`/settings/nozzles/${id}`, d),
-  getUsers:      ()       => api.get('/settings/users'),
-  createUser:    (data)   => api.post('/settings/users', data),
-  updateUser:    (id, d)  => api.put(`/settings/users/${id}`, d),
-  deleteUser:    (id)     => api.delete(`/settings/users/${id}`),
+  // Station details
+  getStation:           ()       => api.get('/settings'),
+  updateStation:        (data)   => api.put('/settings', data),
+
+  // Fuel rates
+  getFuelRates:         ()       => api.get('/settings/fuel-rates'),
+  updateFuelRates:      (data)   => api.put('/settings/fuel-rates', data),
+
+  // Nozzles
+  getNozzles:           ()       => api.get('/settings/nozzles'),
+  storeNozzle:          (data)   => api.post('/settings/nozzles', data),
+  updateNozzle:         (id, d)  => api.put(`/settings/nozzles/${id}`, d),
+  deleteNozzle:         (id)     => api.delete(`/settings/nozzles/${id}`),
+
+  // Notification preferences
+  getNotifications:     ()       => api.get('/settings/notifications'),
+  updateNotifications:  (data)   => api.put('/settings/notifications', data),
 }
 
 // ──────────────────────────────────────────────────────────────────
