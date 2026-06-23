@@ -8,15 +8,17 @@
       </template>
     </PageHeader>
 
+    <!-- KPI Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <KpiCard label="Total Expenses"  :value="'₹'+fmt(totalExp)"     icon="🧾" color="#ef4444" sub="April 2026"/>
-      <KpiCard label="Avg Per Day"      :value="'₹'+fmt(totalExp/30)"  icon="📊" color="#f59e0b" sub="30-day average"/>
-      <KpiCard label="Lowest Day"       value="₹615"                   icon="✅" color="#10b981" sub="Apr 06, 2026"/>
-      <KpiCard label="Highest Day"      value="₹23,777"                icon="⚠️" color="#ef4444" sub="Apr 10, 2026"/>
+      <KpiCard label="Total Expenses"  :value="'₹'+fmt(summary.total)"      icon="🧾" color="#ef4444" :sub="monthLabel"/>
+      <KpiCard label="Avg Per Day"     :value="'₹'+fmt(summary.avg_per_day)" icon="📊" color="#f59e0b" :sub="monthLabel"/>
+      <KpiCard label="Lowest Day"      :value="summary.min ? '₹'+fmt(summary.min.amount) : '—'" icon="✅" color="#10b981" :sub="summary.min ? fmtDate(summary.min.date) : '—'"/>
+      <KpiCard label="Highest Day"     :value="summary.max ? '₹'+fmt(summary.max.amount) : '—'" icon="⚠️" color="#ef4444" :sub="summary.max ? fmtDate(summary.max.date) : '—'"/>
     </div>
 
-    <!-- Search bar -->
+    <!-- Filters -->
     <div class="flex flex-wrap gap-3 mb-4">
+      <input type="month" v-model="month" class="form-input" />
       <input v-model="search" class="form-input" placeholder="🔍 Search narration…" style="min-width:220px" />
       <select v-model="categoryFilter" class="form-select">
         <option value="">All Categories</option>
@@ -26,33 +28,56 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <!-- Table -->
       <div class="lg:col-span-2 card">
         <div class="card-header">
-          <div class="font-display font-bold text-[15px] text-white">Daily Expenses — April 2026</div>
+          <div class="font-display font-bold text-[15px] text-white">Daily Expenses — {{ monthLabel }}</div>
         </div>
-        <div class="overflow-x-auto">
+
+        <!-- Loading -->
+        <div v-if="loading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
+          <span class="animate-spin inline-block mr-2">⟳</span>Loading…
+        </div>
+
+        <!-- Error -->
+        <div v-else-if="loadError" class="card-body text-center py-8">
+          <p class="text-[#ef4444] text-[13px] mb-2">{{ loadError }}</p>
+          <button class="text-[#f59e0b] text-[12px] hover:underline" @click="loadExpenses">Retry</button>
+        </div>
+
+        <!-- Data -->
+        <div v-else class="overflow-x-auto">
           <table class="data-table">
-            <thead><tr><th>#</th><th>Date</th><th>Amount (₹)</th><th>Category</th><th>Narration / Notes</th><th>Actions</th></tr></thead>
+            <thead><tr><th>#</th><th>Date</th><th>Amount (₹)</th><th>Category</th><th>Narration / Notes</th><th>Paid By</th><th>Actions</th></tr></thead>
             <tbody>
-              <tr v-for="(r,i) in filtered" :key="r.date+i">
-                <td class="font-mono-custom text-[11px] text-[#5a6a82]">{{ i+1 }}</td>
-                <td><span class="font-mono-custom text-[12px] text-[#f59e0b]">{{ r.date }}</span></td>
-                <td class="amt" :class="r.exp>10000?'text-negative':r.exp>3000?'text-[#f59e0b]':''">{{ fmt(r.exp) }}</td>
+              <tr v-for="(r, i) in filtered" :key="r.id">
+                <td class="font-mono-custom text-[11px] text-[#5a6a82]">{{ i + 1 }}</td>
+                <td><span class="font-mono-custom text-[12px] text-[#f59e0b]">{{ fmtDate(r.date) }}</span></td>
+                <td class="amt" :class="r.amount > 10000 ? 'text-negative' : r.amount > 3000 ? 'text-[#f59e0b]' : ''">{{ fmt(r.amount) }}</td>
                 <td><span class="badge badge-gray text-[11px]">{{ r.category }}</span></td>
                 <td class="max-w-[260px]"><div class="text-[12px] text-[#8a9ab5] truncate" :title="r.narration">{{ r.narration }}</div></td>
+                <td class="text-[12px] text-[#8a9ab5]">{{ r.paid_by || '—' }}</td>
                 <td>
                   <div class="flex gap-1.5">
                     <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditExpense(r)">✏️</button>
-                    <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="deleteExpense(r, i)">🗑</button>
+                    <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDeleteExpense(r)">🗑</button>
                   </div>
                 </td>
               </tr>
+              <tr v-if="!filtered.length && !loading">
+                <td colspan="7" class="text-center text-[12.5px] text-[#5a6a82] py-6">
+                  No expenses found for this period.
+                </td>
+              </tr>
             </tbody>
-            <tfoot><tr><td colspan="2">TOTAL</td><td>{{ fmt(filteredTotal) }}</td><td colspan="3">—</td></tr></tfoot>
+            <tfoot v-if="filtered.length">
+              <tr><td colspan="2">TOTAL</td><td>{{ fmt(filteredTotal) }}</td><td colspan="4">—</td></tr>
+            </tfoot>
           </table>
         </div>
       </div>
 
+      <!-- Chart -->
       <div class="card">
         <div class="card-header"><div class="font-display font-bold text-[15px] text-white">Expense Trend</div></div>
         <div class="card-body">
@@ -93,7 +118,7 @@
       </div>
       <template #footer>
         <div class="flex justify-end gap-3">
-          <button class="btn btn-ghost px-6" @click="showAdd=false">Cancel</button>
+          <button class="btn btn-ghost px-6" @click="showAdd = false">Cancel</button>
           <button class="btn btn-primary px-8" @click="saveExpense" :disabled="saving">
             <span v-if="saving" class="animate-spin inline-block mr-1">⟳</span>💾 Save Expense
           </button>
@@ -106,19 +131,28 @@
       <div class="space-y-4" v-if="editData">
         <div class="grid grid-cols-2 gap-4">
           <div><label class="field-label">Date</label><input type="date" v-model="editData.date" class="form-input w-full" /></div>
-          <div><label class="field-label">Amount (₹)</label><input type="number" step="0.01" v-model.number="editData.exp" class="form-input w-full" /></div>
+          <div><label class="field-label">Amount (₹)</label><input type="number" step="0.01" v-model.number="editData.amount" class="form-input w-full" /></div>
         </div>
-        <div><label class="field-label">Category</label>
+        <div>
+          <label class="field-label">Category</label>
           <select v-model="editData.category" class="form-select w-full">
             <option v-for="c in categories" :key="c">{{ c }}</option>
           </select>
         </div>
         <div><label class="field-label">Narration</label><textarea v-model="editData.narration" class="form-input w-full" rows="3" /></div>
+        <div>
+          <label class="field-label">Paid By</label>
+          <select v-model="editData.paid_by" class="form-select w-full">
+            <option>Cash</option><option>PhonePe</option><option>Card</option>
+          </select>
+        </div>
       </div>
       <template #footer>
         <div class="flex justify-end gap-3">
-          <button class="btn btn-ghost px-6" @click="showEdit=false">Cancel</button>
-          <button class="btn btn-primary px-8" @click="saveEdit">💾 Update</button>
+          <button class="btn btn-ghost px-6" @click="showEdit = false">Cancel</button>
+          <button class="btn btn-primary px-8" @click="saveEdit" :disabled="editSaving">
+            <span v-if="editSaving" class="animate-spin inline-block mr-1">⟳</span>💾 Update
+          </button>
         </div>
       </template>
     </AppModal>
@@ -127,23 +161,27 @@
     <AppModal v-model="showDelete" title="Delete Expense" icon="⚠️" max-width="420px">
       <div v-if="deleteTarget" class="text-center py-4">
         <div class="text-5xl mb-4">🗑️</div>
-        <p class="text-[14px] text-[#e8edf5] mb-2">Delete expense of <span class="font-bold text-negative">₹{{ fmt(deleteTarget.exp) }}</span> on <span class="text-[#f59e0b]">{{ deleteTarget.date }}</span>?</p>
+        <p class="text-[14px] text-[#e8edf5] mb-2">
+          Delete expense of <span class="font-bold text-negative">₹{{ fmt(deleteTarget.amount) }}</span>
+          on <span class="text-[#f59e0b]">{{ fmtDate(deleteTarget.date) }}</span>?
+        </p>
         <p class="text-[12px] text-[#5a6a82]">"{{ deleteTarget.narration }}"</p>
         <p class="text-[12px] text-negative mt-3">This action cannot be undone.</p>
       </div>
       <template #footer>
         <div class="flex justify-end gap-3">
-          <button class="btn btn-ghost px-6" @click="showDelete=false">Cancel</button>
-          <button class="btn btn-danger px-8" @click="confirmDelete">🗑 Delete</button>
+          <button class="btn btn-ghost px-6" @click="showDelete = false">Cancel</button>
+          <button class="btn btn-danger px-8" @click="confirmDelete" :disabled="deleteSaving">
+            <span v-if="deleteSaving" class="animate-spin inline-block mr-1">⟳</span>🗑 Delete
+          </button>
         </div>
       </template>
     </AppModal>
-
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard    from '@/components/ui/KpiCard.vue'
 import AppModal   from '@/components/ui/AppModal.vue'
@@ -151,125 +189,195 @@ import BaseChart  from '@/components/charts/BaseChart.vue'
 import { fmt }    from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
+import { expenseApi } from '@/services/api'
 
 const ui = useUiStore()
-const showAdd    = ref(false)
-const showEdit   = ref(false)
-const showDelete = ref(false)
-const saving     = ref(false)
-const editData   = ref(null)
-const deleteTarget = ref(null)
-const deleteIndex  = ref(-1)
-const search = ref('')
+
+// ── Month selector ────────────────────────────────────────────────
+const month = ref(new Date().toISOString().slice(0, 7)) // YYYY-MM
+
+const monthLabel = computed(() => {
+  const [y, m] = month.value.split('-')
+  return new Date(Number(y), Number(m) - 1).toLocaleString('en-IN', { month: 'long', year: 'numeric' })
+})
+
+// ── Data & loading state ──────────────────────────────────────────
+const expData   = ref([])
+const loading   = ref(false)
+const loadError = ref('')
+
+const summary = ref({ total: 0, count: 0, avg_per_day: 0, min: null, max: null })
+
+// ── Helpers ───────────────────────────────────────────────────────
+const categories = ['Employee Shortage', 'Tanker Charges', 'Tea & Snacks', 'DG Diesel', 'Maintenance', 'Stationary', 'Other']
+
+function fmtDate(d) {
+  if (!d) return '—'
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })
+}
+
+// ── Load expenses + summary ───────────────────────────────────────
+async function loadExpenses() {
+  loading.value   = true
+  loadError.value = ''
+  try {
+    const [expRes, sumRes] = await Promise.all([
+      expenseApi.getAll({ month: month.value }),
+      expenseApi.getSummary({ month: month.value }),
+    ])
+    expData.value  = expRes.data?.expenses  || []
+    summary.value  = sumRes.data?.summary   || { total: 0, count: 0, avg_per_day: 0, min: null, max: null }
+  } catch (e) {
+    loadError.value = e?.message || 'Failed to load expenses.'
+  } finally {
+    loading.value = false
+  }
+}
+
+watch(month, loadExpenses)
+onMounted(loadExpenses)
+
+// ── Filters (client-side within loaded month) ─────────────────────
+const search         = ref('')
 const categoryFilter = ref('')
 
-const categories = ['Employee Shortage','Tanker Charges','Tea & Snacks','DG Diesel','Maintenance','Stationary','Other']
-
-const expForm = reactive({ date:'', amount:null, category:'Other', narration:'', paidBy:'Cash' })
-
-const expData = reactive([
-  {date:'01 Apr',exp:1086, category:'Employee Shortage',narration:'Employee Short + Density + Tea'},
-  {date:'02 Apr',exp:3832, category:'Other',            narration:'Employee Short + Tea + DG Diesel + Snacks'},
-  {date:'03 Apr',exp:1963, category:'Maintenance',      narration:'Employee Short + Juice + Tea + Ghanta gadi'},
-  {date:'04 Apr',exp:6687, category:'Stationary',       narration:'Employee Short + Water Jar + Stationary'},
-  {date:'05 Apr',exp:708,  category:'Tea & Snacks',     narration:'Employee Short + Tea'},
-  {date:'06 Apr',exp:615,  category:'Tea & Snacks',     narration:'Employee Short + Tea'},
-  {date:'07 Apr',exp:1108, category:'Tanker Charges',   narration:'Employee Short + Tanker + Xerox'},
-  {date:'08 Apr',exp:1729, category:'Tea & Snacks',     narration:'Employee Short + Tea'},
-  {date:'09 Apr',exp:9153, category:'Maintenance',      narration:'Employee Short + Tea + Air Machine Pipe + Fabrication'},
-  {date:'10 Apr',exp:23777,category:'Tanker Charges',   narration:'Employee Short + Tanker + Tea + Petrol'},
-  {date:'11 Apr',exp:3722, category:'Maintenance',      narration:'Employee Short + Ghanta Gadi + Stationary + Light Electrician'},
-  {date:'12 Apr',exp:3124, category:'DG Diesel',        narration:'Employee short + Tea + DG Diesel + Water Bottle'},
-  {date:'13 Apr',exp:2119, category:'Other',            narration:'Employee Short + Jayesh Advance + Tea + Harpick'},
-  {date:'14 Apr',exp:1171, category:'Tanker Charges',   narration:'Employee Short + Tea + Tanker'},
-  {date:'15 Apr',exp:709,  category:'Tanker Charges',   narration:'Employee Short + Tea + Tanker'},
-  {date:'16 Apr',exp:1328, category:'Tea & Snacks',     narration:'Employee short + Tea'},
-  {date:'17 Apr',exp:13383,category:'Maintenance',      narration:'Employee Short + Dhanu + LED light'},
-  {date:'18 Apr',exp:2033, category:'Maintenance',      narration:'Employee Short + Light Fitting + Tea'},
-  {date:'19 Apr',exp:1399, category:'Tanker Charges',   narration:'Employee Short + Tea + Lock + Tanker'},
-  {date:'20 Apr',exp:6207, category:'Other',            narration:'Pooja Tailor + Ajay Adv + Employee Short + Tea'},
-  {date:'21 Apr',exp:5419, category:'DG Diesel',        narration:'Employee Short + DG Diesel + Tea + Shoes'},
-  {date:'22 Apr',exp:866,  category:'Tea & Snacks',     narration:'Employee Short + Avasthi + Tea'},
-  {date:'23 Apr',exp:1001, category:'Tanker Charges',   narration:'Water + Employee Short + Tanker'},
-  {date:'24 Apr',exp:16600,category:'Other',            narration:'Santosh Advance + Tea'},
-  {date:'25 Apr',exp:18049,category:'Maintenance',      narration:'Fabrication + Tanker + Dhanu Petrol + Tea + Employee Short'},
-  {date:'26 Apr',exp:1984, category:'Tea & Snacks',     narration:'Employee Short + Tea'},
-  {date:'27 Apr',exp:2100, category:'Other',            narration:'Employee Short + Tea + Paint'},
-  {date:'28 Apr',exp:3482, category:'Tanker Charges',   narration:'Employee Short + Tea + Tanker'},
-  {date:'29 Apr',exp:856,  category:'Tea & Snacks',     narration:'Employee Short + Tea'},
-  {date:'30 Apr',exp:1342, category:'DG Diesel',        narration:'Employee Short + DG Diesel + Tea'},
-])
-
 const filtered = computed(() => {
-  let d = [...expData]
-  if (search.value) d = d.filter(r => r.narration.toLowerCase().includes(search.value.toLowerCase()))
+  let d = expData.value
+  if (search.value)         d = d.filter(r => r.narration.toLowerCase().includes(search.value.toLowerCase()))
   if (categoryFilter.value) d = d.filter(r => r.category === categoryFilter.value)
   return d
 })
 
-const totalExp      = computed(() => expData.reduce((a,r)=>a+r.exp,0))
-const filteredTotal = computed(() => filtered.value.reduce((a,r)=>a+r.exp,0))
+const filteredTotal = computed(() => filtered.value.reduce((a, r) => a + Number(r.amount), 0))
+
+// ── Add Expense ───────────────────────────────────────────────────
+const showAdd = ref(false)
+const saving  = ref(false)
+const expForm = reactive({ date: '', amount: null, category: 'Other', narration: '', paidBy: 'Cash' })
 
 function openAddExpense() {
-  expForm.date = new Date().toISOString().split('T')[0]
-  expForm.amount = null; expForm.narration = ''; expForm.category = 'Other'; expForm.paidBy = 'Cash'
-  showAdd.value = true
+  expForm.date      = new Date().toISOString().split('T')[0]
+  expForm.amount    = null
+  expForm.narration = ''
+  expForm.category  = 'Other'
+  expForm.paidBy    = 'Cash'
+  showAdd.value     = true
 }
-
-function openEditExpense(r) { editData.value = {...r}; showEdit.value = true }
-
-function deleteExpense(r, i) { deleteTarget.value = r; deleteIndex.value = i; showDelete.value = true }
 
 async function saveExpense() {
-  if (!expForm.date || !expForm.amount || !expForm.narration) { ui.error('Date, amount and narration are required'); return }
+  if (!expForm.date || !expForm.amount || !expForm.narration) {
+    ui.error('Date, amount and narration are required')
+    return
+  }
   saving.value = true
-  await new Promise(r => setTimeout(r, 500))
-  expData.push({ date: expForm.date, exp: expForm.amount, category: expForm.category, narration: expForm.narration })
-  expData.sort((a,b) => a.date.localeCompare(b.date))
-  saving.value = false
-  showAdd.value = false
-  ui.success('Expense added!')
+  try {
+    await expenseApi.create({
+      date:      expForm.date,
+      amount:    expForm.amount,
+      category:  expForm.category,
+      narration: expForm.narration,
+      paid_by:   expForm.paidBy,
+    })
+    showAdd.value = false
+    ui.success('Expense added!')
+    await loadExpenses()
+  } catch (e) {
+    ui.error(e?.message || 'Failed to add expense.')
+  } finally {
+    saving.value = false
+  }
 }
 
-function saveEdit() {
-  const i = expData.findIndex(r => r.date === editData.value.date && r.narration === editData.value.narration)
-  if (i !== -1) expData[i] = { ...editData.value }
-  showEdit.value = false
-  ui.success('Expense updated!')
+// ── Edit Expense ──────────────────────────────────────────────────
+const showEdit   = ref(false)
+const editSaving = ref(false)
+const editData   = ref(null)
+
+function openEditExpense(r) {
+  editData.value = { ...r }
+  showEdit.value = true
 }
 
-function confirmDelete() {
-  const i = expData.findIndex(r => r.date === deleteTarget.value.date && r.narration === deleteTarget.value.narration)
-  if (i !== -1) expData.splice(i, 1)
-  showDelete.value = false
-  ui.success('Expense deleted!')
+async function saveEdit() {
+  editSaving.value = true
+  try {
+    await expenseApi.update(editData.value.id, {
+      date:      editData.value.date,
+      amount:    editData.value.amount,
+      category:  editData.value.category,
+      narration: editData.value.narration,
+      paid_by:   editData.value.paid_by,
+    })
+    showEdit.value = false
+    ui.success('Expense updated!')
+    await loadExpenses()
+  } catch (e) {
+    ui.error(e?.message || 'Failed to update expense.')
+  } finally {
+    editSaving.value = false
+  }
 }
 
+// ── Delete Expense ────────────────────────────────────────────────
+const showDelete  = ref(false)
+const deleteSaving= ref(false)
+const deleteTarget= ref(null)
+
+function openDeleteExpense(r) {
+  deleteTarget.value = r
+  showDelete.value   = true
+}
+
+async function confirmDelete() {
+  deleteSaving.value = true
+  try {
+    await expenseApi.delete(deleteTarget.value.id)
+    showDelete.value = false
+    ui.success('Expense deleted!')
+    await loadExpenses()
+  } catch (e) {
+    ui.error(e?.message || 'Failed to delete expense.')
+  } finally {
+    deleteSaving.value = false
+  }
+}
+
+// ── Export / Print ────────────────────────────────────────────────
 function doExport() {
-  const headers = ['Date','Amount (₹)','Category','Narration']
-  const rows = expData.map(r => [r.date, r.exp, r.category, r.narration])
-  exportCSV('Expenses_April2026', headers, rows)
+  const headers = ['Date', 'Amount (₹)', 'Category', 'Narration', 'Paid By']
+  const rows    = expData.value.map(r => [fmtDate(r.date), r.amount, r.category, r.narration, r.paid_by || '—'])
+  exportCSV(`Expenses_${month.value}`, headers, rows)
   ui.success('CSV exported!')
 }
 
 function doPrint() {
-  const headers = ['Date','Amount','Category','Notes']
-  const rows = expData.map(r => [r.date, '₹'+fmt(r.exp), r.category, r.narration])
-  printTable('Daily Expenses — April 2026', headers, rows)
+  const headers = ['Date', 'Amount', 'Category', 'Notes']
+  const rows    = expData.value.map(r => [fmtDate(r.date), '₹' + fmt(r.amount), r.category, r.narration])
+  printTable(`Daily Expenses — ${monthLabel.value}`, headers, rows)
 }
 
+// ── Chart ─────────────────────────────────────────────────────────
 const expChartData = computed(() => ({
-  labels: expData.map(r => r.date.split(' ')[0]),
+  labels: expData.value.map(r => r.date.slice(8, 10)),
   datasets: [{
-    label:'Expense (₹)',
-    data: expData.map(r=>r.exp),
-    backgroundColor: expData.map(r => r.exp>10000?'#ef4444':r.exp>3000?'#f59e0b':'rgba(239,68,68,0.4)'),
-    borderRadius:4, borderSkipped:false,
-  }]
+    label: 'Expense (₹)',
+    data:  expData.value.map(r => r.amount),
+    backgroundColor: expData.value.map(r =>
+      Number(r.amount) > 10000 ? '#ef4444' : Number(r.amount) > 3000 ? '#f59e0b' : 'rgba(239,68,68,0.4)'
+    ),
+    borderRadius: 4, borderSkipped: false,
+  }],
 }))
-const barOpts = { plugins:{legend:{display:false}}, scales:{x:{ticks:{font:{size:9},maxRotation:60}}, y:{ticks:{callback:v=>'₹'+v}}} }
+
+const barOpts = {
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { ticks: { font: { size: 9 }, maxRotation: 60 } },
+    y: { ticks: { callback: v => '₹' + v } },
+  },
+}
 </script>
 
 <style scoped>
-.field-label{display:block;font-size:11.5px;color:#8a9ab5;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.field-label { display:block; font-size:11.5px; color:#8a9ab5; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px }
 </style>
