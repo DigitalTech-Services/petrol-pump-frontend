@@ -2,7 +2,15 @@
   <div>
     <PageHeader title="Settings" subtitle="Station configuration & system preferences" :crumbs="['Home','Settings']">
       <template #actions>
-        <button class="btn btn-primary" @click="saveAll">💾 Save Changes</button>
+        <button
+          v-if="['station','fuel','notifications'].includes(activeSection)"
+          class="btn btn-primary flex items-center gap-2"
+          @click="saveAll"
+          :disabled="saving"
+        >
+          <span v-if="saving" class="animate-spin">⟳</span>
+          {{ saving ? 'Saving…' : '💾 Save Changes' }}
+        </button>
       </template>
     </PageHeader>
 
@@ -32,9 +40,19 @@
           <div class="card">
             <div class="card-header">
               <span class="text-lg">🏪</span>
-              <div><div class="font-display font-bold text-[15px] text-white">Station Details</div><div class="text-[11.5px] text-[#5a6a82] mt-0.5">Basic information about your fuel station</div></div>
+              <div>
+                <div class="font-display font-bold text-[15px] text-white">Station Details</div>
+                <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Basic information about your fuel station</div>
+              </div>
             </div>
-            <div class="card-body grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div v-if="stationLoading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
+              <span class="animate-spin inline-block mr-2">⟳</span>Loading…
+            </div>
+            <div v-else-if="stationError" class="card-body text-center py-8">
+              <p class="text-[#ef4444] text-[13px] mb-2">{{ stationError }}</p>
+              <button class="text-[#f59e0b] text-[12px] hover:underline" @click="loadStation">Retry</button>
+            </div>
+            <div v-else class="card-body grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div><label class="field-label">Station Name</label><input v-model="settings.stationName" class="form-input w-full" /></div>
               <div><label class="field-label">HP Dealer Code</label><input v-model="settings.dealerCode" class="form-input w-full" /></div>
               <div><label class="field-label">Owner Name</label><input v-model="settings.ownerName" class="form-input w-full" /></div>
@@ -53,10 +71,20 @@
           <div class="card">
             <div class="card-header">
               <span class="text-lg">⛽</span>
-              <div><div class="font-display font-bold text-[15px] text-white">Fuel Rates</div><div class="text-[11.5px] text-[#5a6a82] mt-0.5">Current fuel prices (auto-affects revenue calculations)</div></div>
+              <div>
+                <div class="font-display font-bold text-[15px] text-white">Fuel Rates</div>
+                <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Current fuel prices (auto-affects revenue calculations)</div>
+              </div>
               <span class="ml-auto badge badge-green">Live Rates</span>
             </div>
-            <div class="card-body space-y-5">
+            <div v-if="fuelLoading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
+              <span class="animate-spin inline-block mr-2">⟳</span>Loading…
+            </div>
+            <div v-else-if="fuelError" class="card-body text-center py-8">
+              <p class="text-[#ef4444] text-[13px] mb-2">{{ fuelError }}</p>
+              <button class="text-[#f59e0b] text-[12px] hover:underline" @click="loadFuelRates">Retry</button>
+            </div>
+            <div v-else class="card-body space-y-5">
               <div v-for="fuel in fuelRates" :key="fuel.key"
                 class="p-4 rounded-xl" style="background:#161b24; border:1px solid #1c2230">
                 <div class="flex items-center gap-3 mb-4">
@@ -87,24 +115,153 @@
           <div class="card">
             <div class="card-header">
               <span class="text-lg">🔧</span>
-              <div><div class="font-display font-bold text-[15px] text-white">Nozzle Configuration</div><div class="text-[11.5px] text-[#5a6a82] mt-0.5">Pump and nozzle assignments</div></div>
-              <button class="btn btn-primary ml-auto text-[12px] py-1">＋ Add Nozzle</button>
+              <div>
+                <div class="font-display font-bold text-[15px] text-white">Nozzle Configuration</div>
+                <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Pump and nozzle assignments</div>
+              </div>
+              <button class="btn btn-primary ml-auto text-[12px] py-1" @click="openAddNozzle">＋ Add Nozzle</button>
             </div>
-            <div class="overflow-x-auto">
+
+            <div v-if="nozzlesLoading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
+              <span class="animate-spin inline-block mr-2">⟳</span>Loading…
+            </div>
+            <div v-else-if="nozzlesError" class="card-body text-center py-8">
+              <p class="text-[#ef4444] text-[13px] mb-2">{{ nozzlesError }}</p>
+              <button class="text-[#f59e0b] text-[12px] hover:underline" @click="loadNozzles">Retry</button>
+            </div>
+            <div v-else class="overflow-x-auto">
               <table class="data-table">
-                <thead><tr><th>Nozzle ID</th><th>Pump</th><th>Fuel Type</th><th>Status</th><th>Last Reading</th></tr></thead>
+                <thead>
+                  <tr><th>Nozzle ID</th><th>Pump</th><th>Fuel Type</th><th>Status</th><th>Last Reading</th><th>Action</th></tr>
+                </thead>
                 <tbody>
-                  <tr v-for="n in nozzles" :key="n.id">
-                    <td class="font-mono-custom text-[#f59e0b]">{{ n.id }}</td>
+                  <tr v-for="n in nozzles" :key="n.nozzleId">
+                    <td class="font-mono-custom text-[#f59e0b]">{{ n.nozzleId }}</td>
                     <td>{{ n.pump }}</td>
                     <td><span class="badge" :class="n.fuel === 'MS' ? 'badge-ms' : n.fuel === 'HSD' ? 'badge-hsd' : 'badge-speed'">{{ n.fuel }}</span></td>
                     <td><span class="badge" :class="n.active ? 'badge-green' : 'badge-red'">{{ n.active ? 'Active' : 'Inactive' }}</span></td>
-                    <td class="font-mono-custom text-[12px]">{{ n.lastReading }}</td>
+                    <td class="font-mono-custom text-[12px]">{{ n.lastReading || '—' }}</td>
+                    <td>
+                      <div v-if="n.id" class="flex gap-1.5">
+                        <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditNozzle(n)">✏️ Edit</button>
+                        <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDeleteNozzle(n)">🗑</button>
+                      </div>
+                      <span v-else class="text-[11px] text-[#5a6a82]">Default</span>
+                    </td>
+                  </tr>
+                  <tr v-if="!nozzles.length">
+                    <td colspan="6" class="text-center text-[12.5px] text-[#5a6a82] py-6">
+                      No nozzles configured. Click <strong class="text-white">+ Add Nozzle</strong> to create one.
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
+
+          <!-- Add / Edit Nozzle Modal -->
+          <Transition name="modal-fade">
+            <div v-if="nozzleModal.open"
+              class="fixed inset-0 z-50 flex items-center justify-center px-4"
+              style="background:rgba(0,0,0,0.7); backdrop-filter:blur(4px)"
+              @mousedown.self="nozzleModal.open = false">
+              <div class="w-full max-w-[440px] rounded-2xl p-6" style="background:#0f1218; border:1px solid #242d3e">
+                <h3 class="font-display font-bold text-[17px] text-white mb-1">
+                  {{ nozzleModal.mode === 'add' ? 'Add Nozzle' : 'Edit Nozzle' }}
+                </h3>
+                <p class="text-[12px] text-[#5a6a82] mb-5">
+                  {{ nozzleModal.mode === 'add' ? 'Register a new nozzle on a pump.' : 'Update nozzle details.' }}
+                </p>
+                <form @submit.prevent="submitNozzle">
+                  <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label class="field-label">Nozzle ID</label>
+                      <input v-model="nozzleForm.nozzleId" type="text" class="form-input w-full"
+                        placeholder="MS-01" required :disabled="nozzleModal.mode === 'edit'" />
+                    </div>
+                    <div>
+                      <label class="field-label">Pump</label>
+                      <input v-model="nozzleForm.pump" type="text" class="form-input w-full"
+                        placeholder="Pump 1" required />
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label class="field-label">Fuel Type</label>
+                      <select v-model="nozzleForm.fuel" class="form-input w-full" required>
+                        <option value="MS">MS Petrol</option>
+                        <option value="HSD">HSD Diesel</option>
+                        <option value="Speed">Speed</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="field-label">Last Reading</label>
+                      <input v-model="nozzleForm.lastReading" type="text" class="form-input w-full"
+                        placeholder="0.00" />
+                    </div>
+                  </div>
+                  <div class="mb-5 flex items-center justify-between p-3 rounded-xl"
+                    style="background:#161b24; border:1px solid #1c2230">
+                    <span class="text-[13px] text-white">Active Status</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" v-model="nozzleForm.active" class="sr-only peer">
+                      <div class="w-10 h-5 rounded-full peer-checked:bg-[#f59e0b] bg-[#242d3e] transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:w-4 after:h-4 after:transition-all peer-checked:after:translate-x-5"></div>
+                    </label>
+                  </div>
+                  <Transition name="fade">
+                    <div v-if="nozzleSubmitError" class="mb-4 px-3 py-2.5 rounded-lg text-[12px]"
+                      style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444">
+                      ⚠️ {{ nozzleSubmitError }}
+                    </div>
+                  </Transition>
+                  <div class="flex gap-3 justify-end">
+                    <button type="button" @click="nozzleModal.open = false"
+                      class="px-4 py-2 rounded-xl text-[12.5px] font-medium text-[#8a9ab5] hover:text-white"
+                      style="background:#161b24; border:1px solid #242d3e">Cancel</button>
+                    <button type="submit"
+                      class="btn btn-primary px-5 py-2 flex items-center gap-2"
+                      :disabled="nozzleSubmitting">
+                      <span v-if="nozzleSubmitting" class="animate-spin">⟳</span>
+                      {{ nozzleSubmitting ? 'Saving…' : (nozzleModal.mode === 'add' ? 'Add Nozzle' : 'Save Changes') }}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </Transition>
+
+          <!-- Delete Nozzle Confirmation -->
+          <Transition name="modal-fade">
+            <div v-if="nozzleDeleteModal.open"
+              class="fixed inset-0 z-50 flex items-center justify-center px-4"
+              style="background:rgba(0,0,0,0.7); backdrop-filter:blur(4px)"
+              @mousedown.self="nozzleDeleteModal.open = false">
+              <div class="w-full max-w-[360px] rounded-2xl p-6" style="background:#0f1218; border:1px solid #242d3e">
+                <h3 class="font-display font-bold text-[17px] text-white mb-1">Remove Nozzle</h3>
+                <p class="text-[13px] text-[#5a6a82] mb-5">
+                  Remove nozzle <strong class="text-white">{{ nozzleDeleteModal.nozzle?.nozzleId }}</strong>?
+                  This action cannot be undone.
+                </p>
+                <Transition name="fade">
+                  <div v-if="nozzleDeleteError" class="mb-4 px-3 py-2.5 rounded-lg text-[12px]"
+                    style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444">
+                    ⚠️ {{ nozzleDeleteError }}
+                  </div>
+                </Transition>
+                <div class="flex gap-3 justify-end">
+                  <button @click="nozzleDeleteModal.open = false"
+                    class="px-4 py-2 rounded-xl text-[12.5px] font-medium text-[#8a9ab5] hover:text-white"
+                    style="background:#161b24; border:1px solid #242d3e">Cancel</button>
+                  <button @click="confirmDeleteNozzle"
+                    class="btn btn-danger px-5 py-2 flex items-center gap-2"
+                    :disabled="nozzleDeleting">
+                    <span v-if="nozzleDeleting" class="animate-spin">⟳</span>
+                    {{ nozzleDeleting ? 'Removing…' : 'Remove' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Transition>
         </template>
 
         <!-- Users (owner only) -->
@@ -119,25 +276,19 @@
               <button class="btn btn-primary ml-auto text-[12px] py-1" @click="openAddManager">＋ Add Manager</button>
             </div>
 
-            <!-- Loading -->
             <div v-if="managersLoading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
               <span class="animate-spin inline-block mr-2">⟳</span>Loading…
             </div>
-
-            <!-- Error -->
             <div v-else-if="managersError" class="card-body text-center py-8">
               <p class="text-[#ef4444] text-[13px] mb-2">{{ managersError }}</p>
               <button class="text-[#f59e0b] text-[12px] hover:underline" @click="loadManagers">Retry</button>
             </div>
-
-            <!-- Table -->
             <div v-else class="overflow-x-auto">
               <table class="data-table">
                 <thead>
                   <tr><th>Name</th><th>Email</th><th>Contact</th><th>Role</th><th>Created</th><th>Action</th></tr>
                 </thead>
                 <tbody>
-                  <!-- Logged-in owner row -->
                   <tr>
                     <td>
                       <div class="flex items-center gap-2.5">
@@ -154,7 +305,6 @@
                     <td class="text-[12px] text-[#5a6a82]">—</td>
                     <td><span class="text-[11px] text-[#5a6a82]">Current account</span></td>
                   </tr>
-                  <!-- Sub-user (manager) rows -->
                   <tr v-for="m in managers" :key="m.id">
                     <td>
                       <div class="flex items-center gap-2.5">
@@ -288,7 +438,14 @@
               <span class="text-lg">🔔</span>
               <div><div class="font-display font-bold text-[15px] text-white">Notification Preferences</div></div>
             </div>
-            <div class="card-body space-y-4">
+            <div v-if="notifLoading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
+              <span class="animate-spin inline-block mr-2">⟳</span>Loading…
+            </div>
+            <div v-else-if="notifError" class="card-body text-center py-8">
+              <p class="text-[#ef4444] text-[13px] mb-2">{{ notifError }}</p>
+              <button class="text-[#f59e0b] text-[12px] hover:underline" @click="loadNotifications">Retry</button>
+            </div>
+            <div v-else class="card-body space-y-4">
               <div v-for="notif in notifications" :key="notif.key"
                 class="flex items-center justify-between p-4 rounded-xl"
                 style="background:#161b24; border:1px solid #1c2230">
@@ -317,12 +474,13 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useUiStore } from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'
-import { userApi } from '@/services/api'
+import { userApi, settingsApi } from '@/services/api'
 import PageHeader from '@/components/ui/PageHeader.vue'
 
 const ui   = useUiStore()
 const auth = useAuthStore()
 const activeSection = ref('station')
+const saving = ref(false)
 
 const sections = computed(() => [
   { key:'station',       icon:'🏪', label:'Station Details' },
@@ -332,47 +490,274 @@ const sections = computed(() => [
   { key:'notifications', icon:'🔔', label:'Notifications' },
 ])
 
+// ── Station Details ──────────────────────────────────────────────
+const stationLoading = ref(false)
+const stationError   = ref('')
 const settings = reactive({
-  stationName: 'Kailas Petromines',
-  dealerCode:  'HP-MH-2024-0891',
-  ownerName:   'Kailas Patil',
-  phone:       '+91 98765 43210',
-  address:     'NH 48, Near MIDC Gate, Khopoli',
-  city:        'Khopoli',
-  state:       'Maharashtra',
-  gst:         '27AAAAA0000A1Z5',
-  pan:         'AAAAA0000A',
+  stationName: '', dealerCode: '', ownerName: '',
+  phone: '', address: '', city: '', state: '', gst: '', pan: '',
 })
 
-const fuelRates = reactive([
-  { key:'ms',    name:'MS Petrol',   abbr:'MS',  type:'Motor Spirit',    rate:104.77, effectiveDate:'2026-04-01', color:'#f59e0b' },
-  { key:'hsd',   name:'HSD Diesel',  abbr:'HSD', type:'High Speed Diesel',rate:91.28, effectiveDate:'2026-04-01', color:'#10b981' },
-  { key:'speed', name:'Speed',       abbr:'SP',  type:'Premium Petrol',  rate:113.85, effectiveDate:'2026-04-01', color:'#3b82f6' },
-])
+async function loadStation() {
+  stationLoading.value = true
+  stationError.value   = ''
+  try {
+    const res = await settingsApi.getStation()
+    const s   = res.data?.station || {}
+    settings.stationName = s.station_name || ''
+    settings.dealerCode  = s.dealer_code  || ''
+    settings.ownerName   = s.owner_name   || ''
+    settings.phone       = s.phone        || ''
+    settings.address     = s.address      || ''
+    settings.city        = s.city         || ''
+    settings.state       = s.state        || ''
+    settings.gst         = s.gst          || ''
+    settings.pan         = s.pan          || ''
+  } catch (e) {
+    stationError.value = e?.message || 'Failed to load station settings.'
+  } finally {
+    stationLoading.value = false
+  }
+}
 
-const nozzles = [
-  { id:'MS-01', pump:'Pump 1', fuel:'MS',    active:true,  lastReading:'265,422.57' },
-  { id:'MS-02', pump:'Pump 1', fuel:'MS',    active:true,  lastReading:'265,422.57' },
-  { id:'MS-03', pump:'Pump 2', fuel:'MS',    active:true,  lastReading:'354,926.72' },
-  { id:'MS-04', pump:'Pump 2', fuel:'MS',    active:true,  lastReading:'354,926.72' },
-  { id:'MS-05', pump:'Pump 3', fuel:'MS',    active:true,  lastReading:'101,181.38' },
-  { id:'MS-06', pump:'Pump 3', fuel:'MS',    active:false, lastReading:'101,181.38' },
-  { id:'HSD-01',pump:'Pump 4', fuel:'HSD',   active:true,  lastReading:'48,235.60'  },
-  { id:'HSD-02',pump:'Pump 4', fuel:'HSD',   active:true,  lastReading:'48,235.60'  },
-  { id:'SP-01', pump:'Pump 5', fuel:'Speed', active:true,  lastReading:'12,450.22'  },
-  { id:'SP-02', pump:'Pump 5', fuel:'Speed', active:true,  lastReading:'12,450.22'  },
-]
+async function saveStation() {
+  saving.value = true
+  try {
+    await settingsApi.updateStation({
+      station_name: settings.stationName,
+      dealer_code:  settings.dealerCode,
+      owner_name:   settings.ownerName,
+      phone:        settings.phone,
+      address:      settings.address,
+      city:         settings.city,
+      state:        settings.state,
+      gst:          settings.gst,
+      pan:          settings.pan,
+    })
+    ui.success('Station settings saved.')
+  } catch (e) {
+    ui.error(e?.message || 'Failed to save station settings.')
+  } finally {
+    saving.value = false
+  }
+}
+
+// ── Fuel Rates ──────────────────────────────────────────────────
+const fuelLoading = ref(false)
+const fuelError   = ref('')
+const fuelRates   = ref([])
+
+async function loadFuelRates() {
+  fuelLoading.value = true
+  fuelError.value   = ''
+  try {
+    const res   = await settingsApi.getFuelRates()
+    const rates = res.data?.fuel_rates || []
+    fuelRates.value = rates.map(r => ({
+      key:           r.fuel_key,
+      name:          r.name,
+      abbr:          r.abbr,
+      type:          r.type,
+      rate:          r.rate,
+      effectiveDate: r.effective_date,
+      color:         r.color,
+    }))
+  } catch (e) {
+    fuelError.value = e?.message || 'Failed to load fuel rates.'
+  } finally {
+    fuelLoading.value = false
+  }
+}
+
+async function saveFuelRates() {
+  saving.value = true
+  try {
+    await settingsApi.updateFuelRates({
+      rates: fuelRates.value.map(f => ({
+        fuel_key:       f.key,
+        name:           f.name,
+        abbr:           f.abbr,
+        type:           f.type,
+        rate:           f.rate,
+        effective_date: f.effectiveDate,
+        color:          f.color,
+      })),
+    })
+    ui.success('Fuel rates saved.')
+  } catch (e) {
+    ui.error(e?.message || 'Failed to save fuel rates.')
+  } finally {
+    saving.value = false
+  }
+}
+
+// ── Nozzles ─────────────────────────────────────────────────────
+const nozzlesLoading = ref(false)
+const nozzlesError   = ref('')
+const nozzles        = ref([])
+
+function mapNozzle(n) {
+  return {
+    id:          n.id          ?? null,
+    nozzleId:    n.nozzle_id   ?? n.nozzleId  ?? '',
+    pump:        n.pump        ?? '',
+    fuel:        n.fuel        ?? 'MS',
+    active:      n.active      ?? true,
+    lastReading: n.last_reading ?? n.lastReading ?? '',
+  }
+}
+
+async function loadNozzles() {
+  nozzlesLoading.value = true
+  nozzlesError.value   = ''
+  try {
+    const res  = await settingsApi.getNozzles()
+    const data = res.data?.nozzles || []
+    nozzles.value = data.map(mapNozzle)
+  } catch (e) {
+    nozzlesError.value = e?.message || 'Failed to load nozzles.'
+  } finally {
+    nozzlesLoading.value = false
+  }
+}
+
+const nozzleModal       = reactive({ open: false, mode: 'add', nozzleDbId: null })
+const nozzleForm        = reactive({ nozzleId: '', pump: '', fuel: 'MS', active: true, lastReading: '' })
+const nozzleSubmitting  = ref(false)
+const nozzleSubmitError = ref('')
+
+function openAddNozzle() {
+  nozzleModal.mode      = 'add'
+  nozzleModal.nozzleDbId = null
+  nozzleForm.nozzleId   = ''
+  nozzleForm.pump       = ''
+  nozzleForm.fuel       = 'MS'
+  nozzleForm.active     = true
+  nozzleForm.lastReading= ''
+  nozzleSubmitError.value = ''
+  nozzleModal.open = true
+}
+
+function openEditNozzle(n) {
+  nozzleModal.mode       = 'edit'
+  nozzleModal.nozzleDbId = n.id
+  nozzleForm.nozzleId    = n.nozzleId
+  nozzleForm.pump        = n.pump
+  nozzleForm.fuel        = n.fuel
+  nozzleForm.active      = n.active
+  nozzleForm.lastReading = n.lastReading
+  nozzleSubmitError.value = ''
+  nozzleModal.open = true
+}
+
+async function submitNozzle() {
+  nozzleSubmitting.value  = true
+  nozzleSubmitError.value = ''
+  try {
+    if (nozzleModal.mode === 'add') {
+      await settingsApi.storeNozzle({
+        nozzle_id:    nozzleForm.nozzleId,
+        pump:         nozzleForm.pump,
+        fuel:         nozzleForm.fuel,
+        active:       nozzleForm.active,
+        last_reading: nozzleForm.lastReading,
+      })
+      ui.success('Nozzle added.')
+    } else {
+      await settingsApi.updateNozzle(nozzleModal.nozzleDbId, {
+        pump:         nozzleForm.pump,
+        fuel:         nozzleForm.fuel,
+        active:       nozzleForm.active,
+        last_reading: nozzleForm.lastReading,
+      })
+      ui.success('Nozzle updated.')
+    }
+    nozzleModal.open = false
+    await loadNozzles()
+  } catch (e) {
+    nozzleSubmitError.value = e?.message || 'Operation failed.'
+  } finally {
+    nozzleSubmitting.value = false
+  }
+}
+
+const nozzleDeleteModal = reactive({ open: false, nozzle: null })
+const nozzleDeleting    = ref(false)
+const nozzleDeleteError = ref('')
+
+function openDeleteNozzle(n) {
+  nozzleDeleteModal.nozzle = n
+  nozzleDeleteError.value  = ''
+  nozzleDeleteModal.open   = true
+}
+
+async function confirmDeleteNozzle() {
+  nozzleDeleting.value    = true
+  nozzleDeleteError.value = ''
+  try {
+    await settingsApi.deleteNozzle(nozzleDeleteModal.nozzle.id)
+    nozzleDeleteModal.open = false
+    ui.success('Nozzle removed.')
+    await loadNozzles()
+  } catch (e) {
+    nozzleDeleteError.value = e?.message || 'Delete failed.'
+  } finally {
+    nozzleDeleting.value = false
+  }
+}
+
+// ── Notifications ────────────────────────────────────────────────
+const notifLoading  = ref(false)
+const notifError    = ref('')
+const notifications = ref([])
+
+async function loadNotifications() {
+  notifLoading.value = true
+  notifError.value   = ''
+  try {
+    const res  = await settingsApi.getNotifications()
+    const data = res.data?.notifications || []
+    notifications.value = data.map(n => ({
+      key:     n.notif_key ?? n.key,
+      icon:    n.icon,
+      label:   n.label,
+      sub:     n.sub,
+      enabled: n.enabled,
+    }))
+  } catch (e) {
+    notifError.value = e?.message || 'Failed to load notification preferences.'
+  } finally {
+    notifLoading.value = false
+  }
+}
+
+async function saveNotifications() {
+  saving.value = true
+  try {
+    await settingsApi.updateNotifications({
+      notifications: notifications.value.map(n => ({
+        notif_key: n.key,
+        enabled:   n.enabled,
+      })),
+    })
+    ui.success('Notification preferences saved.')
+  } catch (e) {
+    ui.error(e?.message || 'Failed to save notification preferences.')
+  } finally {
+    saving.value = false
+  }
+}
 
 // ── Manager (sub-user) management ────────────────────────────────
 const managers        = ref([])
 const managersLoading = ref(false)
 const managersError   = ref('')
 
-const managerModal = reactive({ open: false, mode: 'add', userId: null })
-const managerForm  = reactive({ name: '', email: '', contact: '', password: '' })
-const showManagerPass    = ref(false)
-const managerSubmitting  = ref(false)
-const managerSubmitError = ref('')
+const managerModal      = reactive({ open: false, mode: 'add', userId: null })
+const managerForm       = reactive({ name: '', email: '', contact: '', password: '' })
+const showManagerPass   = ref(false)
+const managerSubmitting = ref(false)
+const managerSubmitError= ref('')
 
 const deleteModal = reactive({ open: false, manager: null })
 const deleting    = ref(false)
@@ -405,26 +790,26 @@ async function loadManagers() {
 }
 
 function openAddManager() {
-  managerModal.mode   = 'add'
-  managerModal.userId = null
-  managerForm.name    = ''
-  managerForm.email   = ''
-  managerForm.contact = ''
-  managerForm.password= ''
+  managerModal.mode    = 'add'
+  managerModal.userId  = null
+  managerForm.name     = ''
+  managerForm.email    = ''
+  managerForm.contact  = ''
+  managerForm.password = ''
   managerSubmitError.value = ''
   showManagerPass.value    = false
-  managerModal.open   = true
+  managerModal.open = true
 }
 
 function openEditManager(m) {
-  managerModal.mode   = 'edit'
-  managerModal.userId = m.id
-  managerForm.name    = m.name
-  managerForm.email   = m.email
-  managerForm.contact = m.contact || ''
-  managerForm.password= ''
+  managerModal.mode    = 'edit'
+  managerModal.userId  = m.id
+  managerForm.name     = m.name
+  managerForm.email    = m.email
+  managerForm.contact  = m.contact || ''
+  managerForm.password = ''
   managerSubmitError.value = ''
-  managerModal.open   = true
+  managerModal.open = true
 }
 
 function openDeleteManager(m) {
@@ -471,19 +856,38 @@ async function confirmDeleteManager() {
   }
 }
 
-// Load managers when the users section becomes active
-watch(activeSection, (val) => { if (val === 'users') loadManagers() })
-onMounted(() => { if (activeSection.value === 'users') loadManagers() })
+// ── Section-aware save ───────────────────────────────────────────
+async function saveAll() {
+  switch (activeSection.value) {
+    case 'station':       return saveStation()
+    case 'fuel':          return saveFuelRates()
+    case 'notifications': return saveNotifications()
+  }
+}
 
-const notifications = reactive([
-  { key:'daily',   icon:'📊', label:'Daily Sales Summary',    sub:'Get end-of-day summary via WhatsApp', enabled:true  },
-  { key:'stock',   icon:'🛢️', label:'Low Stock Alert',         sub:'Alert when fuel drops below threshold', enabled:true  },
-  { key:'salary',  icon:'💰', label:'Monthly Salary Reminder', sub:'Remind on 28th to process payroll', enabled:false },
-  { key:'expense', icon:'🧾', label:'High Expense Alert',      sub:'Alert when daily expense exceeds ₹10,000', enabled:true  },
-  { key:'meter',   icon:'📈', label:'Meter Variation Alert',   sub:'Alert on large meter discrepancies', enabled:false },
-])
+// ── Lazy load per section (load only on first visit) ─────────────
+const loaded = reactive({ station: false, fuel: false, nozzles: false, notifications: false })
 
-const saveAll = () => ui.success('Settings saved successfully!')
+async function loadSection(section) {
+  if (section === 'station' && !loaded.station) {
+    loaded.station = true
+    await loadStation()
+  } else if (section === 'fuel' && !loaded.fuel) {
+    loaded.fuel = true
+    await loadFuelRates()
+  } else if (section === 'nozzles' && !loaded.nozzles) {
+    loaded.nozzles = true
+    await loadNozzles()
+  } else if (section === 'notifications' && !loaded.notifications) {
+    loaded.notifications = true
+    await loadNotifications()
+  } else if (section === 'users') {
+    loadManagers()
+  }
+}
+
+watch(activeSection, loadSection)
+onMounted(() => loadSection(activeSection.value))
 </script>
 
 <style scoped>
