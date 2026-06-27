@@ -195,7 +195,7 @@ export const userApi = {
 // ADMIN (separate axios instance — uses pm_admin_token)
 // ──────────────────────────────────────────────────────────────────
 const adminAxios = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',
+  baseURL: import.meta.env.VITE_API_URL,
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
 })
