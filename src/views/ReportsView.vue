@@ -2,34 +2,34 @@
   <div>
     <PageHeader title="Monthly Reports" subtitle="Analytics, P&L and export — April 2026" :crumbs="['Home','Reports']">
       <template #actions>
-        <button class="btn btn-ghost" @click="printReport">🖨 Print</button>
-        <button class="btn btn-ghost" @click="exportExcel">📊 Excel</button>
-        <button class="btn btn-primary" @click="exportPdf">📄 PDF Report</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="printReport"><Printer :size="14" /> Print</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="exportExcel"><BarChart3 :size="14" /> Excel</button>
+        <button class="btn btn-primary flex items-center gap-1.5" @click="exportPdf"><FileText :size="14" /> PDF Report</button>
       </template>
     </PageHeader>
 
     <!-- Tab Navigation -->
     <div class="tab-bar mb-6">
-      <button class="tab-btn" :class="{ active: tab === 'summary' }"   @click="tab = 'summary'">📊 Summary</button>
-      <button class="tab-btn" :class="{ active: tab === 'fuel' }"      @click="tab = 'fuel'">⛽ Fuel Report</button>
-      <button class="tab-btn" :class="{ active: tab === 'financial' }" @click="tab = 'financial'">💰 P&L</button>
-      <button class="tab-btn" :class="{ active: tab === 'staff' }"     @click="tab = 'staff'">👥 Staff</button>
+      <button class="tab-btn flex items-center gap-1.5" :class="{ active: tab === 'summary' }"   @click="tab = 'summary'"><BarChart3 :size="14" /> Summary</button>
+      <button class="tab-btn flex items-center gap-1.5" :class="{ active: tab === 'fuel' }"      @click="tab = 'fuel'"><Fuel :size="14" /> Fuel Report</button>
+      <button class="tab-btn flex items-center gap-1.5" :class="{ active: tab === 'financial' }" @click="tab = 'financial'"><Banknote :size="14" /> P&L</button>
+      <button class="tab-btn flex items-center gap-1.5" :class="{ active: tab === 'staff' }"     @click="tab = 'staff'"><Users :size="14" /> Staff</button>
     </div>
 
     <!-- ===== SUMMARY TAB ===== -->
     <template v-if="tab === 'summary'">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <KpiCard label="Gross Revenue"   value="₹1,82,46,018" icon="💰" color="#f59e0b" sub="30 days" />
-        <KpiCard label="Total Fuel Sold" value="1,80,155 L"   icon="⛽" color="#10b981" sub="All fuel types" />
-        <KpiCard label="Total Expenses"  value="₹1,29,358"    icon="🧾" color="#ef4444" sub="Operational" />
-        <KpiCard label="Net Payroll"     value="₹1,04,449"    icon="👥" color="#6366f1" sub="13 staff" />
+        <KpiCard label="Gross Revenue"   value="₹1,82,46,018" :icon="Banknote" color="#f59e0b" sub="30 days" />
+        <KpiCard label="Total Fuel Sold" value="1,80,155 L"   :icon="Fuel"    color="#10b981" sub="All fuel types" />
+        <KpiCard label="Total Expenses"  value="₹1,29,358"    :icon="Receipt" color="#ef4444" sub="Operational" />
+        <KpiCard label="Net Payroll"     value="₹1,04,449"    :icon="Users"   color="#6366f1" sub="13 staff" />
       </div>
 
       <!-- P&L Summary Card -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         <div class="card">
           <div class="card-header">
-            <div class="font-display font-bold text-[15px] text-white">📋 April 2026 — P&L Summary</div>
+            <div class="font-display font-bold text-[15px] text-white flex items-center gap-2"><ClipboardList :size="16" /> April 2026 — P&L Summary</div>
           </div>
           <div class="card-body">
             <div class="space-y-0">
@@ -52,7 +52,7 @@
         <!-- Collection breakdown -->
         <div class="card">
           <div class="card-header">
-            <div class="font-display font-bold text-[15px] text-white">💳 Collection Breakdown</div>
+            <div class="font-display font-bold text-[15px] text-white flex items-center gap-2"><CreditCard :size="16" /> Collection Breakdown</div>
           </div>
           <div class="card-body">
             <BaseChart type="doughnut" :data="collectionChart" :options="doughnutOpts" :height="220" />
@@ -89,7 +89,7 @@
     <template v-if="tab === 'fuel'">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-white">⛽ MS Petrol</div></div>
+          <div class="card-header"><div class="font-display font-bold text-[15px] text-white flex items-center gap-2"><Fuel :size="16" /> MS Petrol</div></div>
           <div class="card-body space-y-3">
             <div class="flex justify-between"><span class="text-[#8a9ab5]">Total Volume</span><span class="amt text-[#f59e0b] font-semibold">1,23,951.86 L</span></div>
             <div class="flex justify-between"><span class="text-[#8a9ab5]">Rate/Litre</span><span class="amt">₹104.77</span></div>
@@ -101,7 +101,7 @@
           </div>
         </div>
         <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-white">🟢 HSD Diesel</div></div>
+          <div class="card-header"><div class="font-display font-bold text-[15px] text-white flex items-center gap-2"><Fuel :size="16" class="text-[#10b981]" /> HSD Diesel</div></div>
           <div class="card-body space-y-3">
             <div class="flex justify-between"><span class="text-[#8a9ab5]">Total Volume</span><span class="amt text-[#10b981] font-semibold">50,475.40 L</span></div>
             <div class="flex justify-between"><span class="text-[#8a9ab5]">Rate/Litre</span><span class="amt">₹91.28</span></div>
@@ -113,7 +113,7 @@
           </div>
         </div>
         <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-white">🔵 Speed Premium</div></div>
+          <div class="card-header"><div class="font-display font-bold text-[15px] text-white flex items-center gap-2"><Fuel :size="16" class="text-[#3b82f6]" /> Speed Premium</div></div>
           <div class="card-body space-y-3">
             <div class="flex justify-between"><span class="text-[#8a9ab5]">Total Volume</span><span class="amt text-[#3b82f6] font-semibold">5,728.48 L</span></div>
             <div class="flex justify-between"><span class="text-[#8a9ab5]">Rate/Litre</span><span class="amt">₹113.85</span></div>
@@ -157,7 +157,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div v-for="cat in expCategories" :key="cat.label"
               class="p-4 rounded-xl" style="background:#161b24; border:1px solid #1c2230">
-              <div class="text-2xl mb-2">{{ cat.icon }}</div>
+              <component :is="cat.icon" :size="24" class="mb-2" />
               <div class="text-[12px] text-[#5a6a82] mb-1">{{ cat.label }}</div>
               <div class="font-display font-bold text-[18px]" :style="{ color: cat.color }">₹{{ cat.value }}</div>
               <div class="text-[11px] text-[#5a6a82] mt-1">{{ cat.sub }}</div>
@@ -237,6 +237,10 @@ import KpiCard    from '@/components/ui/KpiCard.vue'
 import BaseChart  from '@/components/charts/BaseChart.vue'
 import { fmt, chartColors } from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
+import {
+  Banknote, Fuel, Receipt, Users, CreditCard, BarChart3,
+  ClipboardList, Printer, FileText, HardHat, Truck, Coffee, Zap
+} from 'lucide-vue-next'
 
 const tab = ref('summary')
 const ui  = useUiStore()
@@ -346,9 +350,9 @@ const plRows = [
 ]
 
 const expCategories = [
-  { icon:'👷', label:'Employee Shortage', value:'48,213', sub:'Daily cash handover', color:'#f59e0b' },
-  { icon:'🚛', label:'Tanker Charges',    value:'31,000', sub:'Delivery expenses', color:'#10b981' },
-  { icon:'☕', label:'Tea & Snacks',       value:'8,200',  sub:'Daily staff tea', color:'#06b6d4' },
-  { icon:'⚡', label:'Fabrication & Misc',value:'41,945', sub:'Repairs, spares, tools', color:'#ef4444' },
+  { icon: HardHat, label:'Employee Shortage', value:'48,213', sub:'Daily cash handover', color:'#f59e0b' },
+  { icon: Truck,   label:'Tanker Charges',    value:'31,000', sub:'Delivery expenses', color:'#10b981' },
+  { icon: Coffee,  label:'Tea & Snacks',       value:'8,200',  sub:'Daily staff tea', color:'#06b6d4' },
+  { icon: Zap,     label:'Fabrication & Misc',value:'41,945', sub:'Repairs, spares, tools', color:'#ef4444' },
 ]
 </script>

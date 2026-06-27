@@ -3,9 +3,9 @@
     <PageHeader title="Time Sheet" :subtitle="'Staff attendance & working hours — '+monthLabel" :crumbs="['Home','Time Sheet']">
       <template #actions>
         <input type="month" v-model="selectedMonth" class="form-input text-[13px]" style="width:150px" />
-        <button class="btn btn-ghost" @click="doExport">📥 Export CSV</button>
-        <button class="btn btn-ghost" @click="doPrint">🖨 Print</button>
-        <button class="btn btn-primary" @click="openMarkAttendance">✅ Mark Attendance</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="doExport"><Download :size="14" /> Export CSV</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="doPrint"><Printer :size="14" /> Print</button>
+        <button class="btn btn-primary flex items-center gap-1.5" @click="openMarkAttendance"><CheckCircle2 :size="14" /> Mark Attendance</button>
       </template>
     </PageHeader>
 
@@ -15,10 +15,10 @@
     <template v-else>
       <!-- KPIs -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <KpiCard label="Total Staff"     :value="timesheetData.length"                                                                               icon="👥" color="#f59e0b" sub="Active this month"/>
-        <KpiCard label="Total Man-Days"  :value="timesheetData.reduce((a,s)=>a+s.daysWorked,0)"                                                      icon="📅" color="#10b981" sub="Combined attendance"/>
-        <KpiCard label="Avg Attendance"  :value="timesheetData.length ? Math.round(timesheetData.reduce((a,s)=>a+s.daysWorked,0)/timesheetData.length)+' days' : '—'" icon="📊" color="#3b82f6" sub="Per person"/>
-        <KpiCard label="Full Attendance" :value="timesheetData.filter(s=>s.daysWorked>=30).length+' Staff'"                                          icon="🏆" color="#6366f1" sub="30/30 days"/>
+        <KpiCard label="Total Staff"     :value="timesheetData.length"                                                                               :icon="Users"      color="#f59e0b" sub="Active this month"/>
+        <KpiCard label="Total Man-Days"  :value="timesheetData.reduce((a,s)=>a+s.daysWorked,0)"                                                      :icon="Calendar"   color="#10b981" sub="Combined attendance"/>
+        <KpiCard label="Avg Attendance"  :value="timesheetData.length ? Math.round(timesheetData.reduce((a,s)=>a+s.daysWorked,0)/timesheetData.length)+' days' : '—'" :icon="BarChart3" color="#3b82f6" sub="Per person"/>
+        <KpiCard label="Full Attendance" :value="timesheetData.filter(s=>s.daysWorked>=30).length+' Staff'"                                          :icon="Award"      color="#6366f1" sub="30/30 days"/>
       </div>
 
       <!-- Summary Cards -->
@@ -63,7 +63,7 @@
               <div class="font-display font-bold text-[13px] text-positive">₹{{ fmtK(s.salary) }}</div>
             </div>
           </div>
-          <div class="mt-3 text-center text-[10.5px] text-[#5a6a82] hover:text-[#f59e0b] transition-colors">✏️ Click to edit</div>
+          <div class="mt-3 text-center text-[10.5px] text-[#5a6a82] hover:text-[#f59e0b] transition-colors flex items-center justify-center gap-1"><Pencil :size="10" /> Click to edit</div>
         </div>
       </div>
 
@@ -74,7 +74,7 @@
             <div class="font-display font-bold text-[15px] text-white">Attendance Register — {{ monthLabel }}</div>
             <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Complete shift & salary register</div>
           </div>
-          <button class="btn btn-ghost ml-auto text-[12px]" @click="doPrint">🖨 Print Register</button>
+          <button class="btn btn-ghost ml-auto text-[12px] flex items-center gap-1.5" @click="doPrint"><Printer :size="13" /> Print Register</button>
         </div>
         <div class="overflow-x-auto">
           <table class="data-table">
@@ -109,7 +109,7 @@
                   </div>
                 </td>
                 <td>
-                  <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditAttendance(s)">✏️ Edit</button>
+                  <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditAttendance(s)"><Pencil :size="11" /> Edit</button>
                 </td>
               </tr>
             </tbody>
@@ -133,7 +133,7 @@
     </template>
 
     <!-- ═══ MARK ATTENDANCE MODAL ═══ -->
-    <AppModal v-model="showMark" title="Mark Attendance" subtitle="Record staff attendance for the date" icon="✅" max-width="560px">
+    <AppModal v-model="showMark" title="Mark Attendance" subtitle="Record staff attendance for the date" :icon="CheckCircle2" max-width="560px">
       <div class="mb-4">
         <label class="field-label">Attendance Date *</label>
         <input type="date" v-model="attendanceDate" class="form-input w-full" />
@@ -188,13 +188,15 @@
       <template #footer>
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showMark=false">Cancel</button>
-          <button class="btn btn-primary px-8" :disabled="saving" @click="saveAttendance">{{ saving ? 'Saving…' : '✅ Save Attendance' }}</button>
+          <button class="btn btn-primary px-8 flex items-center gap-1.5" :disabled="saving" @click="saveAttendance">
+            <RotateCw v-if="saving" :size="14" class="animate-spin" /><CheckCircle2 v-else :size="14" /> {{ saving ? 'Saving…' : 'Save Attendance' }}
+          </button>
         </div>
       </template>
     </AppModal>
 
     <!-- ═══ EDIT ATTENDANCE MODAL ═══ -->
-    <AppModal v-model="showEditAtt" :title="'Edit — '+(editAttData?.name||'')" icon="✏️" max-width="480px">
+    <AppModal v-model="showEditAtt" :title="'Edit — '+(editAttData?.name||'')" :icon="Pencil" max-width="480px">
       <div class="space-y-4" v-if="editAttData">
         <div class="flex items-center gap-3 p-3 rounded-lg mb-2" style="background:#161b24;border:1px solid #1c2230">
           <div class="w-12 h-12 rounded-full flex items-center justify-center font-display font-bold text-[16px] text-white" :style="{background:editAttData.color}">{{ editAttData.name.slice(0,2).toUpperCase() }}</div>
@@ -271,7 +273,9 @@
       <template #footer>
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showEditAtt=false">Cancel</button>
-          <button class="btn btn-primary px-8" :disabled="saving" @click="saveEditAtt">{{ saving ? 'Saving…' : '💾 Update' }}</button>
+          <button class="btn btn-primary px-8 flex items-center gap-1.5" :disabled="saving" @click="saveEditAtt">
+            <RotateCw v-if="saving" :size="14" class="animate-spin" /><Save v-else :size="14" /> {{ saving ? 'Saving…' : 'Update' }}
+          </button>
         </div>
       </template>
     </AppModal>
@@ -288,6 +292,10 @@ import { fmt }    from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
 import { staffApi }   from '@/services/api'
+import {
+  Users, Calendar, BarChart3, Award, Download, Printer,
+  CheckCircle2, Pencil, RotateCw, Save
+} from 'lucide-vue-next'
 
 const ui          = useUiStore()
 const showMark    = ref(false)

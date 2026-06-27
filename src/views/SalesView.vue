@@ -2,9 +2,9 @@
   <div>
     <PageHeader title="Petrol Sales" subtitle="All daily sale records — April 2026" :crumbs="['Home','Sales']">
       <template #actions>
-        <button class="btn btn-ghost" @click="doExport">📥 Export CSV</button>
-        <button class="btn btn-ghost" @click="doPrint">🖨 Print</button>
-        <button class="btn btn-primary" @click="openAdd">＋ New Sale Entry</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="doExport"><Download :size="14" /> Export CSV</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="doPrint"><Printer :size="14" /> Print</button>
+        <button class="btn btn-primary flex items-center gap-1.5" @click="openAdd"><Plus :size="14" /> New Sale Entry</button>
       </template>
     </PageHeader>
 
@@ -13,7 +13,7 @@
 
     <!-- Filters -->
     <div class="flex flex-wrap gap-3 mb-4">
-      <input v-model="search" class="form-input" placeholder="🔍 Search narration, date…" style="min-width:220px" />
+      <input v-model="search" class="form-input" placeholder="Search narration, date…" style="min-width:220px" />
       <select v-model="sortKey" class="form-select">
         <option value="">Sort: Default</option>
         <option value="revenue">Revenue ↓</option>
@@ -53,8 +53,8 @@
               <td><div class="text-[11.5px] text-[#5a6a82] truncate max-w-[160px]" :title="r.narration">{{ r.narration }}</div></td>
               <td>
                 <div class="flex gap-1.5">
-                  <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEdit(r)">✏️</button>
-                  <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDelete(r,i)">🗑</button>
+                  <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEdit(r)"><Pencil :size="11" /></button>
+                  <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDelete(r,i)"><Trash2 :size="11" /></button>
                 </div>
               </td>
             </tr>
@@ -79,7 +79,7 @@
     </div>
 
     <!-- ═══ ADD SALE MODAL ═══ -->
-    <AppModal v-model="showAdd" title="New Sale Entry" subtitle="Enter daily fuel sale data" icon="⛽" max-width="640px">
+    <AppModal v-model="showAdd" title="New Sale Entry" subtitle="Enter daily fuel sale data" :icon="Fuel" max-width="640px">
       <div class="space-y-5">
 
         <!-- Row 1: Date & Shift -->
@@ -131,7 +131,7 @@
 
         <!-- Row 5: Collections -->
         <div class="p-4 rounded-xl" style="background:#161b24;border:1px solid #1c2230">
-          <div class="text-[12px] font-semibold text-white mb-3">💰 Collections</div>
+          <div class="text-[12px] font-semibold text-white mb-3 flex items-center gap-1.5"><Banknote :size="14" /> Collections</div>
           <div class="grid grid-cols-3 gap-3">
             <div><label class="field-label">Cash (₹)</label><input type="number" step="0.01" v-model.number="saleForm.cash" class="form-input w-full" placeholder="0.00" @input="recalc" /></div>
             <div><label class="field-label">PhonePe (₹)</label><input type="number" step="0.01" v-model.number="saleForm.phonepay" class="form-input w-full" placeholder="0.00" @input="recalc" /></div>
@@ -165,15 +165,15 @@
       <template #footer>
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showAdd=false">Cancel</button>
-          <button class="btn btn-primary px-8" @click="saveSale" :disabled="saving">
-            <span v-if="saving" class="animate-spin inline-block mr-1">⟳</span>💾 Save Sale Entry
+          <button class="btn btn-primary px-8 flex items-center gap-1.5" @click="saveSale" :disabled="saving">
+            <RotateCw v-if="saving" :size="14" class="animate-spin" /><Save v-else :size="14" /> Save Sale Entry
           </button>
         </div>
       </template>
     </AppModal>
 
     <!-- ═══ EDIT MODAL ═══ -->
-    <AppModal v-model="showEdit" title="Edit Sale Entry" icon="✏️" max-width="640px">
+    <AppModal v-model="showEdit" title="Edit Sale Entry" :icon="Pencil" max-width="640px">
       <div class="space-y-4" v-if="editData">
         <div class="grid grid-cols-2 gap-4">
           <div><label class="field-label">Date</label><input type="text" v-model="editData.date" class="form-input w-full" /></div>
@@ -206,15 +206,15 @@
       <template #footer>
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showEdit=false">Cancel</button>
-          <button class="btn btn-primary px-8" @click="saveEdit">💾 Update Sale</button>
+          <button class="btn btn-primary px-8 flex items-center gap-1.5" @click="saveEdit"><Save :size="14" /> Update Sale</button>
         </div>
       </template>
     </AppModal>
 
     <!-- ═══ DELETE CONFIRM ═══ -->
-    <AppModal v-model="showDelete" title="Delete Sale Record" icon="⚠️" max-width="420px">
+    <AppModal v-model="showDelete" title="Delete Sale Record" :icon="AlertTriangle" max-width="420px">
       <div v-if="deleteTarget" class="text-center py-4">
-        <div class="text-5xl mb-4">🗑️</div>
+        <Trash2 :size="48" class="mx-auto mb-4 text-[#ef4444] opacity-70" />
         <p class="text-[14px] text-[#e8edf5] mb-2">
           Delete sale record for <span class="text-[#f59e0b] font-bold">{{ deleteTarget.date }}</span>?
         </p>
@@ -224,7 +224,7 @@
       <template #footer>
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showDelete=false">Cancel</button>
-          <button class="btn btn-danger px-8" @click="confirmDelete">🗑 Delete</button>
+          <button class="btn btn-danger px-8 flex items-center gap-1.5" @click="confirmDelete"><Trash2 :size="14" /> Delete</button>
         </div>
       </template>
     </AppModal>
@@ -240,6 +240,7 @@ import AppModal   from '@/components/ui/AppModal.vue'
 import { fmt }    from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
+import { Download, Printer, Plus, Fuel, Pencil, AlertTriangle, RotateCw, Save, Trash2, Banknote } from 'lucide-vue-next'
 
 const ui = useUiStore()
 const showAdd    = ref(false)

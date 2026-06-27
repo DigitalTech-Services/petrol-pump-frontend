@@ -2,25 +2,25 @@
   <div>
     <PageHeader title="Stock Summary" subtitle="Fuel inventory & stock variation" :crumbs="['Home','Stock']">
       <template #actions>
-        <button class="btn btn-ghost" @click="doExport">📥 Export CSV</button>
-        <button class="btn btn-ghost" @click="doPrint">🖨 Print</button>
-        <button class="btn btn-primary" @click="openAddModal">＋ Add Stock</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="doExport"><Download :size="14" /> Export CSV</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="doPrint"><Printer :size="14" /> Print</button>
+        <button class="btn btn-primary flex items-center gap-1.5" @click="openAddModal"><Plus :size="14" /> Add Stock</button>
       </template>
     </PageHeader>
 
     <!-- KPIs -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <KpiCard label="MS Received (Apr)"  value="1,23,000 L" icon="🔴" color="#f59e0b" sub="Multiple deliveries" />
-      <KpiCard label="HSD Received (Apr)" value="~52,500 L"  icon="🟢" color="#10b981" sub="Multiple deliveries" />
-      <KpiCard label="Speed Received"     value="~6,000 L"   icon="🔵" color="#3b82f6" sub="Multiple deliveries" />
-      <KpiCard label="Avg MS Variation"   value="+1.4 L/day" icon="📊" color="#6366f1" sub="Over/Short avg" />
+      <KpiCard label="MS Received (Apr)"  value="1,23,000 L" :icon="Fuel"     color="#f59e0b" sub="Multiple deliveries" />
+      <KpiCard label="HSD Received (Apr)" value="~52,500 L"  :icon="Fuel"     color="#10b981" sub="Multiple deliveries" />
+      <KpiCard label="Speed Received"     value="~6,000 L"   :icon="Fuel"     color="#3b82f6" sub="Multiple deliveries" />
+      <KpiCard label="Avg MS Variation"   value="+1.4 L/day" :icon="BarChart3" color="#6366f1" sub="Over/Short avg" />
     </div>
 
     <!-- Tabs -->
     <div class="tab-bar mb-5">
-      <button class="tab-btn" :class="{active:tab==='ms'}"    @click="tab='ms'">⛽ MS (Petrol)</button>
-      <button class="tab-btn" :class="{active:tab==='hsd'}"   @click="tab='hsd'">🟢 HSD (Diesel)</button>
-      <button class="tab-btn" :class="{active:tab==='speed'}" @click="tab='speed'">🔵 Speed (Premium)</button>
+      <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='ms'}"    @click="tab='ms'"><Fuel :size="14" /> MS (Petrol)</button>
+      <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='hsd'}"   @click="tab='hsd'"><Fuel :size="14" class="text-[#10b981]" /> HSD (Diesel)</button>
+      <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='speed'}" @click="tab='speed'"><Fuel :size="14" class="text-[#3b82f6]" /> Speed (Premium)</button>
     </div>
 
     <!-- Table -->
@@ -60,7 +60,7 @@
                 </span>
               </td>
               <td>
-                <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditModal(r)">✏️ Edit</button>
+                <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditModal(r)"><Pencil :size="11" /> Edit</button>
               </td>
             </tr>
           </tbody>
@@ -80,7 +80,7 @@
     </div>
 
     <!-- ═══ ADD STOCK MODAL ═══ -->
-    <AppModal v-model="showAdd" title="Add Stock Entry" subtitle="Record new fuel delivery or opening stock" icon="🛢️" max-width="520px">
+    <AppModal v-model="showAdd" title="Add Stock Entry" subtitle="Record new fuel delivery or opening stock" :icon="Package" max-width="520px">
       <div class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
           <div>
@@ -90,9 +90,9 @@
           <div>
             <label class="field-label">Fuel Type *</label>
             <select v-model="form.fuelType" class="form-select w-full">
-              <option value="MS">⛽ MS (Petrol)</option>
-              <option value="HSD">🟢 HSD (Diesel)</option>
-              <option value="Speed">🔵 Speed (Premium)</option>
+              <option value="MS">MS (Petrol)</option>
+              <option value="HSD">HSD (Diesel)</option>
+              <option value="Speed">Speed (Premium)</option>
             </select>
           </div>
         </div>
@@ -139,16 +139,15 @@
       <template #footer>
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showAdd=false">Cancel</button>
-          <button class="btn btn-primary px-8" @click="saveStock" :disabled="saving">
-            <span v-if="saving" class="animate-spin inline-block mr-1">⟳</span>
-            💾 Save Stock Entry
+          <button class="btn btn-primary px-8 flex items-center gap-1.5" @click="saveStock" :disabled="saving">
+            <RotateCw v-if="saving" :size="14" class="animate-spin" /><Save v-else :size="14" /> Save Stock Entry
           </button>
         </div>
       </template>
     </AppModal>
 
     <!-- ═══ EDIT MODAL ═══ -->
-    <AppModal v-model="showEdit" title="Edit Stock Entry" icon="✏️" max-width="520px">
+    <AppModal v-model="showEdit" title="Edit Stock Entry" :icon="Pencil" max-width="520px">
       <div class="space-y-4" v-if="editRow">
         <div class="grid grid-cols-2 gap-4">
           <div><label class="field-label">Date</label><input type="text" v-model="editRow.date" class="form-input w-full" /></div>
@@ -166,7 +165,7 @@
       <template #footer>
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showEdit=false">Cancel</button>
-          <button class="btn btn-primary px-8" @click="saveEdit">💾 Update</button>
+          <button class="btn btn-primary px-8 flex items-center gap-1.5" @click="saveEdit"><Save :size="14" /> Update</button>
         </div>
       </template>
     </AppModal>
@@ -182,6 +181,7 @@ import AppModal   from '@/components/ui/AppModal.vue'
 import { fmt }    from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
+import { Download, Printer, Plus, Fuel, BarChart3, Package, Pencil, RotateCw, Save } from 'lucide-vue-next'
 
 const ui     = useUiStore()
 const tab    = ref('ms')

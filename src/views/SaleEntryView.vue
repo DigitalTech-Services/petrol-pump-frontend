@@ -11,7 +11,7 @@
 
         <!-- Date & Shift -->
         <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-white">📅 Basic Details</div></div>
+          <div class="card-header"><div class="font-display font-bold text-[15px] text-white flex items-center gap-2"><Calendar :size="16" /> Basic Details</div></div>
           <div class="card-body space-y-4">
             <div>
               <label class="field-label">Sale Date *</label>
@@ -32,7 +32,7 @@
 
         <!-- Fuel Volumes -->
         <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-white">⛽ Fuel Volumes</div></div>
+          <div class="card-header"><div class="font-display font-bold text-[15px] text-white flex items-center gap-2"><Fuel :size="16" /> Fuel Volumes</div></div>
           <div class="card-body space-y-4">
             <div class="grid grid-cols-2 gap-3">
               <div>
@@ -69,7 +69,7 @@
 
         <!-- Collections -->
         <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-white">💰 Collections</div></div>
+          <div class="card-header"><div class="font-display font-bold text-[15px] text-white flex items-center gap-2"><Banknote :size="16" /> Collections</div></div>
           <div class="card-body space-y-4">
             <div class="grid grid-cols-2 gap-3">
               <div>
@@ -101,7 +101,7 @@
         <!-- Auto Calculated -->
         <div class="card">
           <div class="card-header">
-            <div class="font-display font-bold text-[15px] text-white">🧮 Auto Calculated</div>
+            <div class="font-display font-bold text-[15px] text-white flex items-center gap-2"><Calculator :size="16" /> Auto Calculated</div>
             <span class="ml-auto badge badge-green text-[11px]">Live Preview</span>
           </div>
           <div class="card-body space-y-3">
@@ -137,9 +137,9 @@
       <!-- Submit -->
       <div class="flex gap-3 mt-5 justify-end">
         <RouterLink to="/sales" class="btn btn-ghost px-8">Cancel</RouterLink>
-        <button type="submit" class="btn btn-primary px-10 py-2.5 text-[14px]" :disabled="saving">
-          <span v-if="saving" class="animate-spin inline-block">⟳</span>
-          <span v-else>💾 Save Sale Entry</span>
+        <button type="submit" class="btn btn-primary px-10 py-2.5 text-[14px] flex items-center gap-1.5" :disabled="saving">
+          <RotateCw v-if="saving" :size="14" class="animate-spin" /><Save v-else :size="14" />
+          {{ saving ? 'Saving…' : 'Save Sale Entry' }}
         </button>
       </div>
     </form>
@@ -153,6 +153,7 @@ import { useSalesStore } from '@/stores/sales'
 import { useUiStore }    from '@/stores/ui'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import { fmt } from '@/utils/format'
+import { Calendar, Fuel, Banknote, Calculator, RotateCw, Save } from 'lucide-vue-next'
 
 const store  = useSalesStore()
 const ui     = useUiStore()

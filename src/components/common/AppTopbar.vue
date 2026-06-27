@@ -5,9 +5,9 @@
   >
     <!-- Mobile menu toggle -->
     <button
-      class="lg:hidden text-[#8a9ab5] hover:text-white transition-colors text-xl"
+      class="lg:hidden text-[#8a9ab5] hover:text-white transition-colors"
       @click="ui.toggleSidebar()"
-    >☰</button>
+    ><Menu :size="22" /></button>
 
     <!-- Breadcrumb / Page Title -->
     <div class="min-w-0">
@@ -34,13 +34,13 @@
       </select>
 
       <!-- Export -->
-      <button class="btn btn-ghost py-1.5 hidden sm:flex">
-        <span>📥</span> Export
+      <button class="btn btn-ghost py-1.5 hidden sm:flex items-center gap-1.5">
+        <Download :size="14" /> Export
       </button>
 
       <!-- New Entry CTA -->
-      <RouterLink to="/sales/new" class="btn btn-primary py-1.5">
-        <span>＋</span> New Entry
+      <RouterLink to="/sales/new" class="btn btn-primary py-1.5 flex items-center gap-1.5">
+        <Plus :size="14" /> New Entry
       </RouterLink>
 
     </div>
@@ -52,6 +52,7 @@ import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUiStore }   from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'
+import { Menu, Download, Plus } from 'lucide-vue-next'
 
 const route  = useRoute()
 const ui     = useUiStore()

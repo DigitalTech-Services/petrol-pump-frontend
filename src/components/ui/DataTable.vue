@@ -45,7 +45,7 @@
           <template v-else-if="!rows.length">
             <tr>
               <td :colspan="columns.length" class="text-center py-16 text-[#5a6a82]">
-                <div class="text-4xl mb-3">📭</div>
+                <InboxIcon :size="40" class="mx-auto mb-3 opacity-40" />
                 <div class="font-medium">No records found</div>
                 <div class="text-[12px] mt-1">Try adjusting your filters</div>
               </td>
@@ -81,6 +81,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { Inbox as InboxIcon } from 'lucide-vue-next'
 
 const props = defineProps({
   title:       { type: String, default: '' },

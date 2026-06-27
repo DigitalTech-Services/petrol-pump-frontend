@@ -2,27 +2,27 @@
   <div>
     <PageHeader title="Card Transactions" subtitle="Bank of Maharashtra daily PhonePe settlements" :crumbs="['Home','Transactions']">
       <template #actions>
-        <button class="btn btn-ghost" @click="doExport">📥 Export CSV</button>
-        <button class="btn btn-ghost" @click="doPrint">🖨 Print</button>
-        <button class="btn btn-primary" @click="openAdd">＋ Add Transaction</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="doExport"><Download :size="14" /> Export CSV</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="doPrint"><Printer :size="14" /> Print</button>
+        <button class="btn btn-primary flex items-center gap-1.5" @click="openAdd"><Plus :size="14" /> Add Transaction</button>
       </template>
     </PageHeader>
 
     <!-- KPIs -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <KpiCard label="Total Transferred" :value="'₹'+fmtCr(summary.total)"      icon="💳" color="#3b82f6" :sub="monthLabel"/>
-      <KpiCard label="Transactions"      :value="String(summary.count)"           icon="🔢" color="#10b981" sub="All settlements"/>
-      <KpiCard label="Avg Per Day"       :value="'₹'+fmtCr(summary.avg_per_day)" icon="📊" color="#f59e0b" :sub="monthLabel"/>
+      <KpiCard label="Total Transferred" :value="'₹'+fmtCr(summary.total)"      :icon="CreditCard"  color="#3b82f6" :sub="monthLabel"/>
+      <KpiCard label="Transactions"      :value="String(summary.count)"           :icon="Hash"        color="#10b981" sub="All settlements"/>
+      <KpiCard label="Avg Per Day"       :value="'₹'+fmtCr(summary.avg_per_day)" :icon="BarChart3"   color="#f59e0b" :sub="monthLabel"/>
       <KpiCard label="Highest Day"
         :value="summary.highest ? '₹'+fmt(summary.highest.amount) : '—'"
-        icon="🏆" color="#6366f1"
+        :icon="Award" color="#6366f1"
         :sub="summary.highest ? fmtDate(summary.highest.date) : '—'" />
     </div>
 
     <!-- Filters -->
     <div class="flex flex-wrap gap-3 mb-4">
       <input type="month" v-model="month" class="form-input" />
-      <input v-model="search" class="form-input" placeholder="🔍 Search reference, remarks, bank…" style="min-width:200px" />
+      <input v-model="search" class="form-input" placeholder="Search reference, remarks, bank…" style="min-width:200px" />
       <select v-model="typeFilter" class="form-select">
         <option value="">All Types</option>
         <option>PhonePe</option><option>Card</option><option>NEFT</option><option>RTGS</option>
@@ -46,7 +46,7 @@
         </div>
 
         <div v-if="loading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
-          <span class="animate-spin inline-block mr-2">⟳</span>Loading…
+          <RotateCw :size="14" class="animate-spin inline-block mr-2" />Loading…
         </div>
         <div v-else-if="loadError" class="card-body text-center py-8">
           <p class="text-[#ef4444] text-[13px] mb-2">{{ loadError }}</p>
@@ -68,8 +68,8 @@
                 <td class="text-[12px] text-[#5a6a82]">{{ t.remarks || '—' }}</td>
                 <td>
                   <div class="flex gap-1.5">
-                    <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEdit(t)">✏️</button>
-                    <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDelete(t)">🗑</button>
+                    <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEdit(t)"><Pencil :size="11" /></button>
+                    <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDelete(t)"><Trash2 :size="11" /></button>
                   </div>
                 </td>
               </tr>
@@ -112,7 +112,7 @@
     </div>
 
     <!-- ═══ ADD TRANSACTION MODAL ═══ -->
-    <AppModal v-model="showAdd" title="Add Transaction" subtitle="Record a card or PhonePe payment" icon="💳" max-width="500px">
+    <AppModal v-model="showAdd" title="Add Transaction" subtitle="Record a card or PhonePe payment" :icon="CreditCard" max-width="500px">
       <div class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
           <div>
@@ -156,14 +156,14 @@
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showAdd = false">Cancel</button>
           <button class="btn btn-primary px-8" @click="saveTx" :disabled="saving">
-            <span v-if="saving" class="animate-spin inline-block mr-1">⟳</span>💾 Save Transaction
+            <RotateCw v-if="saving" :size="14" class="animate-spin mr-1" /><Save v-else :size="14" class="mr-1" /> Save Transaction
           </button>
         </div>
       </template>
     </AppModal>
 
     <!-- ═══ EDIT MODAL ═══ -->
-    <AppModal v-model="showEdit" title="Edit Transaction" icon="✏️" max-width="500px">
+    <AppModal v-model="showEdit" title="Edit Transaction" :icon="Pencil" max-width="500px">
       <div class="space-y-4" v-if="editData">
         <div class="grid grid-cols-2 gap-4">
           <div><label class="field-label">Date</label><input type="date" v-model="editData.date" class="form-input w-full" /></div>
@@ -193,16 +193,16 @@
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showEdit = false">Cancel</button>
           <button class="btn btn-primary px-8" @click="saveEdit" :disabled="editSaving">
-            <span v-if="editSaving" class="animate-spin inline-block mr-1">⟳</span>💾 Update
+            <RotateCw v-if="editSaving" :size="14" class="animate-spin mr-1" /><Save v-else :size="14" class="mr-1" /> Update
           </button>
         </div>
       </template>
     </AppModal>
 
     <!-- ═══ DELETE CONFIRM ═══ -->
-    <AppModal v-model="showDelete" title="Delete Transaction" icon="⚠️" max-width="400px">
+    <AppModal v-model="showDelete" title="Delete Transaction" :icon="AlertTriangle" max-width="400px">
       <div v-if="deleteTarget" class="text-center py-4">
-        <div class="text-5xl mb-4">🗑️</div>
+        <Trash2 :size="48" class="mx-auto mb-4 text-[#ef4444] opacity-70" />
         <p class="text-[14px] text-[#e8edf5] mb-1">
           Delete <span class="text-positive font-bold">₹{{ fmt(deleteTarget.amount) }}</span>
           on <span class="text-[#f59e0b]">{{ fmtDate(deleteTarget.date) }}</span>?
@@ -214,7 +214,7 @@
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showDelete = false">Cancel</button>
           <button class="btn btn-danger px-8" @click="confirmDelete" :disabled="deleteSaving">
-            <span v-if="deleteSaving" class="animate-spin inline-block mr-1">⟳</span>🗑 Delete
+            <RotateCw v-if="deleteSaving" :size="14" class="animate-spin mr-1" /><Trash2 v-else :size="14" class="mr-1" /> Delete
           </button>
         </div>
       </template>
@@ -232,6 +232,10 @@ import { fmt, fmtCr } from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
 import { transactionApi } from '@/services/api'
+import {
+  Download, Printer, Plus, CreditCard, Hash, BarChart3, Award,
+  RotateCw, Save, Pencil, AlertTriangle, Trash2
+} from 'lucide-vue-next'
 
 const ui = useUiStore()
 

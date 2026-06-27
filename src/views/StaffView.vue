@@ -2,24 +2,27 @@
   <div>
     <PageHeader title="Staff & Salary" subtitle="Payroll management — April 2026" :crumbs="['Home','Staff']">
       <template #actions>
-        <button class="btn btn-ghost" @click="toggleView">{{ viewMode==='cards' ? '📋 Table' : '🧩 Cards' }}</button>
-        <button class="btn btn-ghost" @click="doExport">📥 Export CSV</button>
-        <button class="btn btn-ghost" @click="doPrint">🖨 Print</button>
-        <button class="btn btn-primary" @click="openAddStaff">＋ Add Staff</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="toggleView">
+          <component :is="viewMode==='cards' ? List : LayoutGrid" :size="14" />
+          {{ viewMode==='cards' ? 'Table' : 'Cards' }}
+        </button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="doExport"><Download :size="14" /> Export CSV</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="doPrint"><Printer :size="14" /> Print</button>
+        <button class="btn btn-primary flex items-center gap-1.5" @click="openAddStaff"><Plus :size="14" /> Add Staff</button>
       </template>
     </PageHeader>
 
     <!-- KPIs -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <KpiCard label="Total Staff"    :value="staffList.length"                                   icon="👥" color="#f59e0b" sub="Active employees" />
-      <KpiCard label="Total Payroll"  :value="'₹'+fmt(staffList.reduce((a,s)=>a+s.workingSalary,0))" icon="💰" color="#ef4444" sub="Working salaries" />
-      <KpiCard label="Final Payout"   :value="'₹'+fmt(staffList.reduce((a,s)=>a+Math.max(0,s.finalPayout),0))" icon="✅" color="#10b981" sub="After advances" />
-      <KpiCard label="Total Advances" :value="'₹'+fmt(staffList.reduce((a,s)=>a+s.totalAdvance,0))" icon="📤" color="#6366f1" sub="All staff combined" />
+      <KpiCard label="Total Staff"    :value="staffList.length"                                   :icon="Users"        color="#f59e0b" sub="Active employees" />
+      <KpiCard label="Total Payroll"  :value="'₹'+fmt(staffList.reduce((a,s)=>a+s.workingSalary,0))" :icon="Banknote"  color="#ef4444" sub="Working salaries" />
+      <KpiCard label="Final Payout"   :value="'₹'+fmt(staffList.reduce((a,s)=>a+Math.max(0,s.finalPayout),0))" :icon="CheckCircle2" color="#10b981" sub="After advances" />
+      <KpiCard label="Total Advances" :value="'₹'+fmt(staffList.reduce((a,s)=>a+s.totalAdvance,0))" :icon="Upload"    color="#6366f1" sub="All staff combined" />
     </div>
 
     <!-- Loading -->
     <div v-if="loading" class="flex items-center justify-center py-16 text-[#5a6a82]">
-      <span class="animate-spin text-2xl mr-3">⟳</span> Loading staff…
+      <RotateCw :size="22" class="animate-spin mr-3" /> Loading staff…
     </div>
 
     <!-- CARD VIEW -->
@@ -38,9 +41,9 @@
                 <div class="text-[11.5px] text-[#5a6a82]">{{ s.role }}</div>
               </div>
               <div class="flex gap-1">
-                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[#5a6a82] hover:text-[#f59e0b] hover:bg-[#1c2230] transition-all text-[13px]" @click="openEditStaff(s)" title="Edit">✏️</button>
-                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[#5a6a82] hover:text-[#ef4444] hover:bg-[#1c2230] transition-all text-[13px]" @click="openAddAdvance(s)" title="Add Advance">💰</button>
-                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[#5a6a82] hover:text-[#ef4444] hover:bg-[#1c2230] transition-all text-[13px]" @click="deleteStaff(s)" title="Delete">🗑️</button>
+                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[#5a6a82] hover:text-[#f59e0b] hover:bg-[#1c2230] transition-all" @click="openEditStaff(s)" title="Edit"><Pencil :size="13" /></button>
+                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[#5a6a82] hover:text-[#f59e0b] hover:bg-[#1c2230] transition-all" @click="openAddAdvance(s)" title="Add Advance"><Banknote :size="13" /></button>
+                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[#5a6a82] hover:text-[#ef4444] hover:bg-[#1c2230] transition-all" @click="deleteStaff(s)" title="Delete"><Trash2 :size="13" /></button>
               </div>
             </div>
             <div class="grid grid-cols-3 gap-2 pt-3" style="border-top:1px solid #1c2230">
@@ -68,7 +71,7 @@
         <button @click="openAddStaff"
           class="rounded-xl flex flex-col items-center justify-center gap-3 h-[180px] transition-all hover:border-[#f59e0b] hover:text-[#f59e0b]"
           style="background:#0f1218;border:2px dashed #242d3e;color:#5a6a82">
-          <span class="text-3xl">＋</span>
+          <Plus :size="28" />
           <span class="font-display font-bold text-[14px]">Add New Staff</span>
         </button>
       </div>
@@ -103,9 +106,9 @@
                 <td><span class="badge" :class="s.finalPayout<0?'badge-red':'badge-green'">{{ s.finalPayout<0?'Overpaid':'Due' }}</span></td>
                 <td>
                   <div class="flex gap-1.5">
-                    <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditStaff(s)">✏️ Edit</button>
-                    <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openAddAdvance(s)" style="color:#f59e0b">💰 Adv</button>
-                    <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="deleteStaff(s)" style="color:#ef4444">🗑️</button>
+                    <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditStaff(s)"><Pencil :size="11" /> Edit</button>
+                    <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openAddAdvance(s)" style="color:#f59e0b"><Banknote :size="11" /> Adv</button>
+                    <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="deleteStaff(s)" style="color:#ef4444"><Trash2 :size="11" /></button>
                   </div>
                 </td>
               </tr>
@@ -131,7 +134,7 @@
           <div class="font-display font-bold text-[15px] text-white">Advance Tracker</div>
           <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Daily advance payments per staff</div>
         </div>
-        <button class="btn btn-ghost ml-auto text-[12px]" @click="exportAdvanceCSV">📥 Export</button>
+        <button class="btn btn-ghost ml-auto text-[12px] flex items-center gap-1.5" @click="exportAdvanceCSV"><Download :size="13" /> Export</button>
       </div>
       <div class="overflow-x-auto">
         <table class="data-table">
@@ -164,7 +167,7 @@
     </div>
 
     <!-- ═══ ADD STAFF MODAL ═══ -->
-    <AppModal v-model="showAddStaff" title="Add New Staff Member" subtitle="Fill in employee details" icon="👤" max-width="560px">
+    <AppModal v-model="showAddStaff" title="Add New Staff Member" subtitle="Fill in employee details" :icon="User" max-width="560px">
       <div class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
           <div><label class="field-label">Full Name *</label><input v-model="staffForm.name" class="form-input w-full" placeholder="Employee name" /></div>
@@ -202,15 +205,15 @@
       <template #footer>
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showAddStaff=false">Cancel</button>
-          <button class="btn btn-primary px-8" @click="saveStaff" :disabled="savingStaff">
-            <span v-if="savingStaff" class="animate-spin inline-block mr-1">⟳</span>💾 Save Staff
+          <button class="btn btn-primary px-8 flex items-center gap-1.5" @click="saveStaff" :disabled="savingStaff">
+            <RotateCw v-if="savingStaff" :size="14" class="animate-spin" /><Save v-else :size="14" /> Save Staff
           </button>
         </div>
       </template>
     </AppModal>
 
     <!-- ═══ EDIT STAFF MODAL ═══ -->
-    <AppModal v-model="showEditStaff" title="Edit Staff Member" icon="✏️" max-width="560px">
+    <AppModal v-model="showEditStaff" title="Edit Staff Member" :icon="Pencil" max-width="560px">
       <div class="space-y-4" v-if="editStaffData">
         <div class="grid grid-cols-2 gap-4">
           <div><label class="field-label">Full Name</label><input v-model="editStaffData.name" class="form-input w-full" /></div>
@@ -237,13 +240,13 @@
       <template #footer>
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showEditStaff=false">Cancel</button>
-          <button class="btn btn-primary px-8" @click="saveEditStaff">💾 Update</button>
+          <button class="btn btn-primary px-8 flex items-center gap-1.5" @click="saveEditStaff"><Save :size="14" /> Update</button>
         </div>
       </template>
     </AppModal>
 
     <!-- ═══ ADD ADVANCE MODAL ═══ -->
-    <AppModal v-model="showAdvance" :title="'Add Advance — '+(advanceTarget?.name||'')" icon="💰" max-width="420px">
+    <AppModal v-model="showAdvance" :title="'Add Advance — '+(advanceTarget?.name||'')" :icon="Banknote" max-width="420px">
       <div class="space-y-4">
         <div class="flex items-center gap-3 p-3 rounded-lg mb-2" style="background:#161b24;border:1px solid #1c2230">
           <div class="w-10 h-10 rounded-full flex items-center justify-center font-display font-bold text-[14px] text-white"
@@ -264,7 +267,7 @@
       <template #footer>
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showAdvance=false">Cancel</button>
-          <button class="btn btn-primary px-8" @click="saveAdvance">💾 Record Advance</button>
+          <button class="btn btn-primary px-8 flex items-center gap-1.5" @click="saveAdvance"><Save :size="14" /> Record Advance</button>
         </div>
       </template>
     </AppModal>
@@ -281,6 +284,10 @@ import { fmt }    from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
 import { staffApi } from '@/services/api'
+import {
+  Users, Banknote, CheckCircle2, Upload, RotateCw, Save,
+  Pencil, Trash2, Plus, Download, Printer, List, LayoutGrid, User
+} from 'lucide-vue-next'
 
 const ui = useUiStore()
 const viewMode = ref('cards')

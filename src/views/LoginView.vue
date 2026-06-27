@@ -16,7 +16,7 @@
           style="background:linear-gradient(135deg,#f59e0b,#d97706); box-shadow:0 0 50px rgba(245,158,11,0.35)"
         >K</div>
         <h1 class="font-display font-bold text-[30px] text-white tracking-wide">Kailas Petromines</h1>
-        <p class="text-[13px] text-[#5a6a82] mt-1.5">⛽ HP Fuel Station · Khopoli, Maharashtra</p>
+        <p class="text-[13px] text-[#5a6a82] mt-1.5">HP Fuel Station · Khopoli, Maharashtra</p>
       </div>
 
       <!-- Demo Accounts Banner -->
@@ -79,7 +79,7 @@
                 type="button"
                 @click="showPass = !showPass"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-[#5a6a82] hover:text-white transition-colors text-sm"
-              >{{ showPass ? '🙈' : '👁' }}</button>
+              ><component :is="showPass ? EyeOff : Eye" :size="16" /></button>
             </div>
           </div>
 
@@ -98,7 +98,7 @@
             class="btn btn-primary w-full justify-center py-2.5 text-[14px]"
             :disabled="loading"
           >
-            <span v-if="loading" class="inline-block animate-spin mr-1">⟳</span>
+            <RotateCw v-if="loading" :size="14" class="animate-spin mr-1" />
             <span>{{ loading ? 'Signing in…' : 'Sign In →' }}</span>
           </button>
 
@@ -106,7 +106,7 @@
           <Transition name="fade">
             <div v-if="errorMsg" class="mt-3 px-4 py-3 rounded-lg text-[12.5px]"
               style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444">
-              ⚠️ {{ errorMsg }}
+              <AlertTriangle :size="13" class="inline mr-1" />{{ errorMsg }}
             </div>
           </Transition>
 
@@ -134,6 +134,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { RotateCw, AlertTriangle, Eye, EyeOff } from 'lucide-vue-next'
 
 const router   = useRouter()
 const route    = useRoute()

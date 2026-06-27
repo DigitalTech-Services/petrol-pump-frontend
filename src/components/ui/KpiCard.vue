@@ -12,7 +12,9 @@
       <span v-else-if="trend < 0" class="text-[#ef4444]">↓ {{ Math.abs(trend) }}%</span>
       <span v-if="sub"> {{ sub }}</span>
     </div>
-    <div v-if="icon" class="absolute right-4 top-4 text-[28px] opacity-10 pointer-events-none">{{ icon }}</div>
+    <div v-if="icon" class="absolute right-4 top-4 opacity-10 pointer-events-none">
+      <component :is="icon" :size="32" />
+    </div>
   </div>
 </template>
 
@@ -23,7 +25,7 @@ defineProps({
   sub:       { type: String, default: '' },
   trend:     { type: Number, default: null },
   color:     { type: String, default: '#f59e0b' },
-  icon:      { type: String, default: '' },
+  icon:      { type: [Object, Function], default: null },
   loading:   { type: Boolean, default: false },
   valueSize: { type: String, default: '26px' },
 })

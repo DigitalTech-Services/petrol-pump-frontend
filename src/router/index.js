@@ -53,67 +53,67 @@ const routes = [
         path: 'dashboard',
         name: 'Dashboard',
         component: DashboardView,
-        meta: { title: 'Dashboard', icon: '🏠', breadcrumb: ['Dashboard'] }
+        meta: { title: 'Dashboard', breadcrumb: ['Dashboard'] }
       },
       {
         path: 'sales',
         name: 'Sales',
         component: SalesView,
-        meta: { title: 'Petrol Sales', icon: '⛽', breadcrumb: ['Sales'] }
+        meta: { title: 'Petrol Sales', breadcrumb: ['Sales'] }
       },
       {
         path: 'sales/new',
         name: 'SaleEntry',
         component: SaleEntryView,
-        meta: { title: 'New Sale Entry', icon: '➕', breadcrumb: ['Sales', 'New Entry'] }
+        meta: { title: 'New Sale Entry', breadcrumb: ['Sales', 'New Entry'] }
       },
       {
         path: 'stock',
         name: 'Stock',
         component: StockView,
-        meta: { title: 'Stock Summary', icon: '🛢️', breadcrumb: ['Stock'] }
+        meta: { title: 'Stock Summary', breadcrumb: ['Stock'] }
       },
       {
         path: 'meter',
         name: 'Meter',
         component: MeterView,
-        meta: { title: 'Meter Readings', icon: '📊', breadcrumb: ['Meter Readings'] }
+        meta: { title: 'Meter Readings', breadcrumb: ['Meter Readings'] }
       },
       {
         path: 'transactions',
         name: 'Transactions',
         component: TransactionsView,
-        meta: { title: 'Card Transactions', icon: '💳', breadcrumb: ['Transactions'] }
+        meta: { title: 'Card Transactions', breadcrumb: ['Transactions'] }
       },
       {
         path: 'expenses',
         name: 'Expenses',
         component: ExpensesView,
-        meta: { title: 'Expenses', icon: '💸', breadcrumb: ['Expenses'] }
+        meta: { title: 'Expenses', breadcrumb: ['Expenses'] }
       },
       {
         path: 'staff',
         name: 'Staff',
         component: StaffView,
-        meta: { title: 'Staff & Salary', icon: '👥', breadcrumb: ['Staff'] }
+        meta: { title: 'Staff & Salary', breadcrumb: ['Staff'] }
       },
       {
         path: 'timesheet',
         name: 'Timesheet',
         component: TimesheetView,
-        meta: { title: 'Time Sheet', icon: '🕐', breadcrumb: ['Time Sheet'] }
+        meta: { title: 'Time Sheet', breadcrumb: ['Time Sheet'] }
       },
       {
         path: 'reports',
         name: 'Reports',
         component: ReportsView,
-        meta: { title: 'Reports', icon: '📋', breadcrumb: ['Reports'] }
+        meta: { title: 'Reports', breadcrumb: ['Reports'] }
       },
       {
         path: 'settings',
         name: 'Settings',
         component: SettingsView,
-        meta: { title: 'Settings', icon: '⚙️', breadcrumb: ['Settings'] }
+        meta: { title: 'Settings', breadcrumb: ['Settings'] }
       },
     ]
   },

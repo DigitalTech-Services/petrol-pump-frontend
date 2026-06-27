@@ -22,7 +22,7 @@
         >
           <!-- Header -->
           <div class="flex items-center gap-3 px-6 py-4 flex-shrink-0" style="border-bottom:1px solid #242d3e">
-            <span v-if="icon" class="text-xl flex-shrink-0">{{ icon }}</span>
+            <component v-if="icon" :is="icon" :size="20" class="flex-shrink-0 text-[#f59e0b]" />
             <div class="flex-1 min-w-0">
               <div class="font-display font-bold text-[17px] text-white">{{ title }}</div>
               <div v-if="subtitle" class="text-[12px] text-[#5a6a82] mt-0.5">{{ subtitle }}</div>
@@ -30,7 +30,7 @@
             <button
               @click="$emit('update:modelValue', false)"
               class="w-8 h-8 rounded-lg flex items-center justify-center text-[#5a6a82] hover:text-white hover:bg-[#1c2230] transition-all flex-shrink-0 text-lg"
-            >✕</button>
+            ><X :size="16" /></button>
           </div>
 
           <!-- Body (scrollable) -->
@@ -50,11 +50,12 @@
 </template>
 
 <script setup>
+import { X } from 'lucide-vue-next'
 defineProps({
   modelValue: { type: Boolean, required: true },
   title:      { type: String,  required: true },
   subtitle:   { type: String,  default: '' },
-  icon:       { type: String,  default: '' },
+  icon:       { type: [Object, Function], default: null },
   maxWidth:   { type: String,  default: '560px' },
 })
 defineEmits(['update:modelValue'])

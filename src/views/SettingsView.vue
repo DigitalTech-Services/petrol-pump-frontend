@@ -8,8 +8,8 @@
           @click="saveAll"
           :disabled="saving"
         >
-          <span v-if="saving" class="animate-spin">⟳</span>
-          {{ saving ? 'Saving…' : '💾 Save Changes' }}
+          <RotateCw v-if="saving" :size="14" class="animate-spin" /><Save v-else :size="14" />
+          {{ saving ? 'Saving…' : 'Save Changes' }}
         </button>
       </template>
     </PageHeader>
@@ -26,7 +26,7 @@
               : 'text-[#8a9ab5] hover:bg-[#161b24] hover:text-white'"
             @click="activeSection = s.key"
           >
-            <span class="text-base w-5 text-center flex-shrink-0">{{ s.icon }}</span>
+            <component :is="s.icon" :size="16" class="flex-shrink-0" />
             <span class="font-medium">{{ s.label }}</span>
           </button>
         </div>
@@ -39,14 +39,14 @@
         <template v-if="activeSection === 'station'">
           <div class="card">
             <div class="card-header">
-              <span class="text-lg">🏪</span>
+              <Building2 :size="18" class="text-[#f59e0b]" />
               <div>
                 <div class="font-display font-bold text-[15px] text-white">Station Details</div>
                 <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Basic information about your fuel station</div>
               </div>
             </div>
             <div v-if="stationLoading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
-              <span class="animate-spin inline-block mr-2">⟳</span>Loading…
+              <RotateCw :size="14" class="animate-spin inline-block mr-2" />Loading…
             </div>
             <div v-else-if="stationError" class="card-body text-center py-8">
               <p class="text-[#ef4444] text-[13px] mb-2">{{ stationError }}</p>
@@ -70,7 +70,7 @@
         <template v-if="activeSection === 'fuel'">
           <div class="card">
             <div class="card-header">
-              <span class="text-lg">⛽</span>
+              <Fuel :size="18" class="text-[#f59e0b]" />
               <div>
                 <div class="font-display font-bold text-[15px] text-white">Fuel Rates</div>
                 <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Current fuel prices (auto-affects revenue calculations)</div>
@@ -78,7 +78,7 @@
               <span class="ml-auto badge badge-green">Live Rates</span>
             </div>
             <div v-if="fuelLoading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
-              <span class="animate-spin inline-block mr-2">⟳</span>Loading…
+              <RotateCw :size="14" class="animate-spin inline-block mr-2" />Loading…
             </div>
             <div v-else-if="fuelError" class="card-body text-center py-8">
               <p class="text-[#ef4444] text-[13px] mb-2">{{ fuelError }}</p>
@@ -114,16 +114,16 @@
         <template v-if="activeSection === 'nozzles'">
           <div class="card">
             <div class="card-header">
-              <span class="text-lg">🔧</span>
+              <Wrench :size="18" class="text-[#f59e0b]" />
               <div>
                 <div class="font-display font-bold text-[15px] text-white">Nozzle Configuration</div>
                 <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Pump and nozzle assignments</div>
               </div>
-              <button class="btn btn-primary ml-auto text-[12px] py-1" @click="openAddNozzle">＋ Add Nozzle</button>
+              <button class="btn btn-primary ml-auto text-[12px] py-1 flex items-center gap-1" @click="openAddNozzle"><Plus :size="12" /> Add Nozzle</button>
             </div>
 
             <div v-if="nozzlesLoading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
-              <span class="animate-spin inline-block mr-2">⟳</span>Loading…
+              <RotateCw :size="14" class="animate-spin inline-block mr-2" />Loading…
             </div>
             <div v-else-if="nozzlesError" class="card-body text-center py-8">
               <p class="text-[#ef4444] text-[13px] mb-2">{{ nozzlesError }}</p>
@@ -143,8 +143,8 @@
                     <td class="font-mono-custom text-[12px]">{{ n.lastReading || '—' }}</td>
                     <td>
                       <div v-if="n.id" class="flex gap-1.5">
-                        <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditNozzle(n)">✏️ Edit</button>
-                        <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDeleteNozzle(n)">🗑</button>
+                        <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditNozzle(n)"><Pencil :size="11" /> Edit</button>
+                        <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDeleteNozzle(n)"><Trash2 :size="11" /></button>
                       </div>
                       <span v-else class="text-[11px] text-[#5a6a82]">Default</span>
                     </td>
@@ -211,7 +211,7 @@
                   <Transition name="fade">
                     <div v-if="nozzleSubmitError" class="mb-4 px-3 py-2.5 rounded-lg text-[12px]"
                       style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444">
-                      ⚠️ {{ nozzleSubmitError }}
+                      <AlertTriangle :size="13" class="inline mr-1" />{{ nozzleSubmitError }}
                     </div>
                   </Transition>
                   <div class="flex gap-3 justify-end">
@@ -221,7 +221,7 @@
                     <button type="submit"
                       class="btn btn-primary px-5 py-2 flex items-center gap-2"
                       :disabled="nozzleSubmitting">
-                      <span v-if="nozzleSubmitting" class="animate-spin">⟳</span>
+                      <RotateCw v-if="nozzleSubmitting" :size="14" class="animate-spin" />
                       {{ nozzleSubmitting ? 'Saving…' : (nozzleModal.mode === 'add' ? 'Add Nozzle' : 'Save Changes') }}
                     </button>
                   </div>
@@ -245,7 +245,7 @@
                 <Transition name="fade">
                   <div v-if="nozzleDeleteError" class="mb-4 px-3 py-2.5 rounded-lg text-[12px]"
                     style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444">
-                    ⚠️ {{ nozzleDeleteError }}
+                    <AlertTriangle :size="13" class="inline mr-1" />{{ nozzleDeleteError }}
                   </div>
                 </Transition>
                 <div class="flex gap-3 justify-end">
@@ -255,7 +255,7 @@
                   <button @click="confirmDeleteNozzle"
                     class="btn btn-danger px-5 py-2 flex items-center gap-2"
                     :disabled="nozzleDeleting">
-                    <span v-if="nozzleDeleting" class="animate-spin">⟳</span>
+                    <RotateCw v-if="nozzleDeleting" :size="14" class="animate-spin" />
                     {{ nozzleDeleting ? 'Removing…' : 'Remove' }}
                   </button>
                 </div>
@@ -268,16 +268,16 @@
         <template v-if="activeSection === 'users'">
           <div class="card">
             <div class="card-header">
-              <span class="text-lg">👤</span>
+              <User :size="18" class="text-[#f59e0b]" />
               <div>
                 <div class="font-display font-bold text-[15px] text-white">User Management</div>
                 <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Manage manager accounts for this station</div>
               </div>
-              <button class="btn btn-primary ml-auto text-[12px] py-1" @click="openAddManager">＋ Add Manager</button>
+              <button class="btn btn-primary ml-auto text-[12px] py-1 flex items-center gap-1" @click="openAddManager"><Plus :size="12" /> Add Manager</button>
             </div>
 
             <div v-if="managersLoading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
-              <span class="animate-spin inline-block mr-2">⟳</span>Loading…
+              <RotateCw :size="14" class="animate-spin inline-block mr-2" />Loading…
             </div>
             <div v-else-if="managersError" class="card-body text-center py-8">
               <p class="text-[#ef4444] text-[13px] mb-2">{{ managersError }}</p>
@@ -321,8 +321,8 @@
                     <td class="text-[12px] text-[#5a6a82]">{{ formatDate(m.created_at) }}</td>
                     <td>
                       <div class="flex gap-1.5">
-                        <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditManager(m)">✏️ Edit</button>
-                        <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDeleteManager(m)">🗑</button>
+                        <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditManager(m)"><Pencil :size="11" /> Edit</button>
+                        <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDeleteManager(m)"><Trash2 :size="11" /></button>
                       </div>
                     </td>
                   </tr>
@@ -370,7 +370,7 @@
                           class="form-input w-full pr-10" placeholder="••••••••" required />
                         <button type="button" @click="showManagerPass = !showManagerPass"
                           class="absolute right-3 top-1/2 -translate-y-1/2 text-[#5a6a82] hover:text-white text-sm">
-                          {{ showManagerPass ? '🙈' : '👁' }}
+                          <component :is="showManagerPass ? EyeOff : Eye" :size="16" />
                         </button>
                       </div>
                     </div>
@@ -378,7 +378,7 @@
                   <Transition name="fade">
                     <div v-if="managerSubmitError" class="mb-4 px-3 py-2.5 rounded-lg text-[12px]"
                       style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444">
-                      ⚠️ {{ managerSubmitError }}
+                      <AlertTriangle :size="13" class="inline mr-1" />{{ managerSubmitError }}
                     </div>
                   </Transition>
                   <div class="flex gap-3 justify-end">
@@ -388,7 +388,7 @@
                     <button type="submit"
                       class="btn btn-primary px-5 py-2 flex items-center gap-2"
                       :disabled="managerSubmitting">
-                      <span v-if="managerSubmitting" class="animate-spin">⟳</span>
+                      <RotateCw v-if="managerSubmitting" :size="14" class="animate-spin" />
                       {{ managerSubmitting ? 'Saving…' : (managerModal.mode === 'add' ? 'Add Manager' : 'Save Changes') }}
                     </button>
                   </div>
@@ -412,7 +412,7 @@
                 <Transition name="fade">
                   <div v-if="deleteError" class="mb-4 px-3 py-2.5 rounded-lg text-[12px]"
                     style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444">
-                    ⚠️ {{ deleteError }}
+                    <AlertTriangle :size="13" class="inline mr-1" />{{ deleteError }}
                   </div>
                 </Transition>
                 <div class="flex gap-3 justify-end">
@@ -422,7 +422,7 @@
                   <button @click="confirmDeleteManager"
                     class="btn btn-danger px-5 py-2 flex items-center gap-2"
                     :disabled="deleting">
-                    <span v-if="deleting" class="animate-spin">⟳</span>
+                    <RotateCw v-if="deleting" :size="14" class="animate-spin" />
                     {{ deleting ? 'Removing…' : 'Remove' }}
                   </button>
                 </div>
@@ -435,11 +435,11 @@
         <template v-if="activeSection === 'notifications'">
           <div class="card">
             <div class="card-header">
-              <span class="text-lg">🔔</span>
+              <Bell :size="18" class="text-[#f59e0b]" />
               <div><div class="font-display font-bold text-[15px] text-white">Notification Preferences</div></div>
             </div>
             <div v-if="notifLoading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
-              <span class="animate-spin inline-block mr-2">⟳</span>Loading…
+              <RotateCw :size="14" class="animate-spin inline-block mr-2" />Loading…
             </div>
             <div v-else-if="notifError" class="card-body text-center py-8">
               <p class="text-[#ef4444] text-[13px] mb-2">{{ notifError }}</p>
@@ -476,6 +476,10 @@ import { useUiStore } from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'
 import { userApi, settingsApi } from '@/services/api'
 import PageHeader from '@/components/ui/PageHeader.vue'
+import {
+  Building2, Fuel, Wrench, User, Bell,
+  RotateCw, Save, AlertTriangle, Plus, Pencil, Trash2, Eye, EyeOff
+} from 'lucide-vue-next'
 
 const ui   = useUiStore()
 const auth = useAuthStore()
@@ -483,11 +487,11 @@ const activeSection = ref('station')
 const saving = ref(false)
 
 const sections = computed(() => [
-  { key:'station',       icon:'🏪', label:'Station Details' },
-  { key:'fuel',          icon:'⛽', label:'Fuel Rates' },
-  { key:'nozzles',       icon:'🔧', label:'Nozzle Config' },
-  ...(auth.isOwner ? [{ key:'users', icon:'👤', label:'User Access' }] : []),
-  { key:'notifications', icon:'🔔', label:'Notifications' },
+  { key:'station',       icon: Building2, label:'Station Details' },
+  { key:'fuel',          icon: Fuel,      label:'Fuel Rates' },
+  { key:'nozzles',       icon: Wrench,    label:'Nozzle Config' },
+  ...(auth.isOwner ? [{ key:'users', icon: User, label:'User Access' }] : []),
+  { key:'notifications', icon: Bell,      label:'Notifications' },
 ])
 
 // ── Station Details ──────────────────────────────────────────────

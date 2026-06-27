@@ -2,24 +2,24 @@
   <div>
     <PageHeader title="Expenses" subtitle="Daily expense tracker & analysis" :crumbs="['Home','Expenses']">
       <template #actions>
-        <button class="btn btn-ghost" @click="doExport">📥 Export CSV</button>
-        <button class="btn btn-ghost" @click="doPrint">🖨 Print</button>
-        <button class="btn btn-primary" @click="openAddExpense">＋ Add Expense</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="doExport"><Download :size="14" /> Export CSV</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="doPrint"><Printer :size="14" /> Print</button>
+        <button class="btn btn-primary flex items-center gap-1.5" @click="openAddExpense"><Plus :size="14" /> Add Expense</button>
       </template>
     </PageHeader>
 
     <!-- KPI Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <KpiCard label="Total Expenses"  :value="'₹'+fmt(summary.total)"      icon="🧾" color="#ef4444" :sub="monthLabel"/>
-      <KpiCard label="Avg Per Day"     :value="'₹'+fmt(summary.avg_per_day)" icon="📊" color="#f59e0b" :sub="monthLabel"/>
-      <KpiCard label="Lowest Day"      :value="summary.min ? '₹'+fmt(summary.min.amount) : '—'" icon="✅" color="#10b981" :sub="summary.min ? fmtDate(summary.min.date) : '—'"/>
-      <KpiCard label="Highest Day"     :value="summary.max ? '₹'+fmt(summary.max.amount) : '—'" icon="⚠️" color="#ef4444" :sub="summary.max ? fmtDate(summary.max.date) : '—'"/>
+      <KpiCard label="Total Expenses"  :value="'₹'+fmt(summary.total)"      :icon="Receipt"       color="#ef4444" :sub="monthLabel"/>
+      <KpiCard label="Avg Per Day"     :value="'₹'+fmt(summary.avg_per_day)" :icon="BarChart3"     color="#f59e0b" :sub="monthLabel"/>
+      <KpiCard label="Lowest Day"      :value="summary.min ? '₹'+fmt(summary.min.amount) : '—'" :icon="CheckCircle2" color="#10b981" :sub="summary.min ? fmtDate(summary.min.date) : '—'"/>
+      <KpiCard label="Highest Day"     :value="summary.max ? '₹'+fmt(summary.max.amount) : '—'" :icon="AlertTriangle" color="#ef4444" :sub="summary.max ? fmtDate(summary.max.date) : '—'"/>
     </div>
 
     <!-- Filters -->
     <div class="flex flex-wrap gap-3 mb-4">
       <input type="month" v-model="month" class="form-input" />
-      <input v-model="search" class="form-input" placeholder="🔍 Search narration…" style="min-width:220px" />
+      <input v-model="search" class="form-input" placeholder="Search narration…" style="min-width:220px" />
       <select v-model="categoryFilter" class="form-select">
         <option value="">All Categories</option>
         <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
@@ -36,7 +36,7 @@
 
         <!-- Loading -->
         <div v-if="loading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
-          <span class="animate-spin inline-block mr-2">⟳</span>Loading…
+          <RotateCw :size="14" class="animate-spin inline-block mr-2" />Loading…
         </div>
 
         <!-- Error -->
@@ -59,8 +59,8 @@
                 <td class="text-[12px] text-[#8a9ab5]">{{ r.paid_by || '—' }}</td>
                 <td>
                   <div class="flex gap-1.5">
-                    <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditExpense(r)">✏️</button>
-                    <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDeleteExpense(r)">🗑</button>
+                    <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditExpense(r)"><Pencil :size="11" /></button>
+                    <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDeleteExpense(r)"><Trash2 :size="11" /></button>
                   </div>
                 </td>
               </tr>
@@ -87,7 +87,7 @@
     </div>
 
     <!-- ═══ ADD EXPENSE MODAL ═══ -->
-    <AppModal v-model="showAdd" title="Add Expense" subtitle="Record a daily expense entry" icon="🧾" max-width="480px">
+    <AppModal v-model="showAdd" title="Add Expense" subtitle="Record a daily expense entry" :icon="Receipt" max-width="480px">
       <div class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
           <div>
@@ -120,14 +120,14 @@
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showAdd = false">Cancel</button>
           <button class="btn btn-primary px-8" @click="saveExpense" :disabled="saving">
-            <span v-if="saving" class="animate-spin inline-block mr-1">⟳</span>💾 Save Expense
+            <RotateCw v-if="saving" :size="14" class="animate-spin mr-1" /><Save v-else :size="14" class="mr-1" /> Save Expense
           </button>
         </div>
       </template>
     </AppModal>
 
     <!-- ═══ EDIT EXPENSE MODAL ═══ -->
-    <AppModal v-model="showEdit" title="Edit Expense" icon="✏️" max-width="480px">
+    <AppModal v-model="showEdit" title="Edit Expense" :icon="Pencil" max-width="480px">
       <div class="space-y-4" v-if="editData">
         <div class="grid grid-cols-2 gap-4">
           <div><label class="field-label">Date</label><input type="date" v-model="editData.date" class="form-input w-full" /></div>
@@ -151,16 +151,16 @@
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showEdit = false">Cancel</button>
           <button class="btn btn-primary px-8" @click="saveEdit" :disabled="editSaving">
-            <span v-if="editSaving" class="animate-spin inline-block mr-1">⟳</span>💾 Update
+            <RotateCw v-if="editSaving" :size="14" class="animate-spin mr-1" /><Save v-else :size="14" class="mr-1" /> Update
           </button>
         </div>
       </template>
     </AppModal>
 
     <!-- ═══ DELETE CONFIRM ═══ -->
-    <AppModal v-model="showDelete" title="Delete Expense" icon="⚠️" max-width="420px">
+    <AppModal v-model="showDelete" title="Delete Expense" :icon="AlertTriangle" max-width="420px">
       <div v-if="deleteTarget" class="text-center py-4">
-        <div class="text-5xl mb-4">🗑️</div>
+        <Trash2 :size="48" class="mx-auto mb-4 text-[#ef4444] opacity-70" />
         <p class="text-[14px] text-[#e8edf5] mb-2">
           Delete expense of <span class="font-bold text-negative">₹{{ fmt(deleteTarget.amount) }}</span>
           on <span class="text-[#f59e0b]">{{ fmtDate(deleteTarget.date) }}</span>?
@@ -172,7 +172,7 @@
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showDelete = false">Cancel</button>
           <button class="btn btn-danger px-8" @click="confirmDelete" :disabled="deleteSaving">
-            <span v-if="deleteSaving" class="animate-spin inline-block mr-1">⟳</span>🗑 Delete
+            <RotateCw v-if="deleteSaving" :size="14" class="animate-spin mr-1" /><Trash2 v-else :size="14" class="mr-1" /> Delete
           </button>
         </div>
       </template>
@@ -190,6 +190,10 @@ import { fmt }    from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
 import { expenseApi } from '@/services/api'
+import {
+  Download, Printer, Plus, Receipt, BarChart3, CheckCircle2, AlertTriangle,
+  RotateCw, Save, Pencil, Trash2
+} from 'lucide-vue-next'
 
 const ui = useUiStore()
 

@@ -55,7 +55,7 @@
                 type="button"
                 @click="showPass = !showPass"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-[#5a6a82] hover:text-white transition-colors text-sm"
-              >{{ showPass ? '🙈' : '👁' }}</button>
+              ><component :is="showPass ? EyeOff : Eye" :size="16" /></button>
             </div>
           </div>
 
@@ -66,7 +66,7 @@
             style="background:linear-gradient(135deg,#6366f1,#4f46e5); box-shadow:0 0 20px rgba(99,102,241,0.3)"
             :disabled="loading"
           >
-            <span v-if="loading" class="inline-block animate-spin">⟳</span>
+            <RotateCw v-if="loading" :size="14" class="animate-spin" />
             <span>{{ loading ? 'Signing in…' : 'Sign In →' }}</span>
           </button>
 
@@ -74,7 +74,7 @@
           <Transition name="fade">
             <div v-if="errorMsg" class="mt-3 px-4 py-3 rounded-lg text-[12.5px]"
               style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444">
-              ⚠️ {{ errorMsg }}
+              <AlertTriangle :size="13" class="inline mr-1" />{{ errorMsg }}
             </div>
           </Transition>
 
@@ -92,6 +92,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAdminAuthStore } from '@/stores/adminAuth'
+import { AlertTriangle, RotateCw, Eye, EyeOff } from 'lucide-vue-next'
 
 const router   = useRouter()
 const route    = useRoute()

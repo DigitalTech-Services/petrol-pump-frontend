@@ -40,7 +40,7 @@
 
       <!-- Loading -->
       <div v-if="loading" class="flex items-center justify-center py-24 text-[#5a6a82]">
-        <span class="animate-spin mr-2 text-xl">⟳</span> Loading users…
+        <RotateCw :size="20" class="animate-spin mr-2" /> Loading users…
       </div>
 
       <!-- Error -->
@@ -51,7 +51,7 @@
 
       <!-- Empty -->
       <div v-else-if="!users.length" class="py-20 text-center text-[#5a6a82]">
-        <p class="text-4xl mb-3">👥</p>
+        <Users :size="40" class="mx-auto mb-3 opacity-40" />
         <p class="text-[14px]">No users yet. Add the first one.</p>
       </div>
 
@@ -160,7 +160,7 @@
                   />
                   <button type="button" @click="showPass = !showPass"
                     class="absolute right-3 top-1/2 -translate-y-1/2 text-[#5a6a82] hover:text-white text-sm">
-                    {{ showPass ? '🙈' : '👁' }}
+                    <component :is="showPass ? EyeOff : Eye" :size="16" />
                   </button>
                 </div>
               </div>
@@ -170,7 +170,7 @@
             <Transition name="fade">
               <div v-if="submitError" class="mb-4 px-3 py-2.5 rounded-lg text-[12px]"
                 style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444">
-                ⚠️ {{ submitError }}
+                <AlertTriangle :size="13" class="inline mr-1" />{{ submitError }}
               </div>
             </Transition>
 
@@ -185,7 +185,7 @@
                 class="px-5 py-2 rounded-xl text-[13px] font-semibold text-white transition-all flex items-center gap-2"
                 style="background:linear-gradient(135deg,#6366f1,#4f46e5)"
                 :disabled="submitting">
-                <span v-if="submitting" class="animate-spin">⟳</span>
+                <RotateCw v-if="submitting" :size="14" class="animate-spin" />
                 <span>{{ submitting ? 'Saving…' : (modal.mode === 'add' ? 'Add User' : 'Save Changes') }}</span>
               </button>
             </div>
@@ -202,7 +202,7 @@
         <div class="w-full max-w-[380px] rounded-2xl p-6" style="background:#0f1218; border:1px solid #242d3e">
           <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
             style="background:rgba(239,68,68,0.1)">
-            <span class="text-2xl">🗑️</span>
+            <Trash2 :size="22" class="text-[#ef4444]" />
           </div>
           <h3 class="font-display font-bold text-[18px] text-white mb-1">Delete User</h3>
           <p class="text-[13px] text-[#5a6a82] mb-5">
@@ -213,7 +213,7 @@
           <Transition name="fade">
             <div v-if="deleteError" class="mb-4 px-3 py-2.5 rounded-lg text-[12px]"
               style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444">
-              ⚠️ {{ deleteError }}
+              <AlertTriangle :size="13" class="inline mr-1" />{{ deleteError }}
             </div>
           </Transition>
 
@@ -227,7 +227,7 @@
               class="px-5 py-2 rounded-xl text-[13px] font-semibold text-white transition-all flex items-center gap-2"
               style="background:linear-gradient(135deg,#ef4444,#dc2626)"
               :disabled="deleting">
-              <span v-if="deleting" class="animate-spin">⟳</span>
+              <RotateCw v-if="deleting" :size="14" class="animate-spin" />
               <span>{{ deleting ? 'Deleting…' : 'Delete' }}</span>
             </button>
           </div>
@@ -253,6 +253,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAdminAuthStore } from '@/stores/adminAuth'
 import { adminApi } from '@/services/api'
+import { RotateCw, Users, AlertTriangle, Trash2, Eye, EyeOff } from 'lucide-vue-next'
 
 const router    = useRouter()
 const adminAuth = useAdminAuthStore()

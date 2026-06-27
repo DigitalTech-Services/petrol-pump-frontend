@@ -6,20 +6,20 @@
           <option value="2026-04">April 2026</option>
           <option value="2026-03">March 2026</option>
         </select>
-        <button class="btn btn-ghost" @click="refresh"><span :class="{ 'animate-spin inline-block': store.loading }">⟳</span> Refresh</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="refresh"><RotateCw :size="14" :class="{ 'animate-spin': store.loading }" /> Refresh</button>
       </template>
     </PageHeader>
 
     <!-- KPI Grid -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <KpiCard label="Total Revenue" :value="kpi('totalRevenue','₹1.82Cr')" icon="💰" color="#f59e0b" sub="April 2026" :loading="store.loading" />
-      <KpiCard label="MS Sold (Litres)" :value="kpi('msSold','1,23,952')" icon="🔴" color="#f59e0b" sub="Petrol volume" :loading="store.loading" />
-      <KpiCard label="HSD Sold (Litres)" :value="kpi('hsdSold','50,475')" icon="🟢" color="#10b981" sub="Diesel volume" :loading="store.loading" />
-      <KpiCard label="Speed (Litres)" :value="kpi('speedSold','5,728')" icon="🔵" color="#3b82f6" sub="Premium fuel" :loading="store.loading" />
-      <KpiCard label="Total Cash" :value="kpi('totalCash','₹66.97L')" icon="💵" color="#10b981" sub="36.7% of sales" :loading="store.loading" />
-      <KpiCard label="PhonePe / UPI" :value="kpi('totalPhonePe','₹1.15Cr')" icon="📱" color="#6366f1" sub="63.3% of sales" :loading="store.loading" />
-      <KpiCard label="Total Expenses" :value="kpi('totalExpenses','₹1,29,358')" icon="🧾" color="#ef4444" sub="0.71% of revenue" :loading="store.loading" />
-      <KpiCard label="Staff Payroll" :value="kpi('staffPayroll','₹1,16,302')" icon="👥" color="#8b5cf6" sub="13 staff members" :loading="store.loading" />
+      <KpiCard label="Total Revenue" :value="kpi('totalRevenue','₹1.82Cr')" :icon="Banknote" color="#f59e0b" sub="April 2026" :loading="store.loading" />
+      <KpiCard label="MS Sold (Litres)" :value="kpi('msSold','1,23,952')" :icon="Fuel" color="#f59e0b" sub="Petrol volume" :loading="store.loading" />
+      <KpiCard label="HSD Sold (Litres)" :value="kpi('hsdSold','50,475')" :icon="Fuel" color="#10b981" sub="Diesel volume" :loading="store.loading" />
+      <KpiCard label="Speed (Litres)" :value="kpi('speedSold','5,728')" :icon="Fuel" color="#3b82f6" sub="Premium fuel" :loading="store.loading" />
+      <KpiCard label="Total Cash" :value="kpi('totalCash','₹66.97L')" :icon="Banknote" color="#10b981" sub="36.7% of sales" :loading="store.loading" />
+      <KpiCard label="PhonePe / UPI" :value="kpi('totalPhonePe','₹1.15Cr')" :icon="Smartphone" color="#6366f1" sub="63.3% of sales" :loading="store.loading" />
+      <KpiCard label="Total Expenses" :value="kpi('totalExpenses','₹1,29,358')" :icon="Receipt" color="#ef4444" sub="0.71% of revenue" :loading="store.loading" />
+      <KpiCard label="Staff Payroll" :value="kpi('staffPayroll','₹1,16,302')" :icon="Users" color="#8b5cf6" sub="13 staff members" :loading="store.loading" />
     </div>
 
     <!-- Charts Row 1 -->
@@ -117,7 +117,7 @@
             class="flex items-center justify-between py-2.5 px-3 rounded-lg"
             style="background:#161b24; border:1px solid #1c2230">
             <div class="flex items-center gap-2.5">
-              <span class="text-lg">{{ stat.icon }}</span>
+              <component :is="stat.icon" :size="18" />
               <div>
                 <div class="text-[12.5px] font-medium text-white">{{ stat.label }}</div>
                 <div class="text-[10.5px] text-[#5a6a82]">{{ stat.sub }}</div>
@@ -174,6 +174,10 @@ import KpiCard    from '@/components/ui/KpiCard.vue'
 import FuelBar    from '@/components/ui/FuelBar.vue'
 import BaseChart  from '@/components/charts/BaseChart.vue'
 import { fmt, chartColors } from '@/utils/format'
+import {
+  Banknote, Fuel, Smartphone, Receipt, Users,
+  Calendar, TrendingUp, Award, CreditCard, BarChart3, RotateCw
+} from 'lucide-vue-next'
 
 const store = useDashboardStore()
 const selectedPeriod = ref('2026-04')
@@ -247,11 +251,11 @@ const recentSales = [
 ]
 
 const quickStats = [
-  { icon:'📅', label:'Sales Days',       sub:'April 2026',     value:'30',        color:'#f59e0b' },
-  { icon:'📈', label:'Avg Daily Revenue',sub:'Per day',        value:'₹6.08L',    color:'#10b981' },
-  { icon:'🏆', label:'Best Day Revenue', sub:'Apr 26, 2026',   value:'₹7.51L',    color:'#3b82f6' },
-  { icon:'⛽', label:'Total Fuel Sold',  sub:'All types',      value:'1,80,155L', color:'#6366f1' },
-  { icon:'💳', label:'Card Transactions',sub:'Pine Labs',      value:'₹10,000',   color:'#8b5cf6' },
-  { icon:'📊', label:'Avg MS/Day',       sub:'Petrol volume',  value:'4,131 L',   color:'#f59e0b' },
+  { icon: Calendar,    label:'Sales Days',       sub:'April 2026',     value:'30',        color:'#f59e0b' },
+  { icon: TrendingUp,  label:'Avg Daily Revenue',sub:'Per day',        value:'₹6.08L',    color:'#10b981' },
+  { icon: Award,       label:'Best Day Revenue', sub:'Apr 26, 2026',   value:'₹7.51L',    color:'#3b82f6' },
+  { icon: Fuel,        label:'Total Fuel Sold',  sub:'All types',      value:'1,80,155L', color:'#6366f1' },
+  { icon: CreditCard,  label:'Card Transactions',sub:'Pine Labs',      value:'₹10,000',   color:'#8b5cf6' },
+  { icon: BarChart3,   label:'Avg MS/Day',       sub:'Petrol volume',  value:'4,131 L',   color:'#f59e0b' },
 ]
 </script>

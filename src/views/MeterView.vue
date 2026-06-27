@@ -2,17 +2,17 @@
   <div>
     <PageHeader title="Meter Readings" subtitle="Nozzle-wise opening & closing meters" :crumbs="['Home','Meter']">
       <template #actions>
-        <button class="btn btn-ghost" @click="doExport">📥 Export CSV</button>
-        <button class="btn btn-ghost" @click="doPrint">🖨 Print</button>
-        <button class="btn btn-primary" @click="openAddReading">＋ Add Reading</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="doExport"><Download :size="14" /> Export CSV</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="doPrint"><Printer :size="14" /> Print</button>
+        <button class="btn btn-primary flex items-center gap-1.5" @click="openAddReading"><Plus :size="14" /> Add Reading</button>
       </template>
     </PageHeader>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <KpiCard label="MS Nozzles"    value="3 Active"       icon="🔴" color="#f59e0b" sub="MS-1 to MS-3"/>
-      <KpiCard label="HSD Nozzles"   value="4 Active"       icon="🟢" color="#10b981" sub="HSD-1 to HSD-4"/>
-      <KpiCard label="Speed Nozzles" value="4 Active"       icon="🔵" color="#3b82f6" sub="SP-1 to SP-4"/>
-      <KpiCard label="Total MS Used" value="1,23,952 L"     icon="📊" color="#6366f1" sub="All nozzles Apr"/>
+      <KpiCard label="MS Nozzles"    value="3 Active"       :icon="Gauge"    color="#f59e0b" sub="MS-1 to MS-3"/>
+      <KpiCard label="HSD Nozzles"   value="4 Active"       :icon="Gauge"    color="#10b981" sub="HSD-1 to HSD-4"/>
+      <KpiCard label="Speed Nozzles" value="4 Active"       :icon="Gauge"    color="#3b82f6" sub="SP-1 to SP-4"/>
+      <KpiCard label="Total MS Used" value="1,23,952 L"     :icon="BarChart3" color="#6366f1" sub="All nozzles Apr"/>
     </div>
 
     <div class="card">
@@ -46,7 +46,7 @@
               <td><span class="badge badge-ms">{{ fmt(r.ms3c-r.ms3o) }}</span></td>
               <td class="amt text-[#f59e0b] font-bold">{{ fmt(r.total) }}</td>
               <td>
-                <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditReading(r)">✏️</button>
+                <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditReading(r)"><Pencil :size="11" /></button>
               </td>
             </tr>
           </tbody>
@@ -67,7 +67,7 @@
     </div>
 
     <!-- ═══ ADD METER READING MODAL ═══ -->
-    <AppModal v-model="showAdd" title="Add Meter Reading" subtitle="Enter opening & closing meter for each nozzle" icon="📊" max-width="580px">
+    <AppModal v-model="showAdd" title="Add Meter Reading" subtitle="Enter opening & closing meter for each nozzle" :icon="Gauge" max-width="580px">
       <div class="mb-4">
         <label class="field-label">Reading Date *</label>
         <input type="date" v-model="meterForm.date" class="form-input w-full" />
@@ -99,15 +99,15 @@
       <template #footer>
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showAdd=false">Cancel</button>
-          <button class="btn btn-primary px-8" @click="saveMeterReading" :disabled="saving">
-            <span v-if="saving" class="animate-spin inline-block mr-1">⟳</span>💾 Save Reading
+          <button class="btn btn-primary px-8 flex items-center gap-1.5" @click="saveMeterReading" :disabled="saving">
+            <RotateCw v-if="saving" :size="14" class="animate-spin" /><Save v-else :size="14" /> Save Reading
           </button>
         </div>
       </template>
     </AppModal>
 
     <!-- ═══ EDIT READING MODAL ═══ -->
-    <AppModal v-model="showEdit" title="Edit Meter Reading" icon="✏️" max-width="560px">
+    <AppModal v-model="showEdit" title="Edit Meter Reading" :icon="Pencil" max-width="560px">
       <div class="space-y-4" v-if="editData">
         <div><label class="field-label">Date</label><input v-model="editData.date" class="form-input w-full" /></div>
         <div v-for="nozzle in ['ms1','ms2','ms3']" :key="nozzle"
@@ -122,7 +122,7 @@
       <template #footer>
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showEdit=false">Cancel</button>
-          <button class="btn btn-primary px-8" @click="saveEdit">💾 Update</button>
+          <button class="btn btn-primary px-8 flex items-center gap-1.5" @click="saveEdit"><Save :size="14" /> Update</button>
         </div>
       </template>
     </AppModal>
@@ -138,6 +138,7 @@ import AppModal   from '@/components/ui/AppModal.vue'
 import { fmt }    from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
+import { Download, Printer, Plus, Gauge, BarChart3, Pencil } from 'lucide-vue-next'
 
 const ui      = useUiStore()
 const showAdd  = ref(false)

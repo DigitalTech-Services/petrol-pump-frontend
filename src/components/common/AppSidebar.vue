@@ -11,7 +11,7 @@
       </div>
       <div class="min-w-0">
         <div class="font-display font-bold text-[15px] text-white leading-tight truncate">{{ auth.stationName }}</div>
-        <div class="text-[10px] text-[#5a6a82] uppercase tracking-widest">⛽ HP Fuel Station</div>
+        <div class="text-[10px] text-[#5a6a82] uppercase tracking-widest">HP Fuel Station</div>
       </div>
     </div>
 
