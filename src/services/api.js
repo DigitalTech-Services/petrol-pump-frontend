@@ -2,9 +2,11 @@ import axios from 'axios'
 
 // ── Base Axios instance ───────────────────────────────────────────
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL,
   timeout: 15000,
-  headers: { 'Content-Type': 'application/json' },
+  headers: {
+    'Content-Type': 'application/json',
+  },
 })
 
 // ── Request interceptor: attach Bearer token (skip login) ────────
