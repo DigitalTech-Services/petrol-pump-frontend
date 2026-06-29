@@ -3,13 +3,13 @@ import { ref } from 'vue'
 import { dashboardApi } from '@/services/api'
 
 export const useDashboardStore = defineStore('dashboard', () => {
-  const kpis        = ref(null)
-  const dailyTrend  = ref([])
-  const fuelMix     = ref([])
-  const stockLevels = ref([])
-  const paymentSplit= ref(null)
-  const loading     = ref(false)
-  const error       = ref(null)
+  const kpis         = ref(null)
+  const dailyTrend   = ref([])
+  const fuelMix      = ref([])
+  const stockLevels  = ref([])
+  const paymentSplit = ref(null)
+  const loading      = ref(false)
+  const error        = ref(null)
 
   async function fetchAll(params = {}) {
     loading.value = true
@@ -22,13 +22,14 @@ export const useDashboardStore = defineStore('dashboard', () => {
         dashboardApi.getStockLevel(),
         dashboardApi.getPaymentSplit(params),
       ])
-      kpis.value         = k.data || k
-      dailyTrend.value   = trend.data || trend
-      fuelMix.value      = mix.data || mix
-      stockLevels.value  = stock.data || stock
-      paymentSplit.value = payment.data || payment
+      // Each response shape: { status, success, message, data: <payload> }
+      kpis.value         = k?.data         ?? null
+      dailyTrend.value   = Array.isArray(trend?.data)   ? trend.data   : []
+      fuelMix.value      = Array.isArray(mix?.data)     ? mix.data     : []
+      stockLevels.value  = stock?.data      ?? []
+      paymentSplit.value = payment?.data    ?? null
     } catch (e) {
-      error.value = e
+      error.value = e?.message ?? 'Failed to load dashboard.'
     } finally {
       loading.value = false
     }
