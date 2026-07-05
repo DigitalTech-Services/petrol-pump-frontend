@@ -157,12 +157,13 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-if="store.loading && !recentSales.length">
-              <td colspan="9" class="text-center py-6 text-[#5a6a82]">Loading…</td>
-            </tr>
-            <tr v-else-if="!recentSales.length">
-              <td colspan="9" class="text-center py-6 text-[#5a6a82]">No sales data for this period.</td>
-            </tr>
+            <template v-if="store.loading">
+              <tr><td colspan="9" class="text-center py-6 text-[#5a6a82]"><RotateCw :size="13" class="animate-spin inline mr-1.5" />Loading…</td></tr>
+            </template>
+            <template v-else-if="!recentSales.length">
+              <tr><td colspan="9" class="text-center py-6 text-[#5a6a82]">No sales data for this period.</td></tr>
+            </template>
+            <template v-else>
             <tr v-for="r in recentSales" :key="r.date">
               <td><span class="font-mono-custom text-[11.5px] text-[#f59e0b]">{{ r.date }}</span></td>
               <td><span class="badge badge-ms">{{ r.ms }}</span></td>
@@ -174,6 +175,7 @@
               <td class="amt text-negative">₹{{ r.exp }}</td>
               <td class="amt text-[#f59e0b]">₹{{ r.balance }}</td>
             </tr>
+            </template>
           </tbody>
         </table>
       </div>
@@ -238,16 +240,6 @@ const HSD_DATA = [1030,1372,1251,1304,1372,1396,1231,1664,1160,1360,1687,1611,17
 const SPD_DATA = [54,71,57,319,75,70,127,79,134,150,203,121,181,294,233,
                   72,191,112,155,88,292,171,133,71,720,156,947,94,211,135]
 
-const RECENT_STATIC = [
-  { date:'24 Apr', ms:'5,083', hsd:'1,965', speed:'71',  revenue:'7,20,158', cash:'2,81,123', phone:'4,39,035', exp:'16,600', balance:'7,03,558' },
-  { date:'25 Apr', ms:'3,612', hsd:'1,831', speed:'720', revenue:'6,27,624', cash:'2,42,231', phone:'3,85,393', exp:'18,049', balance:'6,09,575' },
-  { date:'26 Apr', ms:'4,989', hsd:'2,313', speed:'156', revenue:'7,51,649', cash:'2,63,357', phone:'4,88,292', exp:'1,984',  balance:'7,49,665' },
-  { date:'27 Apr', ms:'1,598', hsd:'1,887', speed:'947', revenue:'4,47,540', cash:'1,67,317', phone:'2,80,223', exp:'2,100',  balance:'4,45,440' },
-  { date:'28 Apr', ms:'4,136', hsd:'2,091', speed:'94',  revenue:'6,34,979', cash:'2,32,688', phone:'4,02,291', exp:'3,482',  balance:'6,31,497' },
-  { date:'29 Apr', ms:'4,397', hsd:'1,806', speed:'211', revenue:'6,49,689', cash:'2,58,415', phone:'3,91,274', exp:'856',    balance:'6,48,833' },
-  { date:'30 Apr', ms:'4,347', hsd:'2,014', speed:'135', revenue:'6,54,715', cash:'2,43,090', phone:'4,11,625', exp:'1,342',  balance:'6,53,373' },
-]
-
 // ── Chart data ────────────────────────────────────────────────────────
 
 const revenueChartData = computed(() => {
@@ -291,12 +283,10 @@ const paymentChartData = computed(() => ({
   }],
 }))
 
-// ── Recent sales (last 7 days with data, from dailyTrend) ─────────────
+// ── Recent sales (last 7 days with data, derived from dailyTrend) ─────
 
 const recentSales = computed(() => {
-  if (!store.dailyTrend.length) return RECENT_STATIC
   const withData = store.dailyTrend.filter(d => d.revenue > 0)
-  if (!withData.length) return []
   return withData.slice(-7).map(d => ({
     date:    new Date(d.date + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }),
     ms:      fmt(d.ms, 0),
