@@ -13,14 +13,14 @@
 
     <!-- KPI Grid -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <KpiCard label="Total Revenue"   :value="kpi('totalRevenue','₹1.82Cr')"   :icon="Banknote"    color="#f59e0b" :sub="monthLabel" :loading="store.loading" />
-      <KpiCard label="MS Sold (L)"     :value="kpi('msSold','1,23,952')"         :icon="Fuel"        color="#f59e0b" sub="Petrol volume"  :loading="store.loading" />
-      <KpiCard label="HSD Sold (L)"    :value="kpi('hsdSold','50,475')"          :icon="Fuel"        color="#10b981" sub="Diesel volume"  :loading="store.loading" />
-      <KpiCard label="Speed (L)"       :value="kpi('speedSold','5,728')"         :icon="Fuel"        color="#3b82f6" sub="Premium fuel"   :loading="store.loading" />
-      <KpiCard label="Total Cash"      :value="kpi('totalCash','₹66.97L')"       :icon="Banknote"    color="#10b981" sub="Cash receipts"  :loading="store.loading" />
-      <KpiCard label="PhonePe / UPI"   :value="kpi('totalPhonePe','₹1.15Cr')"   :icon="Smartphone"  color="#6366f1" sub="UPI payments"   :loading="store.loading" />
-      <KpiCard label="Total Expenses"  :value="kpi('totalExpenses','₹1,29,358')" :icon="Receipt"     color="#ef4444" sub="Operating costs" :loading="store.loading" />
-      <KpiCard label="Staff Payroll"   :value="kpi('staffPayroll','₹1,16,302')"  :icon="Users"       color="#8b5cf6" sub="13 staff members" :loading="store.loading" />
+      <KpiCard label="Total Revenue"  :value="kpi('totalRevenue')"  :icon="Banknote"   color="#f59e0b" :sub="monthLabel"       :loading="store.loading" />
+      <KpiCard label="MS Sold (L)"    :value="kpi('msSold')"        :icon="Fuel"       color="#f59e0b" sub="Petrol volume"     :loading="store.loading" />
+      <KpiCard label="HSD Sold (L)"   :value="kpi('hsdSold')"       :icon="Fuel"       color="#10b981" sub="Diesel volume"     :loading="store.loading" />
+      <KpiCard label="Speed (L)"      :value="kpi('speedSold')"     :icon="Fuel"       color="#3b82f6" sub="Premium fuel"      :loading="store.loading" />
+      <KpiCard label="Total Cash"     :value="kpi('totalCash')"     :icon="Banknote"   color="#10b981" sub="Cash receipts"     :loading="store.loading" />
+      <KpiCard label="PhonePe / UPI"  :value="kpi('totalPhonePe')"  :icon="Smartphone" color="#6366f1" sub="UPI payments"      :loading="store.loading" />
+      <KpiCard label="Total Expenses" :value="kpi('totalExpenses')" :icon="Receipt"    color="#ef4444" sub="Operating costs"   :loading="store.loading" />
+      <KpiCard label="Staff Payroll"  :value="kpi('staffPayroll')"  :icon="Users"      color="#8b5cf6" sub="Staff salary"      :loading="store.loading" />
     </div>
 
     <!-- Charts Row 1 -->
@@ -29,11 +29,14 @@
         <div class="card-header">
           <div>
             <div class="font-display font-bold text-[15px] text-white">Daily Revenue</div>
-            <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Day-wise sales revenue (₹)</div>
+            <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Day-wise sales revenue (₹) — {{ monthLabel }}</div>
           </div>
         </div>
         <div class="card-body">
-          <BaseChart type="bar" :data="revenueChartData" :options="revenueOpts" :height="240" />
+          <div v-if="store.loading" class="flex items-center justify-center h-[240px] text-[#5a6a82]">
+            <RotateCw :size="20" class="animate-spin mr-2" /> Loading…
+          </div>
+          <BaseChart v-else type="bar" :data="revenueChartData" :options="revenueOpts" :height="240" />
         </div>
       </div>
 
@@ -41,42 +44,51 @@
         <div class="card-header">
           <div>
             <div class="font-display font-bold text-[15px] text-white">Fuel Volume Mix</div>
-            <div class="text-[11.5px] text-[#5a6a82] mt-0.5">MS vs HSD vs Speed (litres)</div>
+            <div class="text-[11.5px] text-[#5a6a82] mt-0.5">MS vs HSD vs Speed (litres) — {{ monthLabel }}</div>
           </div>
         </div>
         <div class="card-body">
-          <BaseChart type="line" :data="fuelMixChartData" :options="lineOpts" :height="240" />
+          <div v-if="store.loading" class="flex items-center justify-center h-[240px] text-[#5a6a82]">
+            <RotateCw :size="20" class="animate-spin mr-2" /> Loading…
+          </div>
+          <BaseChart v-else type="line" :data="fuelMixChartData" :options="lineOpts" :height="240" />
         </div>
       </div>
     </div>
 
     <!-- Charts Row 2 -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+
       <!-- Payment Split Donut -->
       <div class="card">
         <div class="card-header">
           <div class="font-display font-bold text-[15px] text-white">Payment Split</div>
         </div>
         <div class="card-body flex flex-col items-center">
-          <BaseChart type="doughnut" :data="paymentChartData" :options="doughnutOpts" :height="200" />
-          <div class="mt-4 w-full space-y-2 text-[12px]">
-            <div class="flex justify-between">
-              <span class="text-[#8a9ab5]">Cash</span>
-              <span class="amt text-[#10b981]">{{ store.paymentSplit ? '₹' + fmt(store.paymentSplit.cash, 0) : '₹66,96,849' }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-[#8a9ab5]">PhonePe/UPI</span>
-              <span class="amt text-[#6366f1]">{{ store.paymentSplit ? '₹' + fmt(store.paymentSplit.phone_pe, 0) : '₹1,15,49,169' }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-[#8a9ab5]">Card (Pine)</span>
-              <span class="amt text-[#3b82f6]">{{ store.paymentSplit ? '₹' + fmt(store.paymentSplit.card, 0) : '₹10,000' }}</span>
-            </div>
+          <div v-if="store.loading" class="flex items-center justify-center h-[200px] text-[#5a6a82]">
+            <RotateCw :size="20" class="animate-spin mr-2" /> Loading…
           </div>
+          <template v-else>
+            <BaseChart type="doughnut" :data="paymentChartData" :options="doughnutOpts" :height="200" />
+            <div class="mt-4 w-full space-y-2 text-[12px]">
+              <div class="flex justify-between">
+                <span class="text-[#8a9ab5]">Cash</span>
+                <span class="amt text-[#10b981]">{{ store.paymentSplit ? '₹' + fmt(store.paymentSplit.cash, 0) : '—' }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#8a9ab5]">PhonePe / UPI</span>
+                <span class="amt text-[#6366f1]">{{ store.paymentSplit ? '₹' + fmt(store.paymentSplit.phone_pe, 0) : '—' }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#8a9ab5]">Card (Pine)</span>
+                <span class="amt text-[#3b82f6]">{{ store.paymentSplit ? '₹' + fmt(store.paymentSplit.card, 0) : '—' }}</span>
+              </div>
+            </div>
+          </template>
         </div>
       </div>
 
-      <!-- Stock Levels -->
+      <!-- Stock Levels (static — no stock intake table yet) -->
       <div class="card">
         <div class="card-header">
           <div>
@@ -85,34 +97,12 @@
           </div>
         </div>
         <div class="card-body">
-          <div class="flex items-center gap-3 py-3" style="border-bottom:1px solid #1c2230">
-            <div class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:#f59e0b" />
-            <span class="flex-1 text-[13px] font-medium">MS (Petrol)</span>
-            <div class="text-right">
-              <div class="font-display font-bold text-[15px] text-[#f59e0b]">2,890 L</div>
-              <div class="text-[10.5px] text-[#5a6a82]">Closing stock</div>
+          <div class="flex items-center justify-center py-8 text-center">
+            <div>
+              <Fuel :size="32" class="mx-auto mb-2 text-[#2a3548]" />
+              <div class="text-[12px] text-[#5a6a82]">Stock tracking not set up yet.</div>
+              <div class="text-[11px] text-[#3a4a62] mt-1">Add stock intake records to see levels here.</div>
             </div>
-          </div>
-          <div class="flex items-center gap-3 py-3" style="border-bottom:1px solid #1c2230">
-            <div class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:#10b981" />
-            <span class="flex-1 text-[13px] font-medium">HSD (Diesel)</span>
-            <div class="text-right">
-              <div class="font-display font-bold text-[15px] text-[#10b981]">~4,200 L</div>
-              <div class="text-[10.5px] text-[#5a6a82]">Estimated closing</div>
-            </div>
-          </div>
-          <div class="flex items-center gap-3 py-3">
-            <div class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:#3b82f6" />
-            <span class="flex-1 text-[13px] font-medium">Speed (Premium)</span>
-            <div class="text-right">
-              <div class="font-display font-bold text-[15px] text-[#3b82f6]">~344 L</div>
-              <div class="text-[10.5px] text-[#5a6a82]">Closing stock</div>
-            </div>
-          </div>
-          <div class="mt-4 space-y-2.5">
-            <FuelBar label="MS Level"    value="2,890L" :pct="36" color="#f59e0b" />
-            <FuelBar label="HSD Level"   value="4,200L" :pct="62" color="#10b981" />
-            <FuelBar label="Speed Level" value="344L"   :pct="25" color="#3b82f6" />
           </div>
         </div>
       </div>
@@ -133,7 +123,10 @@
                 <div class="text-[10.5px] text-[#5a6a82]">{{ stat.sub }}</div>
               </div>
             </div>
-            <div class="font-display font-bold text-[15px]" :style="{ color: stat.color }">{{ stat.value }}</div>
+            <div class="font-display font-bold text-[15px]" :style="{ color: stat.color }">
+              <RotateCw v-if="store.loading" :size="13" class="animate-spin" />
+              <span v-else>{{ stat.value }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -144,7 +137,7 @@
       <div class="card-header">
         <div>
           <div class="font-display font-bold text-[15px] text-white">Recent Sales</div>
-          <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Last 7 days with data</div>
+          <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Last 7 days with data — {{ monthLabel }}</div>
         </div>
         <RouterLink to="/sales" class="btn btn-ghost ml-auto text-[12px] py-1.5">View All →</RouterLink>
       </div>
@@ -158,23 +151,25 @@
           </thead>
           <tbody>
             <template v-if="store.loading">
-              <tr><td colspan="9" class="text-center py-6 text-[#5a6a82]"><RotateCw :size="13" class="animate-spin inline mr-1.5" />Loading…</td></tr>
+              <tr><td colspan="9" class="text-center py-6 text-[#5a6a82]">
+                <RotateCw :size="13" class="animate-spin inline mr-1.5" />Loading…
+              </td></tr>
             </template>
             <template v-else-if="!recentSales.length">
-              <tr><td colspan="9" class="text-center py-6 text-[#5a6a82]">No sales data for this period.</td></tr>
+              <tr><td colspan="9" class="text-center py-6 text-[#5a6a82]">No sales data for {{ monthLabel }}.</td></tr>
             </template>
             <template v-else>
-            <tr v-for="r in recentSales" :key="r.date">
-              <td><span class="font-mono-custom text-[11.5px] text-[#f59e0b]">{{ r.date }}</span></td>
-              <td><span class="badge badge-ms">{{ r.ms }}</span></td>
-              <td><span class="badge badge-hsd">{{ r.hsd }}</span></td>
-              <td><span class="badge badge-speed">{{ r.speed }}</span></td>
-              <td class="amt text-[#f59e0b]">₹{{ r.revenue }}</td>
-              <td class="amt text-positive">₹{{ r.cash }}</td>
-              <td class="amt text-[#6366f1]">₹{{ r.phone }}</td>
-              <td class="amt text-negative">₹{{ r.exp }}</td>
-              <td class="amt text-[#f59e0b]">₹{{ r.balance }}</td>
-            </tr>
+              <tr v-for="r in recentSales" :key="r.date">
+                <td><span class="font-mono-custom text-[11.5px] text-[#f59e0b]">{{ r.date }}</span></td>
+                <td><span class="badge badge-ms">{{ r.ms }}</span></td>
+                <td><span class="badge badge-hsd">{{ r.hsd }}</span></td>
+                <td><span class="badge badge-speed">{{ r.speed }}</span></td>
+                <td class="amt text-[#f59e0b]">₹{{ r.revenue }}</td>
+                <td class="amt text-positive">₹{{ r.cash }}</td>
+                <td class="amt text-[#6366f1]">₹{{ r.phone }}</td>
+                <td class="amt text-negative">₹{{ r.exp }}</td>
+                <td class="amt text-[#f59e0b]">₹{{ r.balance }}</td>
+              </tr>
             </template>
           </tbody>
         </table>
@@ -188,9 +183,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useDashboardStore } from '@/stores/dashboard'
 import PageHeader from '@/components/ui/PageHeader.vue'
-import KpiCard    from '@/components/ui/KpiCard.vue'
-import FuelBar    from '@/components/ui/FuelBar.vue'
-import BaseChart  from '@/components/charts/BaseChart.vue'
+import KpiCard   from '@/components/ui/KpiCard.vue'
+import BaseChart from '@/components/charts/BaseChart.vue'
 import { fmt, chartColors } from '@/utils/format'
 import {
   Banknote, Fuel, Smartphone, Receipt, Users,
@@ -199,7 +193,7 @@ import {
 
 const store = useDashboardStore()
 
-// ── Period selector (last 6 months, most recent first) ───────────────
+// ── Period selector (last 6 months, most-recent first) ───────────────
 const now = new Date()
 const periods = Array.from({ length: 6 }, (_, i) => {
   const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
@@ -212,111 +206,88 @@ const periods = Array.from({ length: 6 }, (_, i) => {
 })
 
 const selectedPeriod = ref(periods[0].value)
-
-const monthLabel = computed(() => {
-  const p = periods.find(p => p.value === selectedPeriod.value)
-  return p?.label ?? selectedPeriod.value
-})
+const monthLabel = computed(() => periods.find(p => p.value === selectedPeriod.value)?.label ?? selectedPeriod.value)
 
 const refresh = () => store.fetchAll({ period: selectedPeriod.value })
 onMounted(refresh)
 
-// ── KPI helper: use live value or fall back to hardcoded string ───────
-const kpi = (key, fallback) => store.kpis?.[key] || fallback
+// ── KPI: returns live value or '—' (no static fallbacks) ─────────────
+const kpi = (key) => store.kpis?.[key] ?? '—'
 
-// ── Static fallback data (shown while loading or when no API data) ───
-
-const LABELS_30 = ['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15',
-                   '16','17','18','19','20','21','22','23','24','25','26','27','28','29','30']
-
-const REV_DATA = [428170,468932,511469,531554,514643,550439,539032,565690,557107,569046,
-                  602355,629937,647373,558199,686611,667920,563938,714637,625410,724959,
-                  706186,685611,710433,720158,627624,751649,447540,634979,649689,654715]
-
-const MS_DATA  = [3130,3202,3729,3589,3634,3959,3933,3861,4160,4082,4057,4476,4439,3834,4841,
-                  4773,4000,4822,4363,4893,4596,4739,4664,5083,3612,4989,1598,4136,4397,4347]
-const HSD_DATA = [1030,1372,1251,1304,1372,1396,1231,1664,1160,1360,1687,1611,1771,1347,1674,
-                  1747,1346,2153,1649,2213,2096,1858,2261,1965,1831,2313,1887,2091,1806,2014]
-const SPD_DATA = [54,71,57,319,75,70,127,79,134,150,203,121,181,294,233,
-                  72,191,112,155,88,292,171,133,71,720,156,947,94,211,135]
-
-// ── Chart data ────────────────────────────────────────────────────────
+// ── Charts — fully dynamic, no hardcoded data arrays ─────────────────
 
 const revenueChartData = computed(() => {
-  const hasTrend = store.dailyTrend.length > 0
-  const labels   = hasTrend ? store.dailyTrend.map(d => d.day) : LABELS_30
-  const data     = hasTrend ? store.dailyTrend.map(d => d.revenue) : REV_DATA
+  const labels = store.dailyTrend.map(d => d.day)
+  const data   = store.dailyTrend.map(d => d.revenue)
   return {
     labels,
     datasets: [{
       label: 'Revenue (₹)',
       data,
-      backgroundColor: data.map((_, i) => i === data.length - 1 ? '#f59e0b' : 'rgba(245,158,11,0.55)'),
+      backgroundColor: data.map((v, i) =>
+        (i === data.length - 1 || v === Math.max(...data)) ? '#f59e0b' : 'rgba(245,158,11,0.45)'
+      ),
       borderRadius: 4,
       borderSkipped: false,
     }],
   }
 })
 
-const fuelMixChartData = computed(() => {
-  const hasMix = store.fuelMix.length > 0
-  const labels = hasMix ? store.fuelMix.map(d => d.day) : LABELS_30
-  return {
-    labels,
-    datasets: [
-      { label: 'MS (L)',    data: hasMix ? store.fuelMix.map(d => d.ms)    : MS_DATA,  borderColor: chartColors.ms,    backgroundColor: 'rgba(245,158,11,0.08)', tension: 0.4, fill: true, pointRadius: 2 },
-      { label: 'HSD (L)',   data: hasMix ? store.fuelMix.map(d => d.hsd)   : HSD_DATA, borderColor: chartColors.hsd,   backgroundColor: 'rgba(16,185,129,0.06)',  tension: 0.4, fill: true, pointRadius: 2 },
-      { label: 'Speed (L)', data: hasMix ? store.fuelMix.map(d => d.speed) : SPD_DATA, borderColor: chartColors.speed, backgroundColor: 'rgba(59,130,246,0.06)',  tension: 0.4, fill: true, pointRadius: 2 },
-    ],
-  }
-})
+const fuelMixChartData = computed(() => ({
+  labels: store.fuelMix.map(d => d.day),
+  datasets: [
+    { label: 'MS (L)',    data: store.fuelMix.map(d => d.ms),    borderColor: chartColors.ms,    backgroundColor: 'rgba(245,158,11,0.08)', tension: 0.4, fill: true, pointRadius: 2 },
+    { label: 'HSD (L)',   data: store.fuelMix.map(d => d.hsd),   borderColor: chartColors.hsd,   backgroundColor: 'rgba(16,185,129,0.06)',  tension: 0.4, fill: true, pointRadius: 2 },
+    { label: 'Speed (L)', data: store.fuelMix.map(d => d.speed), borderColor: chartColors.speed, backgroundColor: 'rgba(59,130,246,0.06)',  tension: 0.4, fill: true, pointRadius: 2 },
+  ],
+}))
 
 const paymentChartData = computed(() => ({
   labels: ['Cash', 'PhonePe / UPI', 'Card'],
   datasets: [{
     data: store.paymentSplit
       ? [store.paymentSplit.cash, store.paymentSplit.phone_pe, store.paymentSplit.card]
-      : [6696849, 11549169, 10000],
+      : [0, 0, 0],
     backgroundColor: [chartColors.cash, chartColors.phone, chartColors.card],
     borderWidth: 2,
     borderColor: '#0a0c10',
   }],
 }))
 
-// ── Recent sales (last 7 days with data, derived from dailyTrend) ─────
+// ── Recent sales — last 7 days that have revenue > 0 ─────────────────
+const recentSales = computed(() =>
+  store.dailyTrend
+    .filter(d => d.revenue > 0)
+    .slice(-7)
+    .map(d => ({
+      date:    new Date(d.date + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }),
+      ms:      fmt(d.ms, 0),
+      hsd:     fmt(d.hsd, 0),
+      speed:   fmt(d.speed, 0),
+      revenue: fmt(d.revenue, 0),
+      cash:    fmt(d.cash, 0),
+      phone:   fmt(d.phone_pe, 0),
+      exp:     fmt(d.expenses, 0),
+      balance: fmt(d.balance, 0),
+    }))
+)
 
-const recentSales = computed(() => {
-  const withData = store.dailyTrend.filter(d => d.revenue > 0)
-  return withData.slice(-7).map(d => ({
-    date:    new Date(d.date + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }),
-    ms:      fmt(d.ms, 0),
-    hsd:     fmt(d.hsd, 0),
-    speed:   fmt(d.speed, 0),
-    revenue: fmt(d.revenue, 0),
-    cash:    fmt(d.cash, 0),
-    phone:   fmt(d.phone_pe, 0),
-    exp:     fmt(d.expenses, 0),
-    balance: fmt(d.balance, 0),
-  }))
-})
-
-// ── Quick stats ───────────────────────────────────────────────────────
+// ── Quick stats — fully from API ──────────────────────────────────────
+const salesDays = computed(() => store.dailyTrend.filter(d => d.revenue > 0).length)
 
 const quickStats = computed(() => {
-  const k        = store.kpis
-  const salesDays = store.dailyTrend.filter(d => d.revenue > 0).length
+  const k = store.kpis
   return [
-    { icon: Calendar,   label: 'Sales Days',        sub: monthLabel.value,             value: k ? String(salesDays) : '30',             color: '#f59e0b' },
-    { icon: TrendingUp, label: 'Avg Daily Revenue',  sub: 'Per day',                    value: k?.avgDailyRevenue ?? '₹6.08L',            color: '#10b981' },
-    { icon: Award,      label: 'Best Day Revenue',   sub: k?.bestDay ?? 'Apr 26, 2026', value: k?.bestDayRevenue  ?? '₹7.51L',            color: '#3b82f6' },
-    { icon: Fuel,       label: 'Total Fuel Sold',    sub: 'All types',                  value: k?.totalFuel       ?? '1,80,155 L',        color: '#6366f1' },
-    { icon: CreditCard, label: 'Card Transactions',  sub: 'Pine Labs',                  value: k?.totalCard       ?? '₹10,000',           color: '#8b5cf6' },
-    { icon: BarChart3,  label: 'Avg MS / Day',       sub: 'Petrol volume',              value: k?.avgMsPerDay     ?? '4,131 L',           color: '#f59e0b' },
+    { icon: Calendar,   label: 'Sales Days',       sub: monthLabel.value,           value: k ? String(salesDays.value) : '—', color: '#f59e0b' },
+    { icon: TrendingUp, label: 'Avg Daily Revenue', sub: 'Per day',                  value: k?.avgDailyRevenue ?? '—',          color: '#10b981' },
+    { icon: Award,      label: 'Best Day Revenue',  sub: k?.bestDay ?? '—',          value: k?.bestDayRevenue  ?? '—',          color: '#3b82f6' },
+    { icon: Fuel,       label: 'Total Fuel Sold',   sub: 'All types',                value: k?.totalFuel       ?? '—',          color: '#6366f1' },
+    { icon: CreditCard, label: 'Card Transactions', sub: 'Pine Labs',                value: k?.totalCard       ?? '—',          color: '#8b5cf6' },
+    { icon: BarChart3,  label: 'Avg MS / Day',      sub: 'Petrol volume',            value: k?.avgMsPerDay     ?? '—',          color: '#f59e0b' },
   ]
 })
 
 // ── Chart options ─────────────────────────────────────────────────────
-
 const revenueOpts = {
   plugins: { legend: { display: false } },
   scales: {
