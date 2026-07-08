@@ -13,7 +13,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'https://petrol-pump-backend.vercel.app',
+        target: 'https://petrol-pump-backend-one.vercel.app',
         changeOrigin: true
       }
     }
