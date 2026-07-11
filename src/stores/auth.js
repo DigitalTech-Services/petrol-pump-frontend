@@ -35,8 +35,8 @@ export const useAuthStore = defineStore('auth', () => {
   const isOwner     = computed(() => user.value?.type === 'user')
   const isManager   = computed(() => user.value?.type === 'sub_user')
   const role        = computed(() => user.value?.type === 'sub_user' ? 'Manager' : 'Owner')
-  const stationName = computed(() => user.value?.stationName || 'Kailas Petromines')
-  const fullName    = computed(() => user.value?.name || 'Kailas Petromines')
+  const stationName = computed(() => user.value?.business_name || 'My Business')
+  const fullName    = computed(() => user.value?.name || 'Account')
 
   async function login(credentials) {
     // const { email, password } = credentials
@@ -87,5 +87,15 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('pm_user')
   }
 
-  return { token, user, isLoggedIn, isOwner, isManager, role, stationName, fullName, login, logout }
+  async function updateProfile(data) {
+    const res = await authApi.updateProfile(data)
+    if (res.success) {
+      user.value = { ...user.value, ...res.data }
+      localStorage.setItem('pm_user', JSON.stringify(user.value))
+      return res
+    }
+    throw { message: res.message || 'Failed to update profile.' }
+  }
+
+  return { token, user, isLoggedIn, isOwner, isManager, role, stationName, fullName, login, logout, updateProfile }
 })

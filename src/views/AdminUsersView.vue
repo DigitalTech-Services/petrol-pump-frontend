@@ -89,7 +89,10 @@
                       :style="{ background: avatarColor(u.name) }">
                       {{ initials(u.name) }}
                     </div>
-                    <span class="text-white font-medium">{{ u.name }}</span>
+                    <div class="min-w-0">
+                      <div class="text-white font-medium truncate">{{ u.name }}</div>
+                      <div class="text-[11px] text-[#5a6a82] truncate">{{ u.business_name || '—' }}</div>
+                    </div>
                   </div>
                 </td>
                 <td class="px-5 py-3.5 text-[#8a9ab5]">{{ u.email }}</td>
@@ -178,16 +181,21 @@
         @mousedown.self="closeModal">
         <div class="w-full max-w-[440px] rounded-2xl p-6" style="background:#0f1218; border:1px solid #242d3e">
           <h3 class="font-display font-bold text-[18px] text-white mb-1">
-            {{ modal.mode === 'add' ? 'Add User' : 'Edit User' }}
+            {{ modal.mode === 'add' ? 'Add Owner' : (modal.userType === 'sub_user' ? 'Edit Manager' : 'Edit Owner') }}
           </h3>
           <p class="text-[12.5px] text-[#5a6a82] mb-5">
-            {{ modal.mode === 'add' ? 'Fill in the details to create a new user.' : 'Update user information.' }}
+            {{ modal.mode === 'add' ? 'Fill in the details to create a new owner account.' : 'Update account information.' }}
           </p>
 
           <form @submit.prevent="handleSubmit">
 
+            <div class="mb-4" v-if="modal.mode === 'add' || modal.userType !== 'sub_user'">
+              <label class="field-label">Business Name</label>
+              <input v-model="form.business_name" type="text" class="form-input w-full" placeholder="Kailas Petromines" required />
+            </div>
+
             <div class="mb-4">
-              <label class="field-label">Full Name</label>
+              <label class="field-label">{{ modal.userType === 'sub_user' ? 'Manager Full Name' : 'Owner Full Name' }}</label>
               <input v-model="form.name" type="text" class="form-input w-full" placeholder="John Doe" required />
             </div>
 
@@ -329,8 +337,8 @@ function toggleExpand(ownerId) {
   else expanded.add(ownerId)
 }
 
-const modal = reactive({ open: false, mode: 'add', userId: null })
-const form  = reactive({ name: '', email: '', contact: '', password: '' })
+const modal = reactive({ open: false, mode: 'add', userId: null, userType: 'user' })
+const form  = reactive({ name: '', business_name: '', email: '', contact: '', password: '' })
 const showPass   = ref(false)
 const submitting = ref(false)
 const submitError = ref('')
@@ -383,24 +391,28 @@ async function loadUsers() {
 
 // ── Modal helpers ─────────────────────────────────────────────────
 function openAdd() {
-  modal.mode   = 'add'
-  modal.userId = null
-  form.name    = ''
-  form.email   = ''
-  form.contact = ''
-  form.password= ''
+  modal.mode     = 'add'
+  modal.userId   = null
+  modal.userType = 'user'
+  form.name          = ''
+  form.business_name = ''
+  form.email         = ''
+  form.contact       = ''
+  form.password      = ''
   submitError.value = ''
   showPass.value    = false
   modal.open   = true
 }
 
 function openEdit(u) {
-  modal.mode   = 'edit'
-  modal.userId = u.id
-  form.name    = u.name
-  form.email   = u.email
-  form.contact = u.contact || ''
-  form.password= ''
+  modal.mode     = 'edit'
+  modal.userId   = u.id
+  modal.userType = u.type
+  form.name          = u.name
+  form.business_name = u.business_name || ''
+  form.email         = u.email
+  form.contact       = u.contact || ''
+  form.password      = ''
   submitError.value = ''
   modal.open   = true
 }
@@ -421,11 +433,13 @@ async function handleSubmit() {
   submitError.value = ''
   try {
     if (modal.mode === 'add') {
-      await adminApi.addUser({ name: form.name, email: form.email, contact: form.contact, password: form.password })
-      showToast('User added successfully.')
+      await adminApi.addUser({ name: form.name, business_name: form.business_name, email: form.email, contact: form.contact, password: form.password })
+      showToast('Owner added successfully.')
     } else {
-      await adminApi.updateUser({ user_id: modal.userId, name: form.name, email: form.email })
-      showToast('User updated successfully.')
+      const payload = { user_id: modal.userId, name: form.name, email: form.email }
+      if (modal.userType !== 'sub_user') payload.business_name = form.business_name
+      await adminApi.updateUser(payload)
+      showToast('Account updated successfully.')
     }
     closeModal()
     await loadUsers()

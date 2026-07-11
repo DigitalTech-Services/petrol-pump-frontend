@@ -78,6 +78,7 @@
         <div class="nav-label">Team</div>
 
         <NavItem to="/managers" :icon="UserCog" label="Managers" />
+        <NavItem to="/business-profile" :icon="Building2" label="Business Profile" />
       </div>
 
     </nav>
@@ -125,6 +126,7 @@ import {
   BarChart3,
   Settings,
   UserCog,
+  Building2,
   LogOut
 } from 'lucide-vue-next'
 
