@@ -29,12 +29,12 @@
       <!-- Page Header -->
       <div class="flex items-center justify-between mb-6">
         <div>
-          <h1 class="font-display font-bold text-[22px] text-white">Users</h1>
-          <p class="text-[13px] text-[#5a6a82] mt-0.5">{{ users.length }} registered user{{ users.length !== 1 ? 's' : '' }}</p>
+          <h1 class="font-display font-bold text-[22px] text-white">Owners</h1>
+          <p class="text-[13px] text-[#5a6a82] mt-0.5">{{ owners.length }} owner account{{ owners.length !== 1 ? 's' : '' }} · {{ users.length - owners.length }} manager{{ users.length - owners.length !== 1 ? 's' : '' }}</p>
         </div>
         <button @click="openAdd" class="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold text-white transition-all"
           style="background:linear-gradient(135deg,#6366f1,#4f46e5); box-shadow:0 0 20px rgba(99,102,241,0.25)">
-          + Add User
+          + Add Owner
         </button>
       </div>
 
@@ -50,9 +50,9 @@
       </div>
 
       <!-- Empty -->
-      <div v-else-if="!users.length" class="py-20 text-center text-[#5a6a82]">
+      <div v-else-if="!owners.length" class="py-20 text-center text-[#5a6a82]">
         <Users :size="40" class="mx-auto mb-3 opacity-40" />
-        <p class="text-[14px]">No users yet. Add the first one.</p>
+        <p class="text-[14px]">No owners yet. Add the first one.</p>
       </div>
 
       <!-- Table -->
@@ -60,58 +60,112 @@
         <table class="w-full text-[13px]">
           <thead>
             <tr style="background:#0f1218; border-bottom:1px solid #1c2230">
+              <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[#5a6a82] font-semibold w-8"></th>
               <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[#5a6a82] font-semibold">#</th>
               <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[#5a6a82] font-semibold">Name</th>
               <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[#5a6a82] font-semibold">Email</th>
               <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[#5a6a82] font-semibold">Contact</th>
-              <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[#5a6a82] font-semibold">Type</th>
+              <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[#5a6a82] font-semibold">Managers</th>
               <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[#5a6a82] font-semibold">Created</th>
               <th class="text-right px-5 py-3 text-[11px] uppercase tracking-wider text-[#5a6a82] font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="(u, i) in users"
-              :key="u.id"
-              class="transition-colors hover:bg-[#0f1420]"
-              style="border-bottom:1px solid #161b24"
-            >
-              <td class="px-5 py-3.5 text-[#5a6a82]">{{ i + 1 }}</td>
-              <td class="px-5 py-3.5">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
-                    :style="{ background: avatarColor(u.name) }">
-                    {{ initials(u.name) }}
+            <template v-for="(u, i) in owners" :key="u.id">
+              <tr
+                class="transition-colors hover:bg-[#0f1420] cursor-pointer"
+                style="border-bottom:1px solid #161b24"
+                @click="toggleExpand(u.id)"
+              >
+                <td class="px-5 py-3.5 text-[#5a6a82]">
+                  <ChevronRight v-if="!managersOf(u.id).length" :size="15" class="opacity-20" />
+                  <ChevronDown v-else-if="expanded.has(u.id)" :size="15" />
+                  <ChevronRight v-else :size="15" />
+                </td>
+                <td class="px-5 py-3.5 text-[#5a6a82]">{{ i + 1 }}</td>
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
+                      :style="{ background: avatarColor(u.name) }">
+                      {{ initials(u.name) }}
+                    </div>
+                    <span class="text-white font-medium">{{ u.name }}</span>
                   </div>
-                  <span class="text-white font-medium">{{ u.name }}</span>
-                </div>
-              </td>
-              <td class="px-5 py-3.5 text-[#8a9ab5]">{{ u.email }}</td>
-              <td class="px-5 py-3.5 text-[#8a9ab5]">{{ u.contact || '—' }}</td>
-              <td class="px-5 py-3.5">
-                <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold"
-                  :style="u.type === 'sub_user'
-                    ? 'background:rgba(16,185,129,0.1); color:#10b981'
-                    : 'background:rgba(99,102,241,0.1); color:#818cf8'">
-                  {{ u.type === 'sub_user' ? 'Sub User' : 'User' }}
-                </span>
-              </td>
-              <td class="px-5 py-3.5 text-[#5a6a82] text-[12px]">{{ formatDate(u.created_at) }}</td>
-              <td class="px-5 py-3.5 text-right">
-                <div class="flex items-center justify-end gap-2">
-                  <button
-                    @click="openEdit(u)"
-                    class="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors text-[#8a9ab5] hover:text-white"
-                    style="background:#161b24; border:1px solid #242d3e"
-                  >Edit</button>
-                  <button
-                    @click="openDelete(u)"
-                    class="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors text-[#ef4444] hover:bg-[rgba(239,68,68,0.1)]"
-                    style="border:1px solid rgba(239,68,68,0.2)"
-                  >Delete</button>
-                </div>
-              </td>
-            </tr>
+                </td>
+                <td class="px-5 py-3.5 text-[#8a9ab5]">{{ u.email }}</td>
+                <td class="px-5 py-3.5 text-[#8a9ab5]">{{ u.contact || '—' }}</td>
+                <td class="px-5 py-3.5">
+                  <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold" style="background:rgba(99,102,241,0.1); color:#818cf8">
+                    {{ managersOf(u.id).length }}
+                  </span>
+                </td>
+                <td class="px-5 py-3.5 text-[#5a6a82] text-[12px]">{{ formatDate(u.created_at) }}</td>
+                <td class="px-5 py-3.5 text-right" @click.stop>
+                  <div class="flex items-center justify-end gap-2">
+                    <button
+                      @click="openEdit(u)"
+                      class="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors text-[#8a9ab5] hover:text-white"
+                      style="background:#161b24; border:1px solid #242d3e"
+                    >Edit</button>
+                    <button
+                      @click="openDelete(u)"
+                      class="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors text-[#ef4444] hover:bg-[rgba(239,68,68,0.1)]"
+                      style="border:1px solid rgba(239,68,68,0.2)"
+                    >Delete</button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Nested managers -->
+              <tr v-if="expanded.has(u.id) && managersOf(u.id).length" :key="`${u.id}-managers`">
+                <td colspan="8" class="p-0" style="background:#0a0c10">
+                  <table class="w-full text-[12.5px]">
+                    <tbody>
+                      <tr
+                        v-for="m in managersOf(u.id)"
+                        :key="m.id"
+                        class="transition-colors hover:bg-[#0f1420]"
+                        style="border-bottom:1px solid #161b24"
+                      >
+                        <td class="px-5 py-2.5 w-8"></td>
+                        <td class="px-5 py-2.5"></td>
+                        <td class="px-5 py-2.5">
+                          <div class="flex items-center gap-3 pl-4" style="border-left:2px solid #242d3e">
+                            <div class="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
+                              :style="{ background: avatarColor(m.name) }">
+                              {{ initials(m.name) }}
+                            </div>
+                            <span class="text-[#c8d2e0]">{{ m.name }}</span>
+                          </div>
+                        </td>
+                        <td class="px-5 py-2.5 text-[#8a9ab5]">{{ m.email }}</td>
+                        <td class="px-5 py-2.5 text-[#8a9ab5]">{{ m.contact || '—' }}</td>
+                        <td class="px-5 py-2.5">
+                          <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold" style="background:rgba(16,185,129,0.1); color:#10b981">
+                            Manager
+                          </span>
+                        </td>
+                        <td class="px-5 py-2.5 text-[#5a6a82] text-[12px]">{{ formatDate(m.created_at) }}</td>
+                        <td class="px-5 py-2.5 text-right">
+                          <div class="flex items-center justify-end gap-2">
+                            <button
+                              @click="openEdit(m)"
+                              class="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors text-[#8a9ab5] hover:text-white"
+                              style="background:#161b24; border:1px solid #242d3e"
+                            >Edit</button>
+                            <button
+                              @click="openDelete(m)"
+                              class="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors text-[#ef4444] hover:bg-[rgba(239,68,68,0.1)]"
+                              style="border:1px solid rgba(239,68,68,0.2)"
+                            >Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </template>
           </tbody>
         </table>
       </div>
@@ -249,11 +303,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAdminAuthStore } from '@/stores/adminAuth'
 import { adminApi } from '@/services/api'
-import { RotateCw, Users, AlertTriangle, Trash2, Eye, EyeOff } from 'lucide-vue-next'
+import { RotateCw, Users, AlertTriangle, Trash2, Eye, EyeOff, ChevronRight, ChevronDown } from 'lucide-vue-next'
 
 const router    = useRouter()
 const adminAuth = useAdminAuthStore()
@@ -261,6 +315,19 @@ const adminAuth = useAdminAuthStore()
 const users      = ref([])
 const loading    = ref(false)
 const fetchError = ref('')
+
+// ── Owner / manager grouping ──────────────────────────────────────
+const owners = computed(() => users.value.filter(u => u.type !== 'sub_user'))
+
+function managersOf(ownerId) {
+  return users.value.filter(u => u.type === 'sub_user' && u.parent_user_id === ownerId)
+}
+
+const expanded = reactive(new Set())
+function toggleExpand(ownerId) {
+  if (expanded.has(ownerId)) expanded.delete(ownerId)
+  else expanded.add(ownerId)
+}
 
 const modal = reactive({ open: false, mode: 'add', userId: null })
 const form  = reactive({ name: '', email: '', contact: '', password: '' })
