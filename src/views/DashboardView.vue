@@ -139,7 +139,7 @@
           <div class="font-display font-bold text-[15px] text-white">Recent Sales</div>
           <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Last 7 days with data — {{ monthLabel }}</div>
         </div>
-        <RouterLink to="/sales" class="btn btn-ghost ml-auto text-[12px] py-1.5">View All →</RouterLink>
+        <RouterLink v-if="auth.isManager" to="/sales" class="btn btn-ghost ml-auto text-[12px] py-1.5">View All →</RouterLink>
       </div>
       <div class="overflow-x-auto">
         <table class="data-table">
@@ -181,6 +181,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import { useDashboardStore } from '@/stores/dashboard'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard   from '@/components/ui/KpiCard.vue'
@@ -191,6 +192,7 @@ import {
   Calendar, TrendingUp, Award, CreditCard, BarChart3, RotateCw
 } from 'lucide-vue-next'
 
+const auth  = useAuthStore()
 const store = useDashboardStore()
 
 // ── Period selector (last 6 months, most-recent first) ───────────────

@@ -17,6 +17,7 @@ const StaffView       = () => import('@/views/StaffView.vue')
 const TimesheetView   = () => import('@/views/TimesheetView.vue')
 const ReportsView     = () => import('@/views/ReportsView.vue')
 const SettingsView    = () => import('@/views/SettingsView.vue')
+const ManagersView    = () => import('@/views/ManagersView.vue')
 const NotFoundView    = () => import('@/views/NotFoundView.vue')
 const AppLayout       = () => import('@/components/common/AppLayout.vue')
 
@@ -59,49 +60,49 @@ const routes = [
         path: 'sales',
         name: 'Sales',
         component: SalesView,
-        meta: { title: 'Petrol Sales', breadcrumb: ['Sales'] }
+        meta: { title: 'Petrol Sales', breadcrumb: ['Sales'], role: 'manager' }
       },
       {
         path: 'sales/new',
         name: 'SaleEntry',
         component: SaleEntryView,
-        meta: { title: 'New Sale Entry', breadcrumb: ['Sales', 'New Entry'] }
+        meta: { title: 'New Sale Entry', breadcrumb: ['Sales', 'New Entry'], role: 'manager' }
       },
       {
         path: 'stock',
         name: 'Stock',
         component: StockView,
-        meta: { title: 'Stock Summary', breadcrumb: ['Stock'] }
+        meta: { title: 'Stock Summary', breadcrumb: ['Stock'], role: 'manager' }
       },
       {
         path: 'meter',
         name: 'Meter',
         component: MeterView,
-        meta: { title: 'Meter Readings', breadcrumb: ['Meter Readings'] }
+        meta: { title: 'Meter Readings', breadcrumb: ['Meter Readings'], role: 'manager' }
       },
       {
         path: 'transactions',
         name: 'Transactions',
         component: TransactionsView,
-        meta: { title: 'Card Transactions', breadcrumb: ['Transactions'] }
+        meta: { title: 'Card Transactions', breadcrumb: ['Transactions'], role: 'manager' }
       },
       {
         path: 'expenses',
         name: 'Expenses',
         component: ExpensesView,
-        meta: { title: 'Expenses', breadcrumb: ['Expenses'] }
+        meta: { title: 'Expenses', breadcrumb: ['Expenses'], role: 'manager' }
       },
       {
         path: 'staff',
         name: 'Staff',
         component: StaffView,
-        meta: { title: 'Staff & Salary', breadcrumb: ['Staff'] }
+        meta: { title: 'Staff & Salary', breadcrumb: ['Staff'], role: 'manager' }
       },
       {
         path: 'timesheet',
         name: 'Timesheet',
         component: TimesheetView,
-        meta: { title: 'Time Sheet', breadcrumb: ['Time Sheet'] }
+        meta: { title: 'Time Sheet', breadcrumb: ['Time Sheet'], role: 'manager' }
       },
       {
         path: 'reports',
@@ -113,7 +114,13 @@ const routes = [
         path: 'settings',
         name: 'Settings',
         component: SettingsView,
-        meta: { title: 'Settings', breadcrumb: ['Settings'] }
+        meta: { title: 'Settings', breadcrumb: ['Settings'], role: 'manager' }
+      },
+      {
+        path: 'managers',
+        name: 'Managers',
+        component: ManagersView,
+        meta: { title: 'Managers', breadcrumb: ['Managers'], role: 'owner' }
       },
     ]
   },
@@ -145,6 +152,12 @@ router.beforeEach((to, _from, next) => {
   } else if (to.meta.requiresAuth && !auth.isLoggedIn) {
     next({ name: 'Login', query: { redirect: to.fullPath } })
   } else if (to.name === 'Login' && auth.isLoggedIn) {
+    next({ name: 'Dashboard' })
+  } else if (to.meta.role === 'owner' && !auth.isOwner) {
+    // Managers can't manage other managers
+    next({ name: 'Dashboard' })
+  } else if (to.meta.role === 'manager' && !auth.isManager) {
+    // Owner is stats + manager-management only, no operational screens
     next({ name: 'Dashboard' })
   } else {
     next()
