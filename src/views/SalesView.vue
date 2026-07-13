@@ -8,7 +8,7 @@
       <template #actions>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doExport"><Download :size="14" /> Export CSV</button>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doPrint"><Printer :size="14" /> Print</button>
-        <button class="btn btn-primary flex items-center gap-1.5" @click="openAdd"><Plus :size="14" /> New Sale Entry</button>
+        <button v-if="auth.canWrite" class="btn btn-primary flex items-center gap-1.5" @click="openAdd"><Plus :size="14" /> New Sale Entry</button>
       </template>
     </PageHeader>
 
@@ -66,10 +66,11 @@
               <td class="amt text-[#f59e0b]">{{ fmt(r.balance) }}</td>
               <td><div class="text-[11.5px] text-[#5a6a82] truncate max-w-[160px]" :title="r.narration">{{ r.narration }}</div></td>
               <td>
-                <div class="flex gap-1.5">
+                <div v-if="auth.canWrite" class="flex gap-1.5">
                   <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEdit(r)"><Pencil :size="11" /></button>
                   <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDelete(r)"><Trash2 :size="11" /></button>
                 </div>
+                <span v-else class="text-[11px] text-[#5a6a82]">—</span>
               </td>
             </tr>
           </tbody>
@@ -255,18 +256,22 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import StatRow    from '@/components/ui/StatRow.vue'
 import AppModal   from '@/components/ui/AppModal.vue'
 import { fmt }    from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore }   from '@/stores/ui'
+import { useAuthStore } from '@/stores/auth'
 import { useSalesStore } from '@/stores/sales'
+import { useSelectedStationStore } from '@/stores/selectedStation'
 import { Download, Printer, Plus, Fuel, Pencil, AlertTriangle, RotateCw, Save, Trash2, Banknote } from 'lucide-vue-next'
 
-const ui    = useUiStore()
-const store = useSalesStore()
+const ui              = useUiStore()
+const auth            = useAuthStore()
+const store           = useSalesStore()
+const selectedStation = useSelectedStationStore()
 
 // ── Month filter ──────────────────────────────────────────────────
 const now           = new Date()
@@ -278,10 +283,14 @@ const monthLabel = computed(() => {
 })
 
 function loadSales() {
-  store.fetchAll({ month: selectedMonth.value }).catch(() => {})
+  store.fetchAll({
+    month: selectedMonth.value,
+    ...(selectedStation.selectedStationId ? { station_id: selectedStation.selectedStationId } : {}),
+  }).catch(() => {})
 }
 
 onMounted(() => loadSales())
+watch(() => selectedStation.selectedStationId, loadSales)
 
 // ── Filters & sort ───────────────────────────────────────────────
 const search  = ref('')

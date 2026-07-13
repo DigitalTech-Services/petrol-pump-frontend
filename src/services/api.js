@@ -165,15 +165,15 @@ export const reportsApi = {
 // ──────────────────────────────────────────────────────────────────
 export const settingsApi = {
   // Station details
-  getStation:           ()       => api.get('/settings'),
+  getStation:           (params) => api.get('/settings', { params }),
   updateStation:        (data)   => api.put('/settings', data),
 
   // Fuel rates
-  getFuelRates:         ()       => api.get('/settings/fuel-rates'),
+  getFuelRates:         (params) => api.get('/settings/fuel-rates', { params }),
   updateFuelRates:      (data)   => api.put('/settings/fuel-rates', data),
 
   // Nozzles
-  getNozzles:           ()       => api.get('/settings/nozzles'),
+  getNozzles:           (params) => api.get('/settings/nozzles', { params }),
   storeNozzle:          (data)   => api.post('/settings/nozzles', data),
   updateNozzle:         (id, d)  => api.put(`/settings/nozzles/${id}`, d),
   deleteNozzle:         (id)     => api.delete(`/settings/nozzles/${id}`),

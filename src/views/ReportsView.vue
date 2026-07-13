@@ -217,8 +217,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useUiStore } from '@/stores/ui'
+import { useSelectedStationStore } from '@/stores/selectedStation'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard    from '@/components/ui/KpiCard.vue'
 import BaseChart  from '@/components/charts/BaseChart.vue'
@@ -231,7 +232,8 @@ import {
   Wrench, Package, MoreHorizontal, RotateCw
 } from 'lucide-vue-next'
 
-const ui  = useUiStore()
+const ui              = useUiStore()
+const selectedStation = useSelectedStationStore()
 const tab = ref('summary')
 
 // ── Month filter ──────────────────────────────────────────────────
@@ -253,7 +255,10 @@ const staff   = ref([])
 async function loadAll() {
   loading.value = true
   try {
-    const params = { period: selectedPeriod.value }
+    const params = {
+      period: selectedPeriod.value,
+      ...(selectedStation.selectedStationId ? { station_id: selectedStation.selectedStationId } : {}),
+    }
     const [m, f, p, s] = await Promise.all([
       reportsApi.getMonthly(params),
       reportsApi.getFuelReport(params),
@@ -272,6 +277,7 @@ async function loadAll() {
 }
 
 onMounted(loadAll)
+watch(() => selectedStation.selectedStationId, loadAll)
 
 // ── Chart / display helpers ────────────────────────────────────────
 const revVsCollChart = computed(() => {

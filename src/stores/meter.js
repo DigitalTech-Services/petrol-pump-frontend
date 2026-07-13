@@ -39,11 +39,14 @@ export const useMeterStore = defineStore('meter', {
   },
 
   actions: {
-    async fetchReadings(month) {
+    async fetchReadings(month, stationId) {
       this.loading = true
       this.error   = null
       try {
-        const res = await meterApi.getAll(month ? { month } : {})
+        const res = await meterApi.getAll({
+          ...(month ? { month } : {}),
+          ...(stationId ? { station_id: stationId } : {}),
+        })
         this.readings = (res.data?.readings ?? []).map(normalizeReading)
       } catch (e) {
         this.error = e?.message ?? 'Failed to load meter readings.'

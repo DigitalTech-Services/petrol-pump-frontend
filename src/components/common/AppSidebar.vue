@@ -24,43 +24,41 @@
         <NavItem to="/dashboard" :icon="LayoutDashboard" label="Dashboard" />
       </div>
 
-      <template v-if="auth.isManager">
-        <div class="mb-1">
-          <div class="nav-label">Operations</div>
+      <div class="mb-1">
+        <div class="nav-label">Operations</div>
 
-          <NavItem to="/sales" :icon="Fuel" label="Petrol Sales">
-            <template #badge>
-              <span class="ml-auto text-[10px] font-bold
-            bg-[#f59e0b]/20 text-[#f59e0b]
-            px-1.5 py-0.5 rounded-full">
-                Daily
-              </span>
-            </template>
-          </NavItem>
+        <NavItem to="/sales" :icon="Fuel" label="Petrol Sales">
+          <template #badge>
+            <span class="ml-auto text-[10px] font-bold
+          bg-[#f59e0b]/20 text-[#f59e0b]
+          px-1.5 py-0.5 rounded-full">
+              Daily
+            </span>
+          </template>
+        </NavItem>
 
-          <NavItem to="/sales/new" :icon="CirclePlus" label="New Sale Entry" />
+        <NavItem v-if="auth.isManager" to="/sales/new" :icon="CirclePlus" label="New Sale Entry" />
 
-          <NavItem to="/stock" :icon="Warehouse" label="Stock Summary" />
+        <NavItem to="/stock" :icon="Warehouse" label="Stock Summary" />
 
-          <NavItem to="/meter" :icon="Gauge" label="Meter Readings" />
-        </div>
+        <NavItem to="/meter" :icon="Gauge" label="Meter Readings" />
+      </div>
 
-        <div class="mb-1">
-          <div class="nav-label">Finance</div>
+      <div class="mb-1">
+        <div class="nav-label">Finance</div>
 
-          <NavItem to="/transactions" :icon="CreditCard" label="Card Transactions" />
+        <NavItem to="/transactions" :icon="CreditCard" label="Card Transactions" />
 
-          <NavItem to="/expenses" :icon="Receipt" label="Expenses" />
-        </div>
+        <NavItem to="/expenses" :icon="Receipt" label="Expenses" />
+      </div>
 
-        <div class="mb-1">
-          <div class="nav-label">HR</div>
+      <div class="mb-1">
+        <div class="nav-label">HR</div>
 
-          <NavItem to="/staff" :icon="Users" label="Staff & Salary" />
+        <NavItem to="/staff" :icon="Users" label="Staff & Salary" />
 
-          <NavItem to="/timesheet" :icon="Clock3" label="Time Sheet" />
-        </div>
-      </template>
+        <NavItem to="/timesheet" :icon="Clock3" label="Time Sheet" />
+      </div>
 
       <div class="mb-1">
         <div class="nav-label">Analytics</div>
@@ -68,7 +66,7 @@
         <NavItem to="/reports" :icon="BarChart3" label="Reports" />
       </div>
 
-      <div v-if="auth.isManager">
+      <div>
         <div class="nav-label">System</div>
 
         <NavItem to="/settings" :icon="Settings" label="Settings" />

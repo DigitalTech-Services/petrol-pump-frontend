@@ -21,51 +21,38 @@
     <!-- Right Actions -->
     <div class="flex items-center gap-3">
 
-      <!-- Live indicator -->
-      <div class="hidden sm:flex items-center gap-2 text-[11px] text-[#5a6a82]">
-        <span class="live-dot" />
-        <span>Live</span>
-      </div>
-
-      <!-- Month Filter -->
-      <select v-model="selectedMonth" class="form-select text-[12px] py-1.5 hidden md:block" style="min-width:140px">
-        <option value="">All Months</option>
-        <option v-for="m in months" :key="m.value" :value="m.value">{{ m.label }}</option>
-      </select>
-
-      <!-- Export -->
-      <button class="btn btn-ghost py-1.5 hidden sm:flex items-center gap-1.5">
-        <Download :size="14" /> Export
-      </button>
-
-      <!-- New Entry CTA -->
-      <RouterLink to="/sales/new" class="btn btn-primary py-1.5 flex items-center gap-1.5">
+      <!-- New Entry CTA (manager only — owner is read-only) -->
+      <RouterLink v-if="auth.isManager" to="/sales/new" class="btn btn-primary py-1.5 flex items-center gap-1.5">
         <Plus :size="14" /> New Entry
       </RouterLink>
+
+      <!-- Global station filter (owner only) — applies to every page until changed -->
+      <select v-else-if="auth.isOwner" v-model="selectedStation.selectedStationId"
+        class="form-select text-[12px] py-1.5" style="min-width:160px">
+        <option value="">All Stations</option>
+        <option v-for="s in stations.records" :key="s.id" :value="s.id">{{ s.name }}</option>
+      </select>
 
     </div>
   </header>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUiStore }   from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'
-import { Menu, Download, Plus } from 'lucide-vue-next'
+import { useStationsStore } from '@/stores/stations'
+import { useSelectedStationStore } from '@/stores/selectedStation'
+import { Menu, Plus } from 'lucide-vue-next'
 
 const route  = useRoute()
 const ui     = useUiStore()
 const auth   = useAuthStore()
+const stations        = useStationsStore()
+const selectedStation  = useSelectedStationStore()
 
-const selectedMonth = ref('')
-
-const months = [
-  {value:'2026-04', label:'April 2026'},
-  {value:'2026-03', label:'March 2026'},
-  {value:'2026-02', label:'February 2026'},
-  {value:'2026-01', label:'January 2026'},
-]
+if (auth.isOwner) stations.fetchAll()
 
 const titles = {
   '/dashboard':    { title: 'Dashboard',          sub: 'Overview & KPIs' },

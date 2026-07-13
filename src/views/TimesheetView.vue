@@ -5,7 +5,7 @@
         <input type="month" v-model="selectedMonth" class="form-input text-[13px]" style="width:150px" />
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doExport"><Download :size="14" /> Export CSV</button>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doPrint"><Printer :size="14" /> Print</button>
-        <button class="btn btn-primary flex items-center gap-1.5" @click="openMarkAttendance"><CheckCircle2 :size="14" /> Mark Attendance</button>
+        <button v-if="auth.canWrite" class="btn btn-primary flex items-center gap-1.5" @click="openMarkAttendance"><CheckCircle2 :size="14" /> Mark Attendance</button>
       </template>
     </PageHeader>
 
@@ -24,9 +24,10 @@
       <!-- Summary Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <div v-for="s in timesheetData" :key="s.id"
-          class="rounded-xl p-5 transition-all duration-200 hover:-translate-y-1 cursor-pointer"
+          class="rounded-xl p-5 transition-all duration-200 hover:-translate-y-1"
+          :class="auth.canWrite ? 'cursor-pointer' : ''"
           style="background:#0f1218;border:1px solid #242d3e"
-          @click="openEditAttendance(s)">
+          @click="auth.canWrite && openEditAttendance(s)">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-10 h-10 rounded-full flex items-center justify-center font-display font-bold text-[14px] text-white flex-shrink-0" :style="{background:s.color}">
               {{ s.name.slice(0,2).toUpperCase() }}
@@ -63,7 +64,7 @@
               <div class="font-display font-bold text-[13px] text-positive">₹{{ fmtK(s.salary) }}</div>
             </div>
           </div>
-          <div class="mt-3 text-center text-[10.5px] text-[#5a6a82] hover:text-[#f59e0b] transition-colors flex items-center justify-center gap-1"><Pencil :size="10" /> Click to edit</div>
+          <div v-if="auth.canWrite" class="mt-3 text-center text-[10.5px] text-[#5a6a82] hover:text-[#f59e0b] transition-colors flex items-center justify-center gap-1"><Pencil :size="10" /> Click to edit</div>
         </div>
       </div>
 
@@ -109,7 +110,8 @@
                   </div>
                 </td>
                 <td>
-                  <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditAttendance(s)"><Pencil :size="11" /> Edit</button>
+                  <button v-if="auth.canWrite" class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditAttendance(s)"><Pencil :size="11" /> Edit</button>
+                  <span v-else class="text-[11px] text-[#5a6a82]">—</span>
                 </td>
               </tr>
             </tbody>
@@ -291,13 +293,17 @@ import AppModal   from '@/components/ui/AppModal.vue'
 import { fmt }    from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
+import { useAuthStore } from '@/stores/auth'
+import { useSelectedStationStore } from '@/stores/selectedStation'
 import { staffApi }   from '@/services/api'
 import {
   Users, Calendar, BarChart3, Award, Download, Printer,
   CheckCircle2, Pencil, RotateCw, Save
 } from 'lucide-vue-next'
 
-const ui          = useUiStore()
+const ui              = useUiStore()
+const auth            = useAuthStore()
+const selectedStation = useSelectedStationStore()
 const showMark    = ref(false)
 const showEditAtt = ref(false)
 const editAttData = ref(null)
@@ -350,7 +356,10 @@ const attendanceTimeMap = reactive({})
 async function loadTimesheet() {
   loading.value = true
   try {
-    const res = await staffApi.getTimesheet({ month: selectedMonth.value })
+    const res = await staffApi.getTimesheet({
+      month: selectedMonth.value,
+      ...(selectedStation.selectedStationId ? { station_id: selectedStation.selectedStationId } : {}),
+    })
     const summary = res?.data?.summary ?? []
     timesheetData.splice(0)
     summary.forEach((item, idx) => timesheetData.push(mapEntry(item, idx)))
@@ -367,6 +376,7 @@ async function loadTimesheet() {
 
 onMounted(loadTimesheet)
 watch(selectedMonth, loadTimesheet)
+watch(() => selectedStation.selectedStationId, loadTimesheet)
 
 function openMarkAttendance() {
   attendanceDate.value = new Date().toISOString().split('T')[0]

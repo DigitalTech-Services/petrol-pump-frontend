@@ -4,7 +4,7 @@
       <template #actions>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doExport"><Download :size="14" /> Export CSV</button>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doPrint"><Printer :size="14" /> Print</button>
-        <button class="btn btn-primary flex items-center gap-1.5" @click="openAddModal"><Plus :size="14" /> Add Stock</button>
+        <button v-if="auth.canWrite" class="btn btn-primary flex items-center gap-1.5" @click="openAddModal"><Plus :size="14" /> Add Stock</button>
       </template>
     </PageHeader>
 
@@ -70,10 +70,11 @@
                 </span>
               </td>
               <td>
-                <div class="flex gap-1.5">
+                <div v-if="auth.canWrite" class="flex gap-1.5">
                   <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditModal(r)"><Pencil :size="11" /> Edit</button>
                   <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDeleteModal(r)"><Trash2 :size="11" /></button>
                 </div>
+                <span v-else class="text-[11px] text-[#5a6a82]">—</span>
               </td>
             </tr>
           </tbody>
@@ -215,11 +216,15 @@ import AppModal   from '@/components/ui/AppModal.vue'
 import { fmt }    from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
+import { useAuthStore } from '@/stores/auth'
 import { useStockStore } from '@/stores/stock'
+import { useSelectedStationStore } from '@/stores/selectedStation'
 import { Download, Printer, Plus, Fuel, BarChart3, Package, Pencil, RotateCw, Save, Trash2, AlertTriangle } from 'lucide-vue-next'
 
-const ui    = useUiStore()
-const store = useStockStore()
+const ui              = useUiStore()
+const auth            = useAuthStore()
+const store           = useStockStore()
+const selectedStation = useSelectedStationStore()
 
 // ── Month + tab filters ─────────────────────────────────────────
 const now           = new Date()
@@ -238,18 +243,23 @@ function tankwiseFor(fuelType) {
   return store.tankwise?.[fuelType] ?? { total_received: 0, latest_closing: 0, total_sale: 0, avg_variation: 0 }
 }
 
+function stationParam() {
+  return selectedStation.selectedStationId ? { station_id: selectedStation.selectedStationId } : {}
+}
+
 function loadAll() {
-  store.fetchAll({ month: selectedMonth.value, fuel_type: tabFuelType.value }).catch(() => {})
-  store.fetchTankwise({ month: selectedMonth.value }).catch(() => {})
+  store.fetchAll({ month: selectedMonth.value, fuel_type: tabFuelType.value, ...stationParam() }).catch(() => {})
+  store.fetchTankwise({ month: selectedMonth.value, ...stationParam() }).catch(() => {})
 }
 
 onMounted(() => loadAll())
 
 function onTabChange() {
-  store.fetchAll({ month: selectedMonth.value, fuel_type: tabFuelType.value }).catch(() => {})
+  store.fetchAll({ month: selectedMonth.value, fuel_type: tabFuelType.value, ...stationParam() }).catch(() => {})
 }
 
 watch(tab, () => onTabChange())
+watch(() => selectedStation.selectedStationId, () => loadAll())
 
 // ── Add modal ────────────────────────────────────────────────────
 const showAdd = ref(false)

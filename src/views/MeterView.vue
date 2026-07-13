@@ -4,7 +4,7 @@
       <template #actions>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doExport"><Download :size="14" /> Export CSV</button>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doPrint"><Printer :size="14" /> Print</button>
-        <button class="btn btn-primary flex items-center gap-1.5" @click="openAddReading"><Plus :size="14" /> Add Reading</button>
+        <button v-if="auth.canWrite" class="btn btn-primary flex items-center gap-1.5" @click="openAddReading"><Plus :size="14" /> Add Reading</button>
       </template>
     </PageHeader>
 
@@ -55,10 +55,11 @@
               <td class="font-mono-custom text-[11.5px]">{{ r.ms3c ?? '—' }}</td>
               <td><span class="badge badge-ms">{{ fmt((r.ms3c ?? 0) - (r.ms3o ?? 0)) }}</span></td>
               <td class="amt text-[#f59e0b] font-bold">{{ fmt(r.total) }}</td>
-              <td class="flex items-center gap-1">
+              <td class="flex items-center gap-1" v-if="auth.canWrite">
                 <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditReading(r)"><Pencil :size="11" /></button>
                 <button class="btn btn-ghost py-0.5 px-2 text-[11px] text-red-400" @click="confirmDelete(r)"><Trash2 :size="11" /></button>
               </td>
+              <td v-else class="text-[11px] text-[#5a6a82]">—</td>
             </tr>
           </tbody>
           <tfoot v-if="store.readings.length > 0">
@@ -142,18 +143,22 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard    from '@/components/ui/KpiCard.vue'
 import AppModal   from '@/components/ui/AppModal.vue'
 import { fmt }    from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore }    from '@/stores/ui'
+import { useAuthStore }  from '@/stores/auth'
 import { useMeterStore } from '@/stores/meter'
+import { useSelectedStationStore } from '@/stores/selectedStation'
 import { Download, Printer, Plus, Gauge, BarChart3, Pencil, Save, RotateCw, Trash2 } from 'lucide-vue-next'
 
-const ui    = useUiStore()
-const store = useMeterStore()
+const ui              = useUiStore()
+const auth            = useAuthStore()
+const store           = useMeterStore()
+const selectedStation = useSelectedStationStore()
 
 const NOZZLE_KEYS = ['ms1', 'ms2', 'ms3']
 
@@ -178,9 +183,12 @@ const currentMonth = computed(() => {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 })
 
-onMounted(() => {
-  store.fetchReadings(currentMonth.value)
-})
+function loadReadings() {
+  store.fetchReadings(currentMonth.value, selectedStation.selectedStationId)
+}
+
+onMounted(loadReadings)
+watch(() => selectedStation.selectedStationId, loadReadings)
 
 function openAddReading() {
   meterForm.date = new Date().toISOString().split('T')[0]

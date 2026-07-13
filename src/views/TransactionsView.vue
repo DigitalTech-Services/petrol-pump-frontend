@@ -4,7 +4,7 @@
       <template #actions>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doExport"><Download :size="14" /> Export CSV</button>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doPrint"><Printer :size="14" /> Print</button>
-        <button class="btn btn-primary flex items-center gap-1.5" @click="openAdd"><Plus :size="14" /> Add Transaction</button>
+        <button v-if="auth.canWrite" class="btn btn-primary flex items-center gap-1.5" @click="openAdd"><Plus :size="14" /> Add Transaction</button>
       </template>
     </PageHeader>
 
@@ -67,10 +67,11 @@
                 <td class="font-mono-custom text-[11px] text-[#5a6a82]">{{ t.ref_number || '—' }}</td>
                 <td class="text-[12px] text-[#5a6a82]">{{ t.remarks || '—' }}</td>
                 <td>
-                  <div class="flex gap-1.5">
+                  <div v-if="auth.canWrite" class="flex gap-1.5">
                     <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEdit(t)"><Pencil :size="11" /></button>
                     <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDelete(t)"><Trash2 :size="11" /></button>
                   </div>
+                  <span v-else class="text-[11px] text-[#5a6a82]">—</span>
                 </td>
               </tr>
               <tr v-if="!filtered.length && !loading">
@@ -231,13 +232,17 @@ import BaseChart  from '@/components/charts/BaseChart.vue'
 import { fmt, fmtCr } from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
+import { useAuthStore } from '@/stores/auth'
+import { useSelectedStationStore } from '@/stores/selectedStation'
 import { transactionApi } from '@/services/api'
 import {
   Download, Printer, Plus, CreditCard, Hash, BarChart3, Award,
   RotateCw, Save, Pencil, AlertTriangle, Trash2
 } from 'lucide-vue-next'
 
-const ui = useUiStore()
+const ui              = useUiStore()
+const auth            = useAuthStore()
+const selectedStation = useSelectedStationStore()
 
 // ── Month selector ────────────────────────────────────────────────
 const month = ref(new Date().toISOString().slice(0, 7))
@@ -264,9 +269,13 @@ async function loadAll() {
   loading.value   = true
   loadError.value = ''
   try {
+    const params = {
+      month: month.value,
+      ...(selectedStation.selectedStationId ? { station_id: selectedStation.selectedStationId } : {}),
+    }
     const [txRes, sumRes] = await Promise.all([
-      transactionApi.getAll({ month: month.value }),
-      transactionApi.getSummary({ month: month.value }),
+      transactionApi.getAll(params),
+      transactionApi.getSummary(params),
     ])
     txData.value  = txRes.data?.transactions || []
     summary.value = sumRes.data?.summary     || { ...EMPTY_SUMMARY }
@@ -278,6 +287,7 @@ async function loadAll() {
 }
 
 watch(month, loadAll)
+watch(() => selectedStation.selectedStationId, loadAll)
 onMounted(loadAll)
 
 // ── Client-side filters ───────────────────────────────────────────

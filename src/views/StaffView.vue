@@ -8,7 +8,7 @@
         </button>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doExport"><Download :size="14" /> Export CSV</button>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doPrint"><Printer :size="14" /> Print</button>
-        <button class="btn btn-primary flex items-center gap-1.5" @click="openAddStaff"><Plus :size="14" /> Add Staff</button>
+        <button v-if="auth.canWrite" class="btn btn-primary flex items-center gap-1.5" @click="openAddStaff"><Plus :size="14" /> Add Staff</button>
       </template>
     </PageHeader>
 
@@ -40,7 +40,7 @@
                 <div class="font-display font-bold text-[15px] text-white leading-tight">{{ s.name }}</div>
                 <div class="text-[11.5px] text-[#5a6a82]">{{ s.role }}</div>
               </div>
-              <div class="flex gap-1">
+              <div v-if="auth.canWrite" class="flex gap-1">
                 <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[#5a6a82] hover:text-[#f59e0b] hover:bg-[#1c2230] transition-all" @click="openEditStaff(s)" title="Edit"><Pencil :size="13" /></button>
                 <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[#5a6a82] hover:text-[#f59e0b] hover:bg-[#1c2230] transition-all" @click="openAddAdvance(s)" title="Add Advance"><Banknote :size="13" /></button>
                 <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[#5a6a82] hover:text-[#ef4444] hover:bg-[#1c2230] transition-all" @click="deleteStaff(s)" title="Delete"><Trash2 :size="13" /></button>
@@ -68,7 +68,7 @@
         </div>
 
         <!-- Add New Card -->
-        <button @click="openAddStaff"
+        <button v-if="auth.canWrite" @click="openAddStaff"
           class="rounded-xl flex flex-col items-center justify-center gap-3 h-[180px] transition-all hover:border-[#f59e0b] hover:text-[#f59e0b]"
           style="background:#0f1218;border:2px dashed #242d3e;color:#5a6a82">
           <Plus :size="28" />
@@ -105,11 +105,12 @@
                 <td><span class="font-display font-bold text-[15px]" :class="s.finalPayout<0?'text-negative':'text-[#f59e0b]'">₹{{ fmt(s.finalPayout) }}</span></td>
                 <td><span class="badge" :class="s.finalPayout<0?'badge-red':'badge-green'">{{ s.finalPayout<0?'Overpaid':'Due' }}</span></td>
                 <td>
-                  <div class="flex gap-1.5">
+                  <div v-if="auth.canWrite" class="flex gap-1.5">
                     <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditStaff(s)"><Pencil :size="11" /> Edit</button>
                     <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openAddAdvance(s)" style="color:#f59e0b"><Banknote :size="11" /> Adv</button>
                     <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="deleteStaff(s)" style="color:#ef4444"><Trash2 :size="11" /></button>
                   </div>
+                  <span v-else class="text-[11px] text-[#5a6a82]">—</span>
                 </td>
               </tr>
             </tbody>
@@ -276,20 +277,24 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard    from '@/components/ui/KpiCard.vue'
 import AppModal   from '@/components/ui/AppModal.vue'
 import { fmt }    from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
+import { useAuthStore } from '@/stores/auth'
+import { useSelectedStationStore } from '@/stores/selectedStation'
 import { staffApi } from '@/services/api'
 import {
   Users, Banknote, CheckCircle2, Upload, RotateCw, Save,
   Pencil, Trash2, Plus, Download, Printer, List, LayoutGrid, User
 } from 'lucide-vue-next'
 
-const ui = useUiStore()
+const ui              = useUiStore()
+const auth            = useAuthStore()
+const selectedStation = useSelectedStationStore()
 const viewMode = ref('cards')
 const loading  = ref(false)
 const toggleView = () => viewMode.value = viewMode.value === 'cards' ? 'table' : 'cards'
@@ -345,10 +350,14 @@ function mapStaff(s) {
   }
 }
 
+function stationParam() {
+  return selectedStation.selectedStationId ? { station_id: selectedStation.selectedStationId } : {}
+}
+
 async function loadStaff() {
   loading.value = true
   try {
-    const res = await staffApi.getAll()
+    const res = await staffApi.getAll(stationParam())
     staffList.splice(0)
     ;(res.data?.staff ?? []).forEach(s => staffList.push(mapStaff(s)))
   } catch (e) {
@@ -360,13 +369,16 @@ async function loadStaff() {
 
 async function loadAdvances() {
   try {
-    const res = await staffApi.getAdvances()
+    const res = await staffApi.getAdvances(stationParam())
     allAdvances.splice(0)
     ;(res.data?.advances ?? []).forEach(a => allAdvances.push(a))
   } catch { /* non-critical */ }
 }
 
-onMounted(() => { loadStaff(); loadAdvances() })
+function loadAll() { loadStaff(); loadAdvances() }
+
+onMounted(loadAll)
+watch(() => selectedStation.selectedStationId, loadAll)
 
 function openAddStaff() {
   Object.assign(staffForm, {name:'',role:'Staff',phone:'',joinDate:'',ratePerDay:400,shiftHours:'8',daysWorked:30,notes:''})

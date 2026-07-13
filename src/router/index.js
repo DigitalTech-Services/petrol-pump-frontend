@@ -62,49 +62,50 @@ const routes = [
         path: 'sales',
         name: 'Sales',
         component: SalesView,
-        meta: { title: 'Petrol Sales', breadcrumb: ['Sales'], role: 'manager' }
+        meta: { title: 'Petrol Sales', breadcrumb: ['Sales'] }
       },
       {
         path: 'sales/new',
         name: 'SaleEntry',
         component: SaleEntryView,
+        // Pure creation form — no read-only meaning, stays manager-only.
         meta: { title: 'New Sale Entry', breadcrumb: ['Sales', 'New Entry'], role: 'manager' }
       },
       {
         path: 'stock',
         name: 'Stock',
         component: StockView,
-        meta: { title: 'Stock Summary', breadcrumb: ['Stock'], role: 'manager' }
+        meta: { title: 'Stock Summary', breadcrumb: ['Stock'] }
       },
       {
         path: 'meter',
         name: 'Meter',
         component: MeterView,
-        meta: { title: 'Meter Readings', breadcrumb: ['Meter Readings'], role: 'manager' }
+        meta: { title: 'Meter Readings', breadcrumb: ['Meter Readings'] }
       },
       {
         path: 'transactions',
         name: 'Transactions',
         component: TransactionsView,
-        meta: { title: 'Card Transactions', breadcrumb: ['Transactions'], role: 'manager' }
+        meta: { title: 'Card Transactions', breadcrumb: ['Transactions'] }
       },
       {
         path: 'expenses',
         name: 'Expenses',
         component: ExpensesView,
-        meta: { title: 'Expenses', breadcrumb: ['Expenses'], role: 'manager' }
+        meta: { title: 'Expenses', breadcrumb: ['Expenses'] }
       },
       {
         path: 'staff',
         name: 'Staff',
         component: StaffView,
-        meta: { title: 'Staff & Salary', breadcrumb: ['Staff'], role: 'manager' }
+        meta: { title: 'Staff & Salary', breadcrumb: ['Staff'] }
       },
       {
         path: 'timesheet',
         name: 'Timesheet',
         component: TimesheetView,
-        meta: { title: 'Time Sheet', breadcrumb: ['Time Sheet'], role: 'manager' }
+        meta: { title: 'Time Sheet', breadcrumb: ['Time Sheet'] }
       },
       {
         path: 'reports',
@@ -116,7 +117,7 @@ const routes = [
         path: 'settings',
         name: 'Settings',
         component: SettingsView,
-        meta: { title: 'Settings', breadcrumb: ['Settings'], role: 'manager' }
+        meta: { title: 'Settings', breadcrumb: ['Settings'] }
       },
       {
         path: 'managers',

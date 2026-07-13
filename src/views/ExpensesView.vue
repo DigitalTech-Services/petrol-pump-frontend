@@ -4,7 +4,7 @@
       <template #actions>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doExport"><Download :size="14" /> Export CSV</button>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doPrint"><Printer :size="14" /> Print</button>
-        <button class="btn btn-primary flex items-center gap-1.5" @click="openAddExpense"><Plus :size="14" /> Add Expense</button>
+        <button v-if="auth.canWrite" class="btn btn-primary flex items-center gap-1.5" @click="openAddExpense"><Plus :size="14" /> Add Expense</button>
       </template>
     </PageHeader>
 
@@ -58,10 +58,11 @@
                 <td class="max-w-[260px]"><div class="text-[12px] text-[#8a9ab5] truncate" :title="r.narration">{{ r.narration }}</div></td>
                 <td class="text-[12px] text-[#8a9ab5]">{{ r.paid_by || '—' }}</td>
                 <td>
-                  <div class="flex gap-1.5">
+                  <div v-if="auth.canWrite" class="flex gap-1.5">
                     <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditExpense(r)"><Pencil :size="11" /></button>
                     <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDeleteExpense(r)"><Trash2 :size="11" /></button>
                   </div>
+                  <span v-else class="text-[11px] text-[#5a6a82]">—</span>
                 </td>
               </tr>
               <tr v-if="!filtered.length && !loading">
@@ -189,13 +190,17 @@ import BaseChart  from '@/components/charts/BaseChart.vue'
 import { fmt }    from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
+import { useAuthStore } from '@/stores/auth'
+import { useSelectedStationStore } from '@/stores/selectedStation'
 import { expenseApi } from '@/services/api'
 import {
   Download, Printer, Plus, Receipt, BarChart3, CheckCircle2, AlertTriangle,
   RotateCw, Save, Pencil, Trash2
 } from 'lucide-vue-next'
 
-const ui = useUiStore()
+const ui              = useUiStore()
+const auth            = useAuthStore()
+const selectedStation = useSelectedStationStore()
 
 // ── Month selector ────────────────────────────────────────────────
 const month = ref(new Date().toISOString().slice(0, 7)) // YYYY-MM
@@ -225,9 +230,13 @@ async function loadExpenses() {
   loading.value   = true
   loadError.value = ''
   try {
+    const params = {
+      month: month.value,
+      ...(selectedStation.selectedStationId ? { station_id: selectedStation.selectedStationId } : {}),
+    }
     const [expRes, sumRes] = await Promise.all([
-      expenseApi.getAll({ month: month.value }),
-      expenseApi.getSummary({ month: month.value }),
+      expenseApi.getAll(params),
+      expenseApi.getSummary(params),
     ])
     expData.value  = expRes.data?.expenses  || []
     summary.value  = sumRes.data?.summary   || { total: 0, count: 0, avg_per_day: 0, min: null, max: null }
@@ -239,6 +248,7 @@ async function loadExpenses() {
 }
 
 watch(month, loadExpenses)
+watch(() => selectedStation.selectedStationId, loadExpenses)
 onMounted(loadExpenses)
 
 // ── Filters (client-side within loaded month) ─────────────────────

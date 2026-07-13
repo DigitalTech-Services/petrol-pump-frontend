@@ -3,7 +3,7 @@
     <PageHeader title="Settings" subtitle="Station configuration & system preferences" :crumbs="['Home','Settings']">
       <template #actions>
         <button
-          v-if="['station','fuel','notifications'].includes(activeSection)"
+          v-if="auth.canWrite && ['station','fuel','notifications'].includes(activeSection)"
           class="btn btn-primary flex items-center gap-2"
           @click="saveAll"
           :disabled="saving"
@@ -35,8 +35,19 @@
       <!-- Content Panel -->
       <div class="lg:col-span-3 space-y-5">
 
+        <!-- Owner with no station selected — station/fuel/nozzle config is single-station -->
+        <template v-if="['station','fuel','nozzles'].includes(activeSection) && noStationSelected">
+          <div class="card">
+            <div class="card-body text-center py-12">
+              <Building2 :size="32" class="mx-auto mb-3 text-[#2a3548]" />
+              <div class="text-[13px] text-[#8a9ab5]">Select a station from the top bar to view its settings.</div>
+              <div class="text-[11px] text-[#5a6a82] mt-1">"All Stations" has no single configuration to show.</div>
+            </div>
+          </div>
+        </template>
+
         <!-- Station Details -->
-        <template v-if="activeSection === 'station'">
+        <template v-else-if="activeSection === 'station'">
           <div class="card">
             <div class="card-header">
               <Building2 :size="18" class="text-[#f59e0b]" />
@@ -53,21 +64,21 @@
               <button class="text-[#f59e0b] text-[12px] hover:underline" @click="loadStation">Retry</button>
             </div>
             <div v-else class="card-body grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div><label class="field-label">Station Name</label><input v-model="settings.stationName" class="form-input w-full" /></div>
-              <div><label class="field-label">HP Dealer Code</label><input v-model="settings.dealerCode" class="form-input w-full" /></div>
-              <div><label class="field-label">Owner Name</label><input v-model="settings.ownerName" class="form-input w-full" /></div>
-              <div><label class="field-label">Contact Number</label><input v-model="settings.phone" class="form-input w-full" /></div>
-              <div class="sm:col-span-2"><label class="field-label">Address</label><textarea v-model="settings.address" class="form-input w-full" rows="2" /></div>
-              <div><label class="field-label">City</label><input v-model="settings.city" class="form-input w-full" /></div>
-              <div><label class="field-label">State</label><input v-model="settings.state" class="form-input w-full" /></div>
-              <div><label class="field-label">GST Number</label><input v-model="settings.gst" class="form-input w-full" /></div>
-              <div><label class="field-label">PAN Number</label><input v-model="settings.pan" class="form-input w-full" /></div>
+              <div><label class="field-label">Station Name</label><input v-model="settings.stationName" :disabled="!auth.canWrite" class="form-input w-full" /></div>
+              <div><label class="field-label">HP Dealer Code</label><input v-model="settings.dealerCode" :disabled="!auth.canWrite" class="form-input w-full" /></div>
+              <div><label class="field-label">Owner Name</label><input v-model="settings.ownerName" :disabled="!auth.canWrite" class="form-input w-full" /></div>
+              <div><label class="field-label">Contact Number</label><input v-model="settings.phone" :disabled="!auth.canWrite" class="form-input w-full" /></div>
+              <div class="sm:col-span-2"><label class="field-label">Address</label><textarea v-model="settings.address" :disabled="!auth.canWrite" class="form-input w-full" rows="2" /></div>
+              <div><label class="field-label">City</label><input v-model="settings.city" :disabled="!auth.canWrite" class="form-input w-full" /></div>
+              <div><label class="field-label">State</label><input v-model="settings.state" :disabled="!auth.canWrite" class="form-input w-full" /></div>
+              <div><label class="field-label">GST Number</label><input v-model="settings.gst" :disabled="!auth.canWrite" class="form-input w-full" /></div>
+              <div><label class="field-label">PAN Number</label><input v-model="settings.pan" :disabled="!auth.canWrite" class="form-input w-full" /></div>
             </div>
           </div>
         </template>
 
         <!-- Fuel Rates -->
-        <template v-if="activeSection === 'fuel'">
+        <template v-else-if="activeSection === 'fuel'">
           <div class="card">
             <div class="card-header">
               <Fuel :size="18" class="text-[#f59e0b]" />
@@ -101,9 +112,9 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                   <div><label class="field-label">Current Rate (₹/L)</label>
-                    <input type="number" step="0.01" v-model="fuel.rate" class="form-input w-full" /></div>
+                    <input type="number" step="0.01" v-model="fuel.rate" :disabled="!auth.canWrite" class="form-input w-full" /></div>
                   <div><label class="field-label">Effective Date</label>
-                    <input type="date" v-model="fuel.effectiveDate" class="form-input w-full" /></div>
+                    <input type="date" v-model="fuel.effectiveDate" :disabled="!auth.canWrite" class="form-input w-full" /></div>
                 </div>
               </div>
             </div>
@@ -111,7 +122,7 @@
         </template>
 
         <!-- Nozzle Config -->
-        <template v-if="activeSection === 'nozzles'">
+        <template v-else-if="activeSection === 'nozzles'">
           <div class="card">
             <div class="card-header">
               <Wrench :size="18" class="text-[#f59e0b]" />
@@ -119,7 +130,7 @@
                 <div class="font-display font-bold text-[15px] text-white">Nozzle Configuration</div>
                 <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Pump and nozzle assignments</div>
               </div>
-              <button class="btn btn-primary ml-auto text-[12px] py-1 flex items-center gap-1" @click="openAddNozzle"><Plus :size="12" /> Add Nozzle</button>
+              <button v-if="auth.canWrite" class="btn btn-primary ml-auto text-[12px] py-1 flex items-center gap-1" @click="openAddNozzle"><Plus :size="12" /> Add Nozzle</button>
             </div>
 
             <div v-if="nozzlesLoading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
@@ -142,11 +153,12 @@
                     <td><span class="badge" :class="n.active ? 'badge-green' : 'badge-red'">{{ n.active ? 'Active' : 'Inactive' }}</span></td>
                     <td class="font-mono-custom text-[12px]">{{ n.lastReading || '—' }}</td>
                     <td>
-                      <div v-if="n.id" class="flex gap-1.5">
+                      <div v-if="n.id && auth.canWrite" class="flex gap-1.5">
                         <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditNozzle(n)"><Pencil :size="11" /> Edit</button>
                         <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDeleteNozzle(n)"><Trash2 :size="11" /></button>
                       </div>
-                      <span v-else class="text-[11px] text-[#5a6a82]">Default</span>
+                      <span v-else-if="!n.id" class="text-[11px] text-[#5a6a82]">Default</span>
+                      <span v-else class="text-[11px] text-[#5a6a82]">—</span>
                     </td>
                   </tr>
                   <tr v-if="!nozzles.length">
@@ -265,7 +277,7 @@
         </template>
 
         <!-- Users (owner only) -->
-        <template v-if="activeSection === 'users'">
+        <template v-else-if="activeSection === 'users'">
           <div class="card">
             <div class="card-header">
               <User :size="18" class="text-[#f59e0b]" />
@@ -431,8 +443,8 @@
           </Transition>
         </template>
 
-        <!-- Notifications -->
-        <template v-if="activeSection === 'notifications'">
+        <!-- Notifications (manager-personal, not offered to owner — see `sections` computed) -->
+        <template v-else-if="activeSection === 'notifications'">
           <div class="card">
             <div class="card-header">
               <Bell :size="18" class="text-[#f59e0b]" />
@@ -474,6 +486,7 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useUiStore } from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'
+import { useSelectedStationStore } from '@/stores/selectedStation'
 import { userApi, settingsApi } from '@/services/api'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import {
@@ -481,17 +494,22 @@ import {
   RotateCw, Save, AlertTriangle, Plus, Pencil, Trash2, Eye, EyeOff
 } from 'lucide-vue-next'
 
-const ui   = useUiStore()
-const auth = useAuthStore()
+const ui              = useUiStore()
+const auth            = useAuthStore()
+const selectedStation = useSelectedStationStore()
 const activeSection = ref('station')
 const saving = ref(false)
+
+// Owner has no "all stations" view for single-station config (station/fuel/nozzles).
+const noStationSelected = computed(() => auth.isOwner && !selectedStation.selectedStationId)
 
 const sections = computed(() => [
   { key:'station',       icon: Building2, label:'Station Details' },
   { key:'fuel',          icon: Fuel,      label:'Fuel Rates' },
   { key:'nozzles',       icon: Wrench,    label:'Nozzle Config' },
   ...(auth.isOwner ? [{ key:'users', icon: User, label:'User Access' }] : []),
-  { key:'notifications', icon: Bell,      label:'Notifications' },
+  // Notifications are manager-personal, not station data — no owner view.
+  ...(auth.isOwner ? [] : [{ key:'notifications', icon: Bell, label:'Notifications' }]),
 ])
 
 // ── Station Details ──────────────────────────────────────────────
@@ -502,11 +520,17 @@ const settings = reactive({
   phone: '', address: '', city: '', state: '', gst: '', pan: '',
 })
 
+function stationParam() {
+  return auth.isOwner && selectedStation.selectedStationId
+    ? { station_id: selectedStation.selectedStationId }
+    : {}
+}
+
 async function loadStation() {
   stationLoading.value = true
   stationError.value   = ''
   try {
-    const res = await settingsApi.getStation()
+    const res = await settingsApi.getStation(stationParam())
     const s   = res.data?.station || {}
     settings.stationName = s.station_name || ''
     settings.dealerCode  = s.dealer_code  || ''
@@ -555,7 +579,7 @@ async function loadFuelRates() {
   fuelLoading.value = true
   fuelError.value   = ''
   try {
-    const res   = await settingsApi.getFuelRates()
+    const res   = await settingsApi.getFuelRates(stationParam())
     const rates = res.data?.fuel_rates || []
     fuelRates.value = rates.map(r => ({
       key:           r.fuel_key,
@@ -615,7 +639,7 @@ async function loadNozzles() {
   nozzlesLoading.value = true
   nozzlesError.value   = ''
   try {
-    const res  = await settingsApi.getNozzles()
+    const res  = await settingsApi.getNozzles(stationParam())
     const data = res.data?.nozzles || []
     nozzles.value = data.map(mapNozzle)
   } catch (e) {
@@ -892,6 +916,14 @@ async function loadSection(section) {
 
 watch(activeSection, loadSection)
 onMounted(() => loadSection(activeSection.value))
+
+// Owner switching the global station selector invalidates the single-station
+// config sections — force a re-fetch of whichever one is currently open.
+watch(() => selectedStation.selectedStationId, () => {
+  if (!auth.isOwner) return
+  loaded.station = loaded.fuel = loaded.nozzles = false
+  loadSection(activeSection.value)
+})
 </script>
 
 <style scoped>

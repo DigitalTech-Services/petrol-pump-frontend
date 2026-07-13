@@ -34,6 +34,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isLoggedIn  = computed(() => !!token.value)
   const isOwner     = computed(() => user.value?.type === 'user')
   const isManager   = computed(() => user.value?.type === 'sub_user')
+  const canWrite    = computed(() => isManager.value)
   const role        = computed(() => user.value?.type === 'sub_user' ? 'Manager' : 'Owner')
   const stationName = computed(() => user.value?.business_name || 'My Business')
   const fullName    = computed(() => user.value?.name || 'Account')
@@ -97,5 +98,5 @@ export const useAuthStore = defineStore('auth', () => {
     throw { message: res.message || 'Failed to update profile.' }
   }
 
-  return { token, user, isLoggedIn, isOwner, isManager, role, stationName, fullName, login, logout, updateProfile }
+  return { token, user, isLoggedIn, isOwner, isManager, canWrite, role, stationName, fullName, login, logout, updateProfile }
 })
