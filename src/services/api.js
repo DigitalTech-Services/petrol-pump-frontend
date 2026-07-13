@@ -184,6 +184,16 @@ export const settingsApi = {
 }
 
 // ──────────────────────────────────────────────────────────────────
+// STATIONS — owner only
+// ──────────────────────────────────────────────────────────────────
+export const stationApi = {
+  getAll: ()         => api.get('/stations'),
+  create: (data)     => api.post('/stations', data),
+  update: (id, data) => api.put(`/stations/${id}`, data),
+  delete: (id)        => api.delete(`/stations/${id}`),
+}
+
+// ──────────────────────────────────────────────────────────────────
 // USER — sub-user (manager) management
 // ──────────────────────────────────────────────────────────────────
 export const userApi = {

@@ -2,6 +2,10 @@
   <div>
     <PageHeader title="Dashboard" subtitle="Monthly overview & key metrics" :crumbs="['Home', 'Dashboard']">
       <template #actions>
+        <select v-if="auth.isOwner" v-model="selectedStationId" class="form-select text-[12px]" @change="refresh">
+          <option value="">All Stations</option>
+          <option v-for="s in stations.records" :key="s.id" :value="s.id">{{ s.name }}</option>
+        </select>
         <select v-model="selectedPeriod" class="form-select text-[12px]" @change="refresh">
           <option v-for="p in periods" :key="p.value" :value="p.value">{{ p.label }}</option>
         </select>
@@ -183,6 +187,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useDashboardStore } from '@/stores/dashboard'
+import { useStationsStore } from '@/stores/stations'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard   from '@/components/ui/KpiCard.vue'
 import BaseChart from '@/components/charts/BaseChart.vue'
@@ -192,8 +197,13 @@ import {
   Calendar, TrendingUp, Award, CreditCard, BarChart3, RotateCw
 } from 'lucide-vue-next'
 
-const auth  = useAuthStore()
-const store = useDashboardStore()
+const auth     = useAuthStore()
+const store    = useDashboardStore()
+const stations = useStationsStore()
+
+// ── Station selector (owner only) — empty string means "all stations" ─
+const selectedStationId = ref('')
+if (auth.isOwner) stations.fetchAll()
 
 // ── Period selector (last 6 months, most-recent first) ───────────────
 const now = new Date()
@@ -210,7 +220,10 @@ const periods = Array.from({ length: 6 }, (_, i) => {
 const selectedPeriod = ref(periods[0].value)
 const monthLabel = computed(() => periods.find(p => p.value === selectedPeriod.value)?.label ?? selectedPeriod.value)
 
-const refresh = () => store.fetchAll({ period: selectedPeriod.value })
+const refresh = () => store.fetchAll({
+  period: selectedPeriod.value,
+  ...(selectedStationId.value ? { station_id: selectedStationId.value } : {}),
+})
 onMounted(refresh)
 
 // ── KPI: returns live value or '—' (no static fallbacks) ─────────────

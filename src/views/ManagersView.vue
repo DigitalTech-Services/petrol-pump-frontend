@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Managers" subtitle="Manager accounts — each manager keeps their own individual records" :crumbs="['Home','Managers']">
+    <PageHeader title="Managers" subtitle="Manager accounts — each runs one assigned station" :crumbs="['Home','Managers']">
       <template #actions>
         <button class="btn btn-primary flex items-center gap-1.5" @click="openAdd"><Plus :size="14" /> Add Manager</button>
       </template>
@@ -14,7 +14,7 @@
       <div class="card-header">
         <div>
           <div class="font-display font-bold text-[15px] text-white">Manager Accounts</div>
-          <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Each manager logs in separately and only sees their own sales, stock, staff and settings</div>
+          <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Each manager logs in separately and only sees the sales, stock, staff and settings of their assigned station</div>
         </div>
       </div>
 
@@ -25,18 +25,22 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>#</th><th>Name</th><th>Email</th><th>Contact</th><th>Actions</th>
+              <th>#</th><th>Name</th><th>Email</th><th>Contact</th><th>Station</th><th>Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="store.records.length === 0">
-              <td colspan="5" class="text-center text-[#5a6a82] py-6 text-[13px]">No managers yet. Add the first manager account.</td>
+              <td colspan="6" class="text-center text-[#5a6a82] py-6 text-[13px]">No managers yet. Add the first manager account.</td>
             </tr>
             <tr v-for="(m, i) in store.records" :key="m.id">
               <td class="font-mono-custom text-[11px] text-[#5a6a82]">{{ i + 1 }}</td>
               <td class="text-white font-medium">{{ m.name }}</td>
               <td class="text-[#8a9ab5]">{{ m.email }}</td>
               <td class="font-mono-custom text-[12px]">{{ m.contact }}</td>
+              <td>
+                <span v-if="m.stationName" class="text-[#8a9ab5]">{{ m.stationName }}</span>
+                <span v-else class="text-[11px] text-[#5a6a82] italic">Unassigned</span>
+              </td>
               <td>
                 <div class="flex gap-1.5">
                   <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEdit(m)"><Pencil :size="11" /></button>
@@ -56,6 +60,13 @@
         <div><label class="field-label">Email *</label><input type="email" v-model="form.email" class="form-input w-full" placeholder="manager@example.com" /></div>
         <div><label class="field-label">Contact *</label><input v-model="form.contact" class="form-input w-full" placeholder="10-digit phone" /></div>
         <div><label class="field-label">Password *</label><input type="password" v-model="form.password" class="form-input w-full" placeholder="Min 8 characters" /></div>
+        <div>
+          <label class="field-label">Station</label>
+          <select v-model="form.station_id" class="form-select w-full">
+            <option value="">Unassigned</option>
+            <option v-for="s in stations.records" :key="s.id" :value="s.id">{{ s.name }}</option>
+          </select>
+        </div>
       </div>
       <template #footer>
         <div class="flex justify-end gap-3">
@@ -72,6 +83,13 @@
       <div class="space-y-4" v-if="editRow">
         <div><label class="field-label">Name</label><input v-model="editRow.name" class="form-input w-full" /></div>
         <div><label class="field-label">Email</label><input type="email" v-model="editRow.email" class="form-input w-full" /></div>
+        <div>
+          <label class="field-label">Station</label>
+          <select v-model="editRow.stationId" class="form-select w-full">
+            <option value="">Unassigned</option>
+            <option v-for="s in stations.records" :key="s.id" :value="s.id">{{ s.name }}</option>
+          </select>
+        </div>
       </div>
       <template #footer>
         <div class="flex justify-end gap-3">
@@ -111,19 +129,24 @@ import KpiCard    from '@/components/ui/KpiCard.vue'
 import AppModal   from '@/components/ui/AppModal.vue'
 import { useUiStore } from '@/stores/ui'
 import { useManagersStore } from '@/stores/managers'
+import { useStationsStore } from '@/stores/stations'
 import { Plus, Users, Pencil, Trash2, UserPlus, RotateCw, Save, AlertTriangle } from 'lucide-vue-next'
 
-const ui    = useUiStore()
-const store = useManagersStore()
+const ui       = useUiStore()
+const store    = useManagersStore()
+const stations = useStationsStore()
 
-onMounted(() => store.fetchAll().catch(() => {}))
+onMounted(() => {
+  store.fetchAll().catch(() => {})
+  stations.fetchAll().catch(() => {})
+})
 
 // ── Add modal ────────────────────────────────────────────────────
 const showAdd = ref(false)
-const form = reactive({ name: '', email: '', contact: '', password: '' })
+const form = reactive({ name: '', email: '', contact: '', password: '', station_id: '' })
 
 function openAdd() {
-  form.name = form.email = form.contact = form.password = ''
+  form.name = form.email = form.contact = form.password = form.station_id = ''
   showAdd.value = true
 }
 
@@ -132,7 +155,7 @@ async function saveAdd() {
     ui.error('All fields are required'); return
   }
   try {
-    await store.create({ ...form })
+    await store.create({ ...form, station_id: form.station_id || null })
     showAdd.value = false
     ui.success('Manager created!')
   } catch (e) {
@@ -149,7 +172,11 @@ function openEdit(m) { editRow.value = { ...m }; showEdit.value = true }
 async function saveEdit() {
   if (!editRow.value?.id) return
   try {
-    await store.update(editRow.value.id, { name: editRow.value.name, email: editRow.value.email })
+    await store.update(editRow.value.id, {
+      name: editRow.value.name,
+      email: editRow.value.email,
+      station_id: editRow.value.stationId || null,
+    })
     showEdit.value = false
     ui.success('Manager updated!')
   } catch (e) {

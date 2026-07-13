@@ -77,6 +77,7 @@
       <div v-if="auth.isOwner">
         <div class="nav-label">Team</div>
 
+        <NavItem to="/stations" :icon="Building2" label="Stations" />
         <NavItem to="/managers" :icon="UserCog" label="Managers" />
         <NavItem to="/business-profile" :icon="Building2" label="Business Profile" />
       </div>

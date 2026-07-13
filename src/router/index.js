@@ -18,6 +18,7 @@ const TimesheetView   = () => import('@/views/TimesheetView.vue')
 const ReportsView     = () => import('@/views/ReportsView.vue')
 const SettingsView    = () => import('@/views/SettingsView.vue')
 const ManagersView    = () => import('@/views/ManagersView.vue')
+const StationsView    = () => import('@/views/StationsView.vue')
 const BusinessProfileView = () => import('@/views/BusinessProfileView.vue')
 const NotFoundView    = () => import('@/views/NotFoundView.vue')
 const AppLayout       = () => import('@/components/common/AppLayout.vue')
@@ -122,6 +123,12 @@ const routes = [
         name: 'Managers',
         component: ManagersView,
         meta: { title: 'Managers', breadcrumb: ['Managers'], role: 'owner' }
+      },
+      {
+        path: 'stations',
+        name: 'Stations',
+        component: StationsView,
+        meta: { title: 'Stations', breadcrumb: ['Stations'], role: 'owner' }
       },
       {
         path: 'business-profile',

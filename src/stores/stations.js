@@ -1,20 +1,23 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { userApi } from '@/services/api'
+import { stationApi } from '@/services/api'
 
-function normalize(u) {
+function normalize(s) {
   return {
-    id:          u.id,
-    name:        u.name,
-    email:       u.email,
-    contact:     u.contact,
-    createdAt:   u.created_at,
-    stationId:   u.station_id ?? null,
-    stationName: u.station?.name ?? null,
+    id:          s.id,
+    name:        s.name,
+    dealerCode:  s.dealer_code,
+    address:     s.address,
+    city:        s.city,
+    state:       s.state,
+    gst:         s.gst,
+    pan:         s.pan,
+    phone:       s.phone,
+    manager:     s.manager ?? null,
   }
 }
 
-export const useManagersStore = defineStore('managers', () => {
+export const useStationsStore = defineStore('stations', () => {
   const records = ref([])
   const loading = ref(false)
   const error   = ref(null)
@@ -23,11 +26,11 @@ export const useManagersStore = defineStore('managers', () => {
     loading.value = true
     error.value   = null
     try {
-      const res     = await userApi.getSubUsers()
-      const raw     = res?.data?.sub_users ?? []
+      const res     = await stationApi.getAll()
+      const raw     = res?.data?.stations ?? []
       records.value = raw.map(normalize)
     } catch (e) {
-      error.value = e?.message ?? 'Failed to load managers.'
+      error.value = e?.message ?? 'Failed to load stations.'
       throw e
     } finally {
       loading.value = false
@@ -37,12 +40,12 @@ export const useManagersStore = defineStore('managers', () => {
   async function create(data) {
     loading.value = true
     try {
-      const res  = await userApi.addSubUser(data)
-      const flat = normalize(res?.data?.sub_user ?? {})
+      const res  = await stationApi.create(data)
+      const flat = normalize(res?.data?.station ?? {})
       records.value.push(flat)
       return flat
     } catch (e) {
-      error.value = e?.message ?? 'Failed to create manager.'
+      error.value = e?.message ?? 'Failed to create station.'
       throw e
     } finally {
       loading.value = false
@@ -52,13 +55,13 @@ export const useManagersStore = defineStore('managers', () => {
   async function update(id, data) {
     loading.value = true
     try {
-      const res  = await userApi.updateSubUser({ user_id: id, ...data })
-      const flat = normalize(res?.data?.sub_user ?? {})
+      const res  = await stationApi.update(id, data)
+      const flat = normalize(res?.data?.station ?? {})
       const idx  = records.value.findIndex(r => r.id === id)
       if (idx !== -1) records.value[idx] = flat
       return flat
     } catch (e) {
-      error.value = e?.message ?? 'Failed to update manager.'
+      error.value = e?.message ?? 'Failed to update station.'
       throw e
     } finally {
       loading.value = false
@@ -68,10 +71,10 @@ export const useManagersStore = defineStore('managers', () => {
   async function remove(id) {
     loading.value = true
     try {
-      await userApi.deleteSubUser({ user_id: id })
+      await stationApi.delete(id)
       records.value = records.value.filter(r => r.id !== id)
     } catch (e) {
-      error.value = e?.message ?? 'Failed to delete manager.'
+      error.value = e?.message ?? 'Failed to delete station.'
       throw e
     } finally {
       loading.value = false
