@@ -11,7 +11,7 @@
       </div>
       <div class="min-w-0">
         <div class="font-display font-bold text-[15px] text-white leading-tight truncate">{{ auth.stationName }}</div>
-        <div class="text-[10px] text-[#5a6a82] uppercase tracking-widest">HP Fuel Station</div>
+        <div class="text-[10px] text-[#5a6a82] uppercase tracking-widest truncate">{{ stationCaption }}</div>
       </div>
     </div>
 
@@ -110,6 +110,8 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useUiStore } from '@/stores/ui'
+import { useStationsStore } from '@/stores/stations'
+import { useSelectedStationStore } from '@/stores/selectedStation'
 import NavItem from './NavItem.vue'
 
 import {
@@ -129,9 +131,25 @@ import {
   LogOut
 } from 'lucide-vue-next'
 
-const auth = useAuthStore()
-const ui = useUiStore()
+const auth            = useAuthStore()
+const ui              = useUiStore()
+const stations        = useStationsStore()
+const selectedStation = useSelectedStationStore()
 const router = useRouter()
+
+if (auth.isOwner) stations.fetchAll()
+
+// Manager: the fuel station they're assigned to. Owner: whichever station
+// is currently picked in the global topbar selector, or "All Stations".
+const stationCaption = computed(() => {
+  if (auth.isManager) return auth.user?.station?.name || 'No Station Assigned'
+
+  if (selectedStation.selectedStationId) {
+    const s = stations.records.find((s) => String(s.id) === String(selectedStation.selectedStationId))
+    if (s) return s.name
+  }
+  return 'All Stations'
+})
 
 const initials = computed(() => {
   const n = auth.fullName || 'Admin'

@@ -64,9 +64,7 @@
               <button class="text-[#f59e0b] text-[12px] hover:underline" @click="loadStation">Retry</button>
             </div>
             <div v-else class="card-body grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div><label class="field-label">Station Name</label><input v-model="settings.stationName" :disabled="!auth.canWrite" class="form-input w-full" /></div>
               <div><label class="field-label">HP Dealer Code</label><input v-model="settings.dealerCode" :disabled="!auth.canWrite" class="form-input w-full" /></div>
-              <div><label class="field-label">Owner Name</label><input v-model="settings.ownerName" :disabled="!auth.canWrite" class="form-input w-full" /></div>
               <div><label class="field-label">Contact Number</label><input v-model="settings.phone" :disabled="!auth.canWrite" class="form-input w-full" /></div>
               <div class="sm:col-span-2"><label class="field-label">Address</label><textarea v-model="settings.address" :disabled="!auth.canWrite" class="form-input w-full" rows="2" /></div>
               <div><label class="field-label">City</label><input v-model="settings.city" :disabled="!auth.canWrite" class="form-input w-full" /></div>
@@ -515,7 +513,7 @@ const sections = computed(() => [
 const stationLoading = ref(false)
 const stationError   = ref('')
 const settings = reactive({
-  stationName: '', dealerCode: '', ownerName: '',
+  dealerCode: '',
   phone: '', address: '', city: '', state: '', gst: '', pan: '',
 })
 
@@ -531,9 +529,7 @@ async function loadStation() {
   try {
     const res = await settingsApi.getStation(stationParam())
     const s   = res.data?.station || {}
-    settings.stationName = s.station_name || ''
     settings.dealerCode  = s.dealer_code  || ''
-    settings.ownerName   = s.owner_name   || ''
     settings.phone       = s.phone        || ''
     settings.address     = s.address      || ''
     settings.city        = s.city         || ''
@@ -551,15 +547,13 @@ async function saveStation() {
   saving.value = true
   try {
     await settingsApi.updateStation({
-      station_name: settings.stationName,
-      dealer_code:  settings.dealerCode,
-      owner_name:   settings.ownerName,
-      phone:        settings.phone,
-      address:      settings.address,
-      city:         settings.city,
-      state:        settings.state,
-      gst:          settings.gst,
-      pan:          settings.pan,
+      dealer_code: settings.dealerCode,
+      phone:       settings.phone,
+      address:     settings.address,
+      city:        settings.city,
+      state:       settings.state,
+      gst:         settings.gst,
+      pan:         settings.pan,
     })
     ui.success('Station settings saved.')
   } catch (e) {
