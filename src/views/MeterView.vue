@@ -9,16 +9,23 @@
     </PageHeader>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <KpiCard label="MS Nozzles"    value="3 Active"   :icon="Gauge"    color="#f59e0b" sub="MS-1 to MS-3"/>
-      <KpiCard label="HSD Nozzles"   value="4 Active"   :icon="Gauge"    color="#10b981" sub="HSD-1 to HSD-4"/>
-      <KpiCard label="Speed Nozzles" value="4 Active"   :icon="Gauge"    color="#3b82f6" sub="SP-1 to SP-4"/>
-      <KpiCard label="Total MS Used" :value="fmt(store.totalUsed) + ' L'" :icon="BarChart3" color="#6366f1" sub="All nozzles current month"/>
+      <KpiCard label="MS Nozzles"    :value="`${nozzleCount('MS')} Active`"    :icon="Gauge" color="#f59e0b" sub="From Nozzle Config"/>
+      <KpiCard label="HSD Nozzles"   :value="`${nozzleCount('HSD')} Active`"   :icon="Gauge" color="#10b981" sub="From Nozzle Config"/>
+      <KpiCard label="Speed Nozzles" :value="`${nozzleCount('Speed')} Active`" :icon="Gauge" color="#3b82f6" sub="From Nozzle Config"/>
+      <KpiCard label="Total Fuel Used" :value="fmt(store.totalUsed) + ' L'" :icon="BarChart3" color="#6366f1" sub="All nozzles this month"/>
+    </div>
+
+    <!-- Fuel type tabs -->
+    <div class="tab-bar mb-5">
+      <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='MS'}"    @click="tab='MS'"><Fuel :size="14" /> MS (Petrol)</button>
+      <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='HSD'}"   @click="tab='HSD'"><Fuel :size="14" class="text-[#10b981]" /> HSD (Diesel)</button>
+      <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='Speed'}" @click="tab='Speed'"><Fuel :size="14" class="text-[#3b82f6]" /> Speed (Premium)</button>
     </div>
 
     <div class="card">
       <div class="card-header">
-        <div class="font-display font-bold text-[15px] text-white">MS Nozzle Meter</div>
-        <span class="badge badge-ms ml-2">{{ store.readings.length }} entries</span>
+        <div class="font-display font-bold text-[15px] text-white">{{ tab }} Nozzle Meter</div>
+        <span class="badge ml-2" :class="badgeClass(tab)">{{ store.readings.length }} entries</span>
       </div>
 
       <!-- Loading state -->
@@ -27,33 +34,34 @@
       <!-- Error state -->
       <div v-else-if="store.error" class="p-6 text-center text-red-400 text-[13px]">{{ store.error }}</div>
 
+      <!-- No nozzles configured for this fuel type -->
+      <div v-else-if="!tabNozzles.length" class="p-8 text-center text-[#5a6a82] text-[13px]">
+        No active {{ tab }} nozzles configured. Add one in Settings → Nozzle Configuration.
+      </div>
+
       <div v-else class="overflow-x-auto">
         <table class="data-table">
           <thead>
             <tr>
               <th>#</th><th>Date</th>
-              <th>MS-1 Open</th><th>MS-1 Close</th><th>MS-1 Used</th>
-              <th>MS-2 Open</th><th>MS-2 Close</th><th>MS-2 Used</th>
-              <th>MS-3 Open</th><th>MS-3 Close</th><th>MS-3 Used</th>
+              <template v-for="n in tabNozzles" :key="n.nozzleId">
+                <th>{{ n.nozzleId }} Open</th><th>{{ n.nozzleId }} Close</th><th>{{ n.nozzleId }} Used</th>
+              </template>
               <th>Day Total</th><th>Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="store.readings.length === 0">
-              <td colspan="13" class="text-center text-[#5a6a82] py-6 text-[13px]">No readings found. Add the first one.</td>
+              <td :colspan="2 + tabNozzles.length * 3 + 2" class="text-center text-[#5a6a82] py-6 text-[13px]">No readings found. Add the first one.</td>
             </tr>
             <tr v-for="(r, i) in store.readings" :key="r.id ?? r.date">
               <td class="font-mono-custom text-[11px] text-[#5a6a82]">{{ i + 1 }}</td>
               <td><span class="font-mono-custom text-[12px] text-[#f59e0b]">{{ r.date }}</span></td>
-              <td class="font-mono-custom text-[11.5px]">{{ r.ms1o ?? '—' }}</td>
-              <td class="font-mono-custom text-[11.5px]">{{ r.ms1c ?? '—' }}</td>
-              <td><span class="badge badge-ms">{{ fmt((r.ms1c ?? 0) - (r.ms1o ?? 0)) }}</span></td>
-              <td class="font-mono-custom text-[11.5px]">{{ r.ms2o ?? '—' }}</td>
-              <td class="font-mono-custom text-[11.5px]">{{ r.ms2c ?? '—' }}</td>
-              <td><span class="badge badge-ms">{{ fmt((r.ms2c ?? 0) - (r.ms2o ?? 0)) }}</span></td>
-              <td class="font-mono-custom text-[11.5px]">{{ r.ms3o ?? '—' }}</td>
-              <td class="font-mono-custom text-[11.5px]">{{ r.ms3c ?? '—' }}</td>
-              <td><span class="badge badge-ms">{{ fmt((r.ms3c ?? 0) - (r.ms3o ?? 0)) }}</span></td>
+              <template v-for="n in tabNozzles" :key="n.nozzleId">
+                <td class="font-mono-custom text-[11.5px]">{{ r.nozzles[n.nozzleId]?.opening ?? '—' }}</td>
+                <td class="font-mono-custom text-[11.5px]">{{ r.nozzles[n.nozzleId]?.closing ?? '—' }}</td>
+                <td><span class="badge" :class="badgeClass(tab)">{{ fmt(r.nozzles[n.nozzleId]?.used ?? 0) }}</span></td>
+              </template>
               <td class="amt text-[#f59e0b] font-bold">{{ fmt(r.total) }}</td>
               <td class="flex items-center gap-1" v-if="auth.canWrite">
                 <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditReading(r)"><Pencil :size="11" /></button>
@@ -64,12 +72,11 @@
           </tbody>
           <tfoot v-if="store.readings.length > 0">
             <tr>
-              <td colspan="4">TOTAL</td>
-              <td>{{ fmt(store.readings.reduce((a, r) => a + ((r.ms1c ?? 0) - (r.ms1o ?? 0)), 0)) }}</td>
-              <td colspan="2">—</td>
-              <td>{{ fmt(store.readings.reduce((a, r) => a + ((r.ms2c ?? 0) - (r.ms2o ?? 0)), 0)) }}</td>
-              <td colspan="2">—</td>
-              <td>{{ fmt(store.readings.reduce((a, r) => a + ((r.ms3c ?? 0) - (r.ms3o ?? 0)), 0)) }}</td>
+              <td colspan="2">TOTAL</td>
+              <template v-for="n in tabNozzles" :key="n.nozzleId">
+                <td colspan="2">—</td>
+                <td>{{ fmt(store.readings.reduce((a, r) => a + (r.nozzles[n.nozzleId]?.used ?? 0), 0)) }}</td>
+              </template>
               <td>{{ fmt(store.readings.reduce((a, r) => a + (r.total ?? 0), 0)) }}</td>
               <td>—</td>
             </tr>
@@ -84,27 +91,33 @@
         <label class="field-label">Reading Date *</label>
         <input type="date" v-model="meterForm.date" class="form-input w-full" />
       </div>
-      <div v-for="nozzle in NOZZLE_KEYS" :key="nozzle"
-        class="p-4 rounded-xl mb-3" style="background:#161b24;border:1px solid #1c2230">
-        <div class="flex items-center gap-2 mb-3">
-          <span class="badge badge-ms">{{ nozzleLabel(nozzle) }}</span>
-          <span class="text-[13px] font-medium text-white">Nozzle {{ nozzleLabel(nozzle) }}</span>
-          <span class="ml-auto text-[12px] text-[#5a6a82]">Used: <span class="text-[#f59e0b] font-semibold">{{ fmt(Math.max(0, (meterForm[nozzle + 'c'] || 0) - (meterForm[nozzle + 'o'] || 0))) }} L</span></span>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="field-label">Opening Meter</label>
-            <input type="number" step="0.01" v-model.number="meterForm[nozzle + 'o']" class="form-input w-full" placeholder="0.00" />
-          </div>
-          <div>
-            <label class="field-label">Closing Meter</label>
-            <input type="number" step="0.01" v-model.number="meterForm[nozzle + 'c']" class="form-input w-full" placeholder="0.00" />
-          </div>
-        </div>
+      <div v-if="!activeNozzles.length" class="text-center text-[13px] text-[#5a6a82] py-6">
+        No active nozzles configured yet. Add one in Settings → Nozzle Configuration first.
       </div>
+      <template v-for="group in nozzleGroups" :key="group.fuel">
+        <div class="text-[11px] font-semibold text-[#5a6a82] uppercase tracking-wide mb-2 mt-3">{{ group.fuel }}</div>
+        <div v-for="n in group.items" :key="n.nozzleId"
+          class="p-4 rounded-xl mb-3" style="background:#161b24;border:1px solid #1c2230">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="badge" :class="badgeClass(group.fuel)">{{ n.nozzleId }}</span>
+            <span class="text-[13px] font-medium text-white">{{ n.pump }}</span>
+            <span class="ml-auto text-[12px] text-[#5a6a82]">Used: <span class="text-[#f59e0b] font-semibold">{{ fmt(nozzleUsed(meterForm, n.nozzleId)) }} L</span></span>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="field-label">Opening Meter</label>
+              <input type="number" step="0.01" v-model.number="meterForm.nozzles[n.nozzleId].opening" class="form-input w-full" placeholder="0.00" />
+            </div>
+            <div>
+              <label class="field-label">Closing Meter</label>
+              <input type="number" step="0.01" v-model.number="meterForm.nozzles[n.nozzleId].closing" class="form-input w-full" placeholder="0.00" />
+            </div>
+          </div>
+        </div>
+      </template>
       <div class="p-3 rounded-lg flex justify-between mt-2" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2)">
         <span class="text-[13px] font-medium text-white">Total Day Consumption</span>
-        <span class="font-display font-bold text-[18px] text-[#f59e0b]">{{ fmt(calcTotal) }} L</span>
+        <span class="font-display font-bold text-[18px] text-[#f59e0b]">{{ fmt(calcTotal(meterForm)) }} L</span>
       </div>
       <template #footer>
         <div class="flex justify-end gap-3">
@@ -120,14 +133,17 @@
     <AppModal v-model="showEdit" title="Edit Meter Reading" :icon="Pencil" max-width="560px">
       <div class="space-y-4" v-if="editData">
         <div><label class="field-label">Date</label><input type="date" v-model="editData.date" class="form-input w-full" /></div>
-        <div v-for="nozzle in NOZZLE_KEYS" :key="nozzle"
-          class="p-3 rounded-xl" style="background:#161b24;border:1px solid #1c2230">
-          <div class="text-[12px] font-semibold text-[#f59e0b] mb-2">{{ nozzleLabel(nozzle) }}</div>
-          <div class="grid grid-cols-2 gap-3">
-            <div><label class="field-label">Opening</label><input type="number" step="0.01" v-model.number="editData[nozzle + 'o']" class="form-input w-full" /></div>
-            <div><label class="field-label">Closing</label><input type="number" step="0.01" v-model.number="editData[nozzle + 'c']" class="form-input w-full" /></div>
+        <template v-for="group in editNozzleGroups" :key="group.fuel">
+          <div class="text-[11px] font-semibold text-[#5a6a82] uppercase tracking-wide mb-1">{{ group.fuel }}</div>
+          <div v-for="n in group.items" :key="n.nozzleId"
+            class="p-3 rounded-xl" style="background:#161b24;border:1px solid #1c2230">
+            <div class="text-[12px] font-semibold text-[#f59e0b] mb-2">{{ n.nozzleId }} · {{ n.pump }}</div>
+            <div class="grid grid-cols-2 gap-3">
+              <div><label class="field-label">Opening</label><input type="number" step="0.01" v-model.number="editData.nozzles[n.nozzleId].opening" class="form-input w-full" /></div>
+              <div><label class="field-label">Closing</label><input type="number" step="0.01" v-model.number="editData.nozzles[n.nozzleId].closing" class="form-input w-full" /></div>
+            </div>
           </div>
-        </div>
+        </template>
       </div>
       <template #footer>
         <div class="flex justify-end gap-3">
@@ -153,51 +169,104 @@ import { useUiStore }    from '@/stores/ui'
 import { useAuthStore }  from '@/stores/auth'
 import { useMeterStore } from '@/stores/meter'
 import { useSelectedStationStore } from '@/stores/selectedStation'
-import { Download, Printer, Plus, Gauge, BarChart3, Pencil, Save, RotateCw, Trash2 } from 'lucide-vue-next'
+import { Download, Printer, Plus, Gauge, Fuel, BarChart3, Pencil, Save, RotateCw, Trash2 } from 'lucide-vue-next'
 
 const ui              = useUiStore()
 const auth            = useAuthStore()
 const store           = useMeterStore()
 const selectedStation = useSelectedStationStore()
 
-const NOZZLE_KEYS = ['ms1', 'ms2', 'ms3']
+const tab = ref('MS')
 
-function nozzleLabel(key) {
-  // 'ms1' → 'MS-1'
-  return key.toUpperCase().replace(/([A-Z]+)(\d)/, '$1-$2')
+const BADGE_CLASS = { MS: 'badge-ms', HSD: 'badge-hsd', Speed: 'badge-speed' }
+function badgeClass(fuel) { return BADGE_CLASS[fuel] ?? 'badge-gray' }
+
+function nozzleCount(fuel) {
+  return store.nozzles.filter((n) => n.fuel === fuel && n.active).length
+}
+
+const activeNozzles = computed(() => store.nozzles.filter((n) => n.active))
+const tabNozzles    = computed(() => activeNozzles.value.filter((n) => n.fuel === tab.value))
+
+// Grouped by fuel type for the add/edit modals — one MeterReading covers every
+// nozzle regardless of which tab is active, so these always list everything.
+const nozzleGroups = computed(() => {
+  const order = ['MS', 'HSD', 'Speed']
+  return order
+    .map((fuel) => ({ fuel, items: activeNozzles.value.filter((n) => n.fuel === fuel) }))
+    .filter((g) => g.items.length)
+})
+
+// Editing an existing reading must keep whatever nozzles it already has data
+// for — even ones since deactivated in Settings — because the backend fully
+// replaces a reading's nozzle rows on save; silently dropping one here would
+// delete its historical data. So this group also includes those "orphaned"
+// nozzle IDs (looked up in the full, not-active-filtered nozzle list).
+const editNozzleGroups = computed(() => {
+  if (!editData.value) return nozzleGroups.value
+  const activeIds = new Set(activeNozzles.value.map((n) => n.nozzleId))
+  const extra = Object.keys(editData.value.nozzles ?? {})
+    .filter((id) => !activeIds.has(id))
+    .map((id) => store.nozzles.find((n) => n.nozzleId === id) ?? { nozzleId: id, pump: '—', fuel: 'MS' })
+  const all = [...activeNozzles.value, ...extra]
+  const order = ['MS', 'HSD', 'Speed']
+  return order
+    .map((fuel) => ({ fuel, items: all.filter((n) => n.fuel === fuel) }))
+    .filter((g) => g.items.length)
+})
+
+function nozzleUsed(form, nozzleId) {
+  const n = form.nozzles[nozzleId]
+  if (!n) return 0
+  return Math.max(0, (n.closing || 0) - (n.opening || 0))
+}
+
+function calcTotal(form) {
+  return Object.keys(form.nozzles).reduce((sum, id) => sum + nozzleUsed(form, id), 0)
 }
 
 const showAdd  = ref(false)
 const showEdit = ref(false)
 const editData = ref(null)
 
-const meterForm = reactive({ date: '', ms1o: null, ms1c: null, ms2o: null, ms2c: null, ms3o: null, ms3c: null })
+const meterForm = reactive({ date: '', nozzles: {} })
 
-const calcTotal = computed(() =>
-  NOZZLE_KEYS.reduce((sum, key) =>
-    sum + Math.max(0, (meterForm[key + 'c'] || 0) - (meterForm[key + 'o'] || 0)), 0)
-)
+function buildNozzleForm(nozzleIds, existing) {
+  const next = {}
+  for (const id of nozzleIds) {
+    next[id] = existing?.[id] ? { ...existing[id] } : { opening: null, closing: null }
+  }
+  return next
+}
 
 const currentMonth = computed(() => {
   const now = new Date()
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 })
 
-function loadReadings() {
+function loadAll() {
+  store.fetchNozzles(selectedStation.selectedStationId)
   store.fetchReadings(currentMonth.value, selectedStation.selectedStationId)
 }
 
-onMounted(loadReadings)
-watch(() => selectedStation.selectedStationId, loadReadings)
+onMounted(loadAll)
+watch(() => selectedStation.selectedStationId, loadAll)
 
 function openAddReading() {
   meterForm.date = new Date().toISOString().split('T')[0]
-  NOZZLE_KEYS.forEach((k) => { meterForm[k + 'o'] = null; meterForm[k + 'c'] = null })
+  meterForm.nozzles = buildNozzleForm(activeNozzles.value.map((n) => n.nozzleId))
   showAdd.value = true
 }
 
 function openEditReading(r) {
-  editData.value = { ...r, date: r.date?.includes(' ') ? toIsoDate(r.date) : r.date }
+  const activeIds   = activeNozzles.value.map((n) => n.nozzleId)
+  const existingIds = Object.keys(r.nozzles ?? {})
+  const ids = Array.from(new Set([...activeIds, ...existingIds]))
+  editData.value = {
+    ...r,
+    date: r.date?.includes(' ') ? toIsoDate(r.date) : r.date,
+    nozzles: buildNozzleForm(ids, r.nozzles),
+  }
   showEdit.value = true
 }
 
@@ -211,7 +280,7 @@ function toIsoDate(displayDate) {
 async function saveMeterReading() {
   if (!meterForm.date) { ui.error('Date is required'); return }
   try {
-    const payload = store.buildPayload(meterForm, NOZZLE_KEYS)
+    const payload = store.buildPayload(meterForm, Object.keys(meterForm.nozzles))
     await store.createReading(payload)
     showAdd.value = false
     ui.success('Meter reading saved!')
@@ -223,7 +292,7 @@ async function saveMeterReading() {
 async function saveEdit() {
   if (!editData.value?.id) return
   try {
-    const payload = store.buildPayload(editData.value, NOZZLE_KEYS)
+    const payload = store.buildPayload(editData.value, Object.keys(editData.value.nozzles))
     await store.updateReading(editData.value.id, payload)
     showEdit.value = false
     ui.success('Meter reading updated!')
@@ -243,28 +312,28 @@ async function confirmDelete(r) {
 }
 
 function doExport() {
-  const headers = ['Date', 'MS1-Open', 'MS1-Close', 'MS1-Used', 'MS2-Open', 'MS2-Close', 'MS2-Used', 'MS3-Open', 'MS3-Close', 'MS3-Used', 'Total']
+  const headers = ['Date', ...tabNozzles.value.flatMap((n) => [`${n.nozzleId}-Open`, `${n.nozzleId}-Close`, `${n.nozzleId}-Used`]), 'Total']
   const rows = store.readings.map((r) => [
     r.date,
-    r.ms1o, r.ms1c, fmt((r.ms1c ?? 0) - (r.ms1o ?? 0)),
-    r.ms2o, r.ms2c, fmt((r.ms2c ?? 0) - (r.ms2o ?? 0)),
-    r.ms3o, r.ms3c, fmt((r.ms3c ?? 0) - (r.ms3o ?? 0)),
+    ...tabNozzles.value.flatMap((n) => [
+      r.nozzles[n.nozzleId]?.opening ?? '',
+      r.nozzles[n.nozzleId]?.closing ?? '',
+      fmt(r.nozzles[n.nozzleId]?.used ?? 0),
+    ]),
     r.total,
   ])
-  exportCSV('Meter_Readings', headers, rows)
+  exportCSV(`${tab.value}_Meter_Readings`, headers, rows)
   ui.success('CSV exported!')
 }
 
 function doPrint() {
-  const headers = ['Date', 'MS-1 Used', 'MS-2 Used', 'MS-3 Used', 'Day Total']
+  const headers = ['Date', ...tabNozzles.value.map((n) => `${n.nozzleId} Used`), 'Day Total']
   const rows = store.readings.map((r) => [
     r.date,
-    fmt((r.ms1c ?? 0) - (r.ms1o ?? 0)),
-    fmt((r.ms2c ?? 0) - (r.ms2o ?? 0)),
-    fmt((r.ms3c ?? 0) - (r.ms3o ?? 0)),
+    ...tabNozzles.value.map((n) => fmt(r.nozzles[n.nozzleId]?.used ?? 0)),
     fmt(r.total),
   ])
-  printTable('MS Meter Readings', headers, rows)
+  printTable(`${tab.value} Meter Readings`, headers, rows)
 }
 </script>
 

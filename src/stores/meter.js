@@ -1,35 +1,39 @@
 import { defineStore } from 'pinia'
 import { meterApi } from '@/services/api'
 
-// Maps frontend short keys (ms1, ms2 …) ↔ API nozzle IDs (MS-1, MS-2 …)
-function toNozzleId(key) {
-  // 'ms1' → 'MS-1', 'hsd1' → 'HSD-1', 'sp1' → 'SP-1'
-  return key.toUpperCase().replace(/([A-Z]+)(\d)/, '$1-$2')
-}
-
-function fromNozzleId(id) {
-  // 'MS-1' → 'ms1', 'HSD-1' → 'hsd1'
-  return id.toLowerCase().replace('-', '')
-}
-
 function normalizeReading(reading) {
-  const flat = {
-    id:    reading.id,
-    date:  reading.date,
-    total: reading.total_used ?? 0,
-    notes: reading.notes ?? '',
-  }
+  const nozzles = {}
   for (const nr of reading.nozzle_readings ?? []) {
-    const key = fromNozzleId(nr.nozzle_id)
-    flat[key + 'o'] = nr.opening
-    flat[key + 'c'] = nr.closing
+    nozzles[nr.nozzle_id] = {
+      opening: nr.opening,
+      closing: nr.closing,
+      used:    (nr.closing ?? 0) - (nr.opening ?? 0),
+    }
   }
-  return flat
+  return {
+    id:      reading.id,
+    date:    reading.date,
+    total:   reading.total_used ?? 0,
+    notes:   reading.notes ?? '',
+    nozzles,
+  }
+}
+
+function normalizeNozzle(n) {
+  return {
+    id:          n.id,
+    nozzleId:    n.nozzle_id,
+    pump:        n.pump,
+    fuel:        n.fuel,
+    active:      n.active,
+    lastReading: n.last_reading,
+  }
 }
 
 export const useMeterStore = defineStore('meter', {
   state: () => ({
     readings: [],
+    nozzles:  [],
     loading:  false,
     error:    null,
   }),
@@ -39,6 +43,16 @@ export const useMeterStore = defineStore('meter', {
   },
 
   actions: {
+    async fetchNozzles(stationId) {
+      try {
+        const res = await meterApi.getNozzles(stationId ? { station_id: stationId } : {})
+        this.nozzles = (res.data?.nozzles ?? []).map(normalizeNozzle)
+      } catch (e) {
+        this.error = e?.message ?? 'Failed to load nozzles.'
+        throw e
+      }
+    },
+
     async fetchReadings(month, stationId) {
       this.loading = true
       this.error   = null
@@ -56,14 +70,14 @@ export const useMeterStore = defineStore('meter', {
       }
     },
 
-    buildPayload(form, nozzleKeys) {
+    buildPayload(form, nozzleIds) {
       return {
         date:  form.date,
         notes: form.notes ?? '',
-        nozzle_readings: nozzleKeys.map((key) => ({
-          nozzle_id: toNozzleId(key),
-          opening:   form[key + 'o'] ?? 0,
-          closing:   form[key + 'c'] ?? 0,
+        nozzle_readings: nozzleIds.map((id) => ({
+          nozzle_id: id,
+          opening:   form.nozzles[id]?.opening ?? 0,
+          closing:   form.nozzles[id]?.closing ?? 0,
         })),
       }
     },
