@@ -153,11 +153,10 @@
                     <td><span class="badge" :class="n.active ? 'badge-green' : 'badge-red'">{{ n.active ? 'Active' : 'Inactive' }}</span></td>
                     <td class="font-mono-custom text-[12px]">{{ n.lastReading || '—' }}</td>
                     <td>
-                      <div v-if="n.id && auth.canWrite" class="flex gap-1.5">
+                      <div v-if="auth.canWrite" class="flex gap-1.5">
                         <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditNozzle(n)"><Pencil :size="11" /> Edit</button>
                         <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDeleteNozzle(n)"><Trash2 :size="11" /></button>
                       </div>
-                      <span v-else-if="!n.id" class="text-[11px] text-[#5a6a82]">Default</span>
                       <span v-else class="text-[11px] text-[#5a6a82]">—</span>
                     </td>
                   </tr>
