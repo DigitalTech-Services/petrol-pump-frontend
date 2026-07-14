@@ -97,11 +97,26 @@
           </div>
         </div>
         <div class="card-body">
-          <div class="flex items-center justify-center py-8 text-center">
+          <div v-if="store.loading" class="flex items-center justify-center py-8 text-[#5a6a82]">
+            <RotateCw :size="20" class="animate-spin mr-2" /> Loading…
+          </div>
+          <div v-else-if="!hasStockLevels" class="flex items-center justify-center py-8 text-center">
             <div>
               <Fuel :size="32" class="mx-auto mb-2 text-[#2a3548]" />
-              <div class="text-[12px] text-[#5a6a82]">Stock tracking not set up yet.</div>
-              <div class="text-[11px] text-[#3a4a62] mt-1">Add stock intake records to see levels here.</div>
+              <div class="text-[12px] text-[#5a6a82]">No stock entries recorded {{ monthLabel }}.</div>
+              <div class="text-[11px] text-[#3a4a62] mt-1">Add a stock entry to see levels here.</div>
+            </div>
+          </div>
+          <div v-else class="space-y-3">
+            <div v-for="s in stockRows" :key="s.key" class="flex items-center justify-between py-2.5 px-3 rounded-lg"
+              style="background:#161b24; border:1px solid #1c2230">
+              <div class="flex items-center gap-2.5">
+                <span class="badge" :class="s.badge">{{ s.label }}</span>
+                <span class="text-[11px] text-[#5a6a82]">{{ s.date ? `as of ${s.date}` : 'No entries' }}</span>
+              </div>
+              <span class="font-display font-bold text-[15px]" :style="{ color: s.color }">
+                {{ s.closing !== null ? fmt(s.closing) + ' L' : '—' }}
+              </span>
             </div>
           </div>
         </div>
@@ -221,6 +236,29 @@ watch(() => selectedStation.selectedStationId, refresh)
 
 // ── KPI: returns live value or '—' (no static fallbacks) ─────────────
 const kpi = (key) => store.kpis?.[key] ?? '—'
+
+// ── Fuel Stock card — current closing level per fuel type ────────────
+const STOCK_FUEL_META = {
+  ms:    { label: 'MS',    color: '#f59e0b', badge: 'badge-ms' },
+  hsd:   { label: 'HSD',   color: '#10b981', badge: 'badge-hsd' },
+  speed: { label: 'Speed', color: '#3b82f6', badge: 'badge-speed' },
+}
+
+const stockRows = computed(() =>
+  Object.entries(STOCK_FUEL_META).map(([key, meta]) => {
+    const level = store.stockLevels?.[key] ?? null
+    return {
+      key,
+      label: meta.label,
+      color: meta.color,
+      badge: meta.badge,
+      closing: level ? level.closing : null,
+      date: level ? level.date : null,
+    }
+  })
+)
+
+const hasStockLevels = computed(() => stockRows.value.some((s) => s.closing !== null))
 
 // ── Charts — fully dynamic, no hardcoded data arrays ─────────────────
 

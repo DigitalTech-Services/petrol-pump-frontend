@@ -7,6 +7,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const dailyTrend   = ref([])
   const fuelMix      = ref([])
   const paymentSplit = ref(null)
+  const stockLevels  = ref(null)
   const loading      = ref(false)
   const error        = ref(null)
 
@@ -16,6 +17,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     dailyTrend.value   = []
     fuelMix.value      = []
     paymentSplit.value = null
+    stockLevels.value  = null
     loading.value      = true
     error.value        = null
 
@@ -26,6 +28,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
       dailyTrend.value   = Array.isArray(d.daily_trend)  ? d.daily_trend  : []
       fuelMix.value      = Array.isArray(d.fuel_mix)     ? d.fuel_mix     : []
       paymentSplit.value = d.payment_split                            ?? null
+      stockLevels.value  = d.stock_levels                             ?? null
     } catch (e) {
       error.value = e?.message ?? 'Failed to load dashboard.'
     } finally {
@@ -33,5 +36,5 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   }
 
-  return { kpis, dailyTrend, fuelMix, paymentSplit, loading, error, fetchAll }
+  return { kpis, dailyTrend, fuelMix, paymentSplit, stockLevels, loading, error, fetchAll }
 })

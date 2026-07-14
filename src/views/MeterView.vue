@@ -25,7 +25,7 @@
     <div class="card">
       <div class="card-header">
         <div class="font-display font-bold text-[15px] text-white">{{ tab }} Nozzle Meter</div>
-        <span class="badge ml-2" :class="badgeClass(tab)">{{ store.readings.length }} entries</span>
+        <span class="badge ml-2" :class="badgeClass(tab)">{{ tabReadings.length }} entries</span>
       </div>
 
       <!-- Loading state -->
@@ -47,14 +47,14 @@
               <template v-for="n in tabNozzles" :key="n.nozzleId">
                 <th>{{ n.nozzleId }} Open</th><th>{{ n.nozzleId }} Close</th><th>{{ n.nozzleId }} Used</th>
               </template>
-              <th>Day Total</th><th>Actions</th>
+              <th>{{ tab }} Day Total</th><th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-if="store.readings.length === 0">
-              <td :colspan="2 + tabNozzles.length * 3 + 2" class="text-center text-[#5a6a82] py-6 text-[13px]">No readings found. Add the first one.</td>
+            <tr v-if="tabReadings.length === 0">
+              <td :colspan="2 + tabNozzles.length * 3 + 2" class="text-center text-[#5a6a82] py-6 text-[13px]">No {{ tab }} readings found. Add the first one.</td>
             </tr>
-            <tr v-for="(r, i) in store.readings" :key="r.id ?? r.date">
+            <tr v-for="(r, i) in tabReadings" :key="r.id ?? r.date">
               <td class="font-mono-custom text-[11px] text-[#5a6a82]">{{ i + 1 }}</td>
               <td><span class="font-mono-custom text-[12px] text-[#f59e0b]">{{ r.date }}</span></td>
               <template v-for="n in tabNozzles" :key="n.nozzleId">
@@ -62,7 +62,7 @@
                 <td class="font-mono-custom text-[11.5px]">{{ r.nozzles[n.nozzleId]?.closing ?? '—' }}</td>
                 <td><span class="badge" :class="badgeClass(tab)">{{ fmt(r.nozzles[n.nozzleId]?.used ?? 0) }}</span></td>
               </template>
-              <td class="amt text-[#f59e0b] font-bold">{{ fmt(r.total) }}</td>
+              <td class="amt text-[#f59e0b] font-bold">{{ fmt(tabTotal(r)) }}</td>
               <td class="flex items-center gap-1" v-if="auth.canWrite">
                 <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditReading(r)"><Pencil :size="11" /></button>
                 <button class="btn btn-ghost py-0.5 px-2 text-[11px] text-red-400" @click="confirmDelete(r)"><Trash2 :size="11" /></button>
@@ -70,14 +70,14 @@
               <td v-else class="text-[11px] text-[#5a6a82]">—</td>
             </tr>
           </tbody>
-          <tfoot v-if="store.readings.length > 0">
+          <tfoot v-if="tabReadings.length > 0">
             <tr>
               <td colspan="2">TOTAL</td>
               <template v-for="n in tabNozzles" :key="n.nozzleId">
                 <td colspan="2">—</td>
-                <td>{{ fmt(store.readings.reduce((a, r) => a + (r.nozzles[n.nozzleId]?.used ?? 0), 0)) }}</td>
+                <td>{{ fmt(tabReadings.reduce((a, r) => a + (r.nozzles[n.nozzleId]?.used ?? 0), 0)) }}</td>
               </template>
-              <td>{{ fmt(store.readings.reduce((a, r) => a + (r.total ?? 0), 0)) }}</td>
+              <td>{{ fmt(tabReadings.reduce((a, r) => a + tabTotal(r), 0)) }}</td>
               <td>—</td>
             </tr>
           </tfoot>
@@ -188,6 +188,16 @@ function nozzleCount(fuel) {
 const activeNozzles = computed(() => store.nozzles.filter((n) => n.active))
 const tabNozzles    = computed(() => activeNozzles.value.filter((n) => n.fuel === tab.value))
 
+// Only readings that actually have an entry for one of the current tab's
+// nozzles — a reading with only MS data shouldn't count/appear under HSD.
+const tabReadings = computed(() =>
+  store.readings.filter((r) => tabNozzles.value.some((n) => r.nozzles[n.nozzleId]))
+)
+
+function tabTotal(r) {
+  return tabNozzles.value.reduce((sum, n) => sum + (r.nozzles[n.nozzleId]?.used ?? 0), 0)
+}
+
 // Grouped by fuel type for the add/edit modals — one MeterReading covers every
 // nozzle regardless of which tab is active, so these always list everything.
 const nozzleGroups = computed(() => {
@@ -223,6 +233,17 @@ function nozzleUsed(form, nozzleId) {
 
 function calcTotal(form) {
   return Object.keys(form.nozzles).reduce((sum, id) => sum + nozzleUsed(form, id), 0)
+}
+
+// Only nozzles the user actually entered a value for — submitting every
+// active nozzle regardless (even ones left blank) would record a fake
+// zero reading for fuel types the user never touched that day, which is
+// exactly what made tab filtering/counts unreliable.
+function filledNozzleIds(form) {
+  return Object.keys(form.nozzles).filter((id) => {
+    const n = form.nozzles[id]
+    return n && n.opening !== null && n.opening !== '' && n.closing !== null && n.closing !== ''
+  })
 }
 
 const showAdd  = ref(false)
@@ -279,8 +300,10 @@ function toIsoDate(displayDate) {
 
 async function saveMeterReading() {
   if (!meterForm.date) { ui.error('Date is required'); return }
+  const ids = filledNozzleIds(meterForm)
+  if (!ids.length) { ui.error('Enter at least one nozzle reading'); return }
   try {
-    const payload = store.buildPayload(meterForm, Object.keys(meterForm.nozzles))
+    const payload = store.buildPayload(meterForm, ids)
     await store.createReading(payload)
     showAdd.value = false
     ui.success('Meter reading saved!')
@@ -291,8 +314,10 @@ async function saveMeterReading() {
 
 async function saveEdit() {
   if (!editData.value?.id) return
+  const ids = filledNozzleIds(editData.value)
+  if (!ids.length) { ui.error('Enter at least one nozzle reading'); return }
   try {
-    const payload = store.buildPayload(editData.value, Object.keys(editData.value.nozzles))
+    const payload = store.buildPayload(editData.value, ids)
     await store.updateReading(editData.value.id, payload)
     showEdit.value = false
     ui.success('Meter reading updated!')
@@ -313,14 +338,14 @@ async function confirmDelete(r) {
 
 function doExport() {
   const headers = ['Date', ...tabNozzles.value.flatMap((n) => [`${n.nozzleId}-Open`, `${n.nozzleId}-Close`, `${n.nozzleId}-Used`]), 'Total']
-  const rows = store.readings.map((r) => [
+  const rows = tabReadings.value.map((r) => [
     r.date,
     ...tabNozzles.value.flatMap((n) => [
       r.nozzles[n.nozzleId]?.opening ?? '',
       r.nozzles[n.nozzleId]?.closing ?? '',
       fmt(r.nozzles[n.nozzleId]?.used ?? 0),
     ]),
-    r.total,
+    fmt(tabTotal(r)),
   ])
   exportCSV(`${tab.value}_Meter_Readings`, headers, rows)
   ui.success('CSV exported!')
@@ -328,10 +353,10 @@ function doExport() {
 
 function doPrint() {
   const headers = ['Date', ...tabNozzles.value.map((n) => `${n.nozzleId} Used`), 'Day Total']
-  const rows = store.readings.map((r) => [
+  const rows = tabReadings.value.map((r) => [
     r.date,
     ...tabNozzles.value.map((n) => fmt(r.nozzles[n.nozzleId]?.used ?? 0)),
-    fmt(r.total),
+    fmt(tabTotal(r)),
   ])
   printTable(`${tab.value} Meter Readings`, headers, rows)
 }
