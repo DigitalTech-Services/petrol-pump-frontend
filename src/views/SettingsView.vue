@@ -103,16 +103,29 @@
                     <div class="font-display font-bold text-[15px] text-white">{{ fuel.name }}</div>
                     <div class="text-[11px] text-[#5a6a82]">{{ fuel.type }}</div>
                   </div>
-                  <div class="ml-auto">
-                    <span class="font-display font-bold text-[22px]" :style="{ color: fuel.color }">₹{{ fuel.rate }}</span>
-                    <span class="text-[11px] text-[#5a6a82]">/L</span>
+                  <div class="ml-auto text-right">
+                    <div>
+                      <span class="font-display font-bold text-[22px]" :style="{ color: fuel.color }">₹{{ fuel.rate }}</span>
+                      <span class="text-[11px] text-[#5a6a82]">/L</span>
+                    </div>
+                    <div class="text-[11px] font-semibold" :class="margin(fuel) >= 0 ? 'text-positive' : 'text-negative'">
+                      {{ margin(fuel) >= 0 ? '+' : '−' }}₹{{ fmt(Math.abs(margin(fuel))) }}/L {{ margin(fuel) >= 0 ? 'profit' : 'loss' }}
+                    </div>
                   </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                  <div><label class="field-label">Current Rate (₹/L)</label>
-                    <input type="number" step="0.01" v-model="fuel.rate" :disabled="!auth.canWrite" class="form-input w-full" /></div>
+                <div class="grid grid-cols-3 gap-3">
+                  <div><label class="field-label">Actual Rate (₹/L)</label>
+                    <input type="number" step="0.01" v-model.number="fuel.actualRate" :disabled="!auth.canWrite" class="form-input w-full" /></div>
+                  <div><label class="field-label">Selling Rate (₹/L)</label>
+                    <input type="number" step="0.01" v-model.number="fuel.rate" :disabled="!auth.canWrite" class="form-input w-full" /></div>
                   <div><label class="field-label">Effective Date</label>
                     <input type="date" v-model="fuel.effectiveDate" :disabled="!auth.canWrite" class="form-input w-full" /></div>
+                </div>
+                <div class="mt-3 p-2.5 rounded-lg flex items-center justify-between" style="background:#0f1218;border:1px solid #1c2230">
+                  <span class="text-[12px] text-[#8a9ab5]">Profit / Loss per Litre</span>
+                  <span class="font-display font-bold text-[15px]" :class="margin(fuel) >= 0 ? 'text-positive' : 'text-negative'">
+                    {{ margin(fuel) >= 0 ? '+' : '−' }}₹{{ fmt(Math.abs(margin(fuel))) }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -485,6 +498,7 @@ import { useUiStore } from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'
 import { useSelectedStationStore } from '@/stores/selectedStation'
 import { userApi, settingsApi } from '@/services/api'
+import { fmt } from '@/utils/format'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import {
   Building2, Fuel, Wrench, User, Bell,
@@ -568,6 +582,11 @@ const fuelLoading = ref(false)
 const fuelError   = ref('')
 const fuelRates   = ref([])
 
+// Profit/loss per litre: selling rate minus what the station actually pays.
+function margin(fuel) {
+  return (Number(fuel.rate) || 0) - (Number(fuel.actualRate) || 0)
+}
+
 async function loadFuelRates() {
   fuelLoading.value = true
   fuelError.value   = ''
@@ -580,6 +599,7 @@ async function loadFuelRates() {
       abbr:          r.abbr,
       type:          r.type,
       rate:          r.rate,
+      actualRate:    r.actual_rate ?? 0,
       effectiveDate: r.effective_date,
       color:         r.color,
     }))
@@ -600,6 +620,7 @@ async function saveFuelRates() {
         abbr:           f.abbr,
         type:           f.type,
         rate:           f.rate,
+        actual_rate:    f.actualRate,
         effective_date: f.effectiveDate,
         color:          f.color,
       })),
