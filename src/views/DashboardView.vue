@@ -17,6 +17,7 @@
       <KpiCard label="MS Sold (L)"    :value="kpi('msSold')"        :icon="Fuel"       color="#f59e0b" sub="Petrol volume"     :loading="store.loading" />
       <KpiCard label="HSD Sold (L)"   :value="kpi('hsdSold')"       :icon="Fuel"       color="#10b981" sub="Diesel volume"     :loading="store.loading" />
       <KpiCard label="Speed (L)"      :value="kpi('speedSold')"     :icon="Fuel"       color="#3b82f6" sub="Premium fuel"      :loading="store.loading" />
+      <KpiCard label="Fuel Profit/Loss" :value="fuelProfitDisplay"  :icon="TrendingUp" :color="fuelProfitColor" :sub="fuelProfitSub" :loading="store.loading" />
       <KpiCard label="Total Cash"     :value="kpi('totalCash')"     :icon="Banknote"   color="#10b981" sub="Cash receipts"     :loading="store.loading" />
       <KpiCard label="PhonePe / UPI"  :value="kpi('totalPhonePe')"  :icon="Smartphone" color="#6366f1" sub="UPI payments"      :loading="store.loading" />
       <KpiCard label="Total Expenses" :value="kpi('totalExpenses')" :icon="Receipt"    color="#ef4444" sub="Operating costs"   :loading="store.loading" />
@@ -202,7 +203,7 @@ import { useSelectedStationStore } from '@/stores/selectedStation'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard   from '@/components/ui/KpiCard.vue'
 import BaseChart from '@/components/charts/BaseChart.vue'
-import { fmt, chartColors } from '@/utils/format'
+import { fmt, fmtINR, chartColors } from '@/utils/format'
 import {
   Banknote, Fuel, Smartphone, Receipt, Users,
   Calendar, TrendingUp, Award, CreditCard, BarChart3, RotateCw
@@ -259,6 +260,25 @@ const stockRows = computed(() =>
 )
 
 const hasStockLevels = computed(() => stockRows.value.some((s) => s.closing !== null))
+
+// ── Fuel Profit/Loss — (selling rate − actual rate) × volume, from Fuel Rates ─
+const fuelProfitTotal = computed(() => store.profitLoss?.total ?? null)
+
+const fuelProfitDisplay = computed(() => {
+  if (fuelProfitTotal.value === null) return '—'
+  const amt = Math.abs(fuelProfitTotal.value)
+  return (fuelProfitTotal.value < 0 ? '−' : '') + fmtINR(amt)
+})
+
+const fuelProfitColor = computed(() => {
+  if (fuelProfitTotal.value === null) return '#8b5cf6'
+  return fuelProfitTotal.value >= 0 ? '#10b981' : '#ef4444'
+})
+
+const fuelProfitSub = computed(() => {
+  if (fuelProfitTotal.value === null) return 'Set rates in Settings'
+  return fuelProfitTotal.value >= 0 ? 'Profit this month' : 'Loss this month'
+})
 
 // ── Charts — fully dynamic, no hardcoded data arrays ─────────────────
 
