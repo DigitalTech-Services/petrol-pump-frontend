@@ -11,7 +11,7 @@
 
         <!-- Date & Shift -->
         <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-white flex items-center gap-2"><Calendar :size="16" /> Basic Details</div></div>
+          <div class="card-header"><div class="font-display font-bold text-[15px] text-[var(--text)] flex items-center gap-2"><Calendar :size="16" /> Basic Details</div></div>
           <div class="card-body space-y-4">
             <div>
               <label class="field-label">Sale Date *</label>
@@ -32,7 +32,7 @@
 
         <!-- Fuel Volumes -->
         <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-white flex items-center gap-2"><Fuel :size="16" /> Fuel Volumes</div></div>
+          <div class="card-header"><div class="font-display font-bold text-[15px] text-[var(--text)] flex items-center gap-2"><Fuel :size="16" /> Fuel Volumes</div></div>
           <div class="card-body space-y-4">
             <div class="grid grid-cols-2 gap-3">
               <div>
@@ -69,7 +69,7 @@
 
         <!-- Collections -->
         <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-white flex items-center gap-2"><Banknote :size="16" /> Collections</div></div>
+          <div class="card-header"><div class="font-display font-bold text-[15px] text-[var(--text)] flex items-center gap-2"><Banknote :size="16" /> Collections</div></div>
           <div class="card-body space-y-4">
             <div class="grid grid-cols-2 gap-3">
               <div>
@@ -101,32 +101,32 @@
         <!-- Auto Calculated -->
         <div class="card">
           <div class="card-header">
-            <div class="font-display font-bold text-[15px] text-white flex items-center gap-2"><Calculator :size="16" /> Auto Calculated</div>
+            <div class="font-display font-bold text-[15px] text-[var(--text)] flex items-center gap-2"><Calculator :size="16" /> Auto Calculated</div>
             <span class="ml-auto badge badge-green text-[11px]">Live Preview</span>
           </div>
           <div class="card-body space-y-3">
-            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:#161b24; border:1px solid #1c2230">
-              <span class="text-[13px] text-[#8a9ab5]">MS Revenue</span>
+            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:var(--bg-3); border:1px solid var(--bg-4)">
+              <span class="text-[13px] text-[var(--text-2)]">MS Revenue</span>
               <span class="amt text-[#f59e0b]">₹{{ fmt(calc_msRev) }}</span>
             </div>
-            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:#161b24; border:1px solid #1c2230">
-              <span class="text-[13px] text-[#8a9ab5]">HSD Revenue</span>
+            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:var(--bg-3); border:1px solid var(--bg-4)">
+              <span class="text-[13px] text-[var(--text-2)]">HSD Revenue</span>
               <span class="amt text-[#10b981]">₹{{ fmt(calc_hsdRev) }}</span>
             </div>
-            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:#161b24; border:1px solid #1c2230">
-              <span class="text-[13px] text-[#8a9ab5]">Speed Revenue</span>
+            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:var(--bg-3); border:1px solid var(--bg-4)">
+              <span class="text-[13px] text-[var(--text-2)]">Speed Revenue</span>
               <span class="amt text-[#3b82f6]">₹{{ fmt(calc_speedRev) }}</span>
             </div>
-            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:#161b24; border:1px solid #2e3a50">
-              <span class="text-[14px] font-semibold text-white">Gross Revenue</span>
+            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:var(--bg-3); border:1px solid var(--border-2)">
+              <span class="text-[14px] font-semibold text-[var(--text)]">Gross Revenue</span>
               <span class="amt-lg text-[#f59e0b]">₹{{ fmt(calc_revenue) }}</span>
             </div>
-            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:#161b24; border:1px solid #1c2230">
-              <span class="text-[13px] text-[#8a9ab5]">Total Collection</span>
+            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:var(--bg-3); border:1px solid var(--bg-4)">
+              <span class="text-[13px] text-[var(--text-2)]">Total Collection</span>
               <span class="amt text-positive">₹{{ fmt(calc_collection) }}</span>
             </div>
-            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:#161b24; border:1px solid #1c2230">
-              <span class="text-[14px] font-semibold text-white">Cash Balance</span>
+            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:var(--bg-3); border:1px solid var(--bg-4)">
+              <span class="text-[14px] font-semibold text-[var(--text)]">Cash Balance</span>
               <span class="amt-lg" :class="calc_balance >= 0 ? 'text-positive' : 'text-negative'">₹{{ fmt(calc_balance) }}</span>
             </div>
           </div>
@@ -196,5 +196,5 @@ async function handleSubmit() {
 </script>
 
 <style scoped>
-.field-label { display:block; font-size:11.5px; color:#8a9ab5; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; }
+.field-label { display:block; font-size:11.5px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; }
 </style>

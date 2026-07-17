@@ -1,5 +1,5 @@
 <template>
-   <div class="flex h-screen overflow-hidden" style="background:#0a0c10">
+   <div class="flex h-screen overflow-hidden" style="background:var(--bg)">
 
     <!-- Mobile overlay -->
     <Transition name="fade">
@@ -18,7 +18,7 @@
       <AppTopbar />
 
       <!-- Page Content with scroll -->
-      <main class="flex-1 overflow-y-auto" style="background:#0a0c10">
+      <main class="flex-1 overflow-y-auto" style="background:var(--bg)">
         <div class="px-6 py-6 max-w-[1440px] mx-auto">
           <RouterView v-slot="{ Component, route }">
             <Transition name="page" mode="out-in">

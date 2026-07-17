@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center px-4" style="background:#0a0c10">
+  <div class="min-h-screen flex items-center justify-center px-4" style="background:var(--bg)">
 
     <!-- Background glow -->
     <div class="absolute inset-0 pointer-events-none overflow-hidden">
@@ -12,11 +12,11 @@
       <!-- Logo -->
       <div class="text-center mb-8">
         <div
-          class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 font-display font-bold text-3xl text-[#0a0c10]"
+          class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 font-display font-bold text-3xl text-[var(--bg)]"
           style="background:linear-gradient(135deg,#f59e0b,#d97706); box-shadow:0 0 50px rgba(245,158,11,0.35)"
         >K</div>
-        <h1 class="font-display font-bold text-[30px] text-white tracking-wide">Kailas Petromines</h1>
-        <p class="text-[13px] text-[#5a6a82] mt-1.5">HP Fuel Station · Khopoli, Maharashtra</p>
+        <h1 class="font-display font-bold text-[30px] text-[var(--text)] tracking-wide">Kailas Petromines</h1>
+        <p class="text-[13px] text-[var(--text-3)] mt-1.5">HP Fuel Station · Khopoli, Maharashtra</p>
       </div>
 
       <!-- Demo Accounts Banner -->
@@ -30,14 +30,14 @@
             v-for="demo in demoAccounts" :key="demo.role"
             @click="fillDemo(demo)"
             class="flex flex-col items-center gap-1.5 p-2.5 rounded-lg transition-all duration-150 text-left"
-            style="background:#161b24; border:1px solid #242d3e"
-            :class="form.email === demo.email ? 'border-[#f59e0b] bg-[rgba(245,158,11,0.08)]' : 'hover:border-[#2e3a50]'"
+            style="background:var(--bg-3); border:1px solid var(--border)"
+            :class="form.email === demo.email ? 'border-[#f59e0b] bg-[rgba(245,158,11,0.08)]' : 'hover:border-[var(--border-2)]'"
           >
-            <div class="w-8 h-8 rounded-full flex items-center justify-center font-display font-bold text-[12px] text-white flex-shrink-0"
+            <div class="w-8 h-8 rounded-full flex items-center justify-center font-display font-bold text-[12px] text-[var(--text)] flex-shrink-0"
               :style="{ background: demo.color }">{{ demo.initials }}</div>
             <div>
-              <div class="text-[11.5px] font-semibold text-white">{{ demo.label }}</div>
-              <div class="text-[10px] text-[#5a6a82]">{{ demo.password }}</div>
+              <div class="text-[11.5px] font-semibold text-[var(--text)]">{{ demo.label }}</div>
+              <div class="text-[10px] text-[var(--text-3)]">{{ demo.password }}</div>
             </div>
           </button>
         </div>
@@ -45,8 +45,8 @@
 
       <!-- Login Card -->
       <div class="card p-7">
-        <h2 class="font-display font-bold text-[20px] text-white mb-0.5">Sign In</h2>
-        <p class="text-[13px] text-[#5a6a82] mb-5">Enter your credentials</p>
+        <h2 class="font-display font-bold text-[20px] text-[var(--text)] mb-0.5">Sign In</h2>
+        <p class="text-[13px] text-[var(--text-3)] mb-5">Enter your credentials</p>
 
         <form @submit.prevent="handleLogin">
 
@@ -78,14 +78,14 @@
               <button
                 type="button"
                 @click="showPass = !showPass"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-[#5a6a82] hover:text-white transition-colors text-sm"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-3)] hover:text-[var(--text)] transition-colors text-sm"
               ><component :is="showPass ? EyeOff : Eye" :size="16" /></button>
             </div>
           </div>
 
           <!-- Remember -->
           <!-- <div class="flex items-center justify-between mb-5 text-[12.5px]">
-            <label class="flex items-center gap-2 cursor-pointer text-[#8a9ab5]">
+            <label class="flex items-center gap-2 cursor-pointer text-[var(--text-2)]">
               <input type="checkbox" v-model="form.remember" class="accent-[#f59e0b] rounded" />
               Remember me
             </label>
@@ -114,8 +114,8 @@
       </div>
 
       <!-- Credentials cheatsheet -->
-      <!-- <div class="mt-4 p-3 rounded-lg text-[11.5px] text-[#5a6a82]" style="background:#0f1218; border:1px solid #1c2230">
-        <div class="font-semibold text-[#8a9ab5] mb-1.5">Quick credentials:</div>
+      <!-- <div class="mt-4 p-3 rounded-lg text-[11.5px] text-[var(--text-3)]" style="background:var(--bg-2); border:1px solid var(--bg-4)">
+        <div class="font-semibold text-[var(--text-2)] mb-1.5">Quick credentials:</div>
         <div class="grid grid-cols-1 gap-0.5 font-mono-custom">
           <div>admin@petromines.com / <span class="text-[#f59e0b]">admin123</span></div>
           <div>manager@petromines.com / <span class="text-[#3b82f6]">manager123</span></div>
@@ -123,7 +123,7 @@
         </div>
       </div> -->
 
-      <p class="text-center text-[11.5px] text-[#5a6a82] mt-5">
+      <p class="text-center text-[11.5px] text-[var(--text-3)] mt-5">
         Petromines Management v1.0 · No backend required for demo
       </p>
     </div>
@@ -177,7 +177,7 @@ async function handleLogin() {
 .field-label {
   display: block;
   font-size: 11.5px;
-  color: #8a9ab5;
+  color: var(--text-2);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 6px;

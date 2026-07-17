@@ -20,7 +20,7 @@ const canvas = ref(null)
 let chart = null
 
 const GRID  = 'rgba(36,45,62,0.8)'
-const TICK  = '#5a6a82'
+const TICK  = 'var(--text-3)'
 
 function defaultOptions() {
   return {
@@ -30,11 +30,11 @@ function defaultOptions() {
     plugins: {
       legend: { labels: { color: TICK, font: { size: 11, family: 'DM Sans' }, padding: 16 } },
       tooltip: {
-        backgroundColor: '#161b24',
-        borderColor: '#2e3a50',
+        backgroundColor: 'var(--bg-3)',
+        borderColor: 'var(--border-2)',
         borderWidth: 1,
-        titleColor: '#e8edf5',
-        bodyColor: '#8a9ab5',
+        titleColor: 'var(--text)',
+        bodyColor: 'var(--text-2)',
         padding: 10,
         cornerRadius: 8,
       },

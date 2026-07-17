@@ -1,24 +1,24 @@
 <template>
-  <div class="min-h-screen" style="background:#0a0c10">
+  <div class="min-h-screen" style="background:var(--bg)">
 
     <!-- Top Bar -->
     <header class="sticky top-0 z-30 flex items-center justify-between px-6 h-14 border-b"
-      style="background:#0f1218; border-color:#1c2230">
+      style="background:var(--bg-2); border-color:var(--bg-4)">
       <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-white text-sm"
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-[var(--text)] text-sm"
           style="background:linear-gradient(135deg,#6366f1,#4f46e5)">A</div>
-        <span class="font-display font-bold text-white text-[15px]">Admin Portal</span>
-        <span class="text-[#2e3a50] mx-1">·</span>
-        <span class="text-[#5a6a82] text-[13px]">Manage Users</span>
+        <span class="font-display font-bold text-[var(--text)] text-[15px]">Admin Portal</span>
+        <span class="text-[var(--border-2)] mx-1">·</span>
+        <span class="text-[var(--text-3)] text-[13px]">Manage Users</span>
       </div>
       <div class="flex items-center gap-4">
-        <span class="text-[12.5px] text-[#8a9ab5]">
-          Signed in as <strong class="text-white">{{ adminAuth.username }}</strong>
+        <span class="text-[12.5px] text-[var(--text-2)]">
+          Signed in as <strong class="text-[var(--text)]">{{ adminAuth.username }}</strong>
         </span>
         <button
           @click="handleLogout"
-          class="px-3 py-1.5 rounded-lg text-[12px] font-medium text-[#8a9ab5] hover:text-white transition-colors"
-          style="background:#161b24; border:1px solid #242d3e"
+          class="px-3 py-1.5 rounded-lg text-[12px] font-medium text-[var(--text-2)] hover:text-[var(--text)] transition-colors"
+          style="background:var(--bg-3); border:1px solid var(--border)"
         >Logout</button>
       </div>
     </header>
@@ -29,17 +29,17 @@
       <!-- Page Header -->
       <div class="flex items-center justify-between mb-6">
         <div>
-          <h1 class="font-display font-bold text-[22px] text-white">Owners</h1>
-          <p class="text-[13px] text-[#5a6a82] mt-0.5">{{ owners.length }} owner account{{ owners.length !== 1 ? 's' : '' }} · {{ users.length - owners.length }} manager{{ users.length - owners.length !== 1 ? 's' : '' }}</p>
+          <h1 class="font-display font-bold text-[22px] text-[var(--text)]">Owners</h1>
+          <p class="text-[13px] text-[var(--text-3)] mt-0.5">{{ owners.length }} owner account{{ owners.length !== 1 ? 's' : '' }} · {{ users.length - owners.length }} manager{{ users.length - owners.length !== 1 ? 's' : '' }}</p>
         </div>
-        <button @click="openAdd" class="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold text-white transition-all"
+        <button @click="openAdd" class="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold text-[var(--text)] transition-all"
           style="background:linear-gradient(135deg,#6366f1,#4f46e5); box-shadow:0 0 20px rgba(99,102,241,0.25)">
           + Add Owner
         </button>
       </div>
 
       <!-- Loading -->
-      <div v-if="loading" class="flex items-center justify-center py-24 text-[#5a6a82]">
+      <div v-if="loading" class="flex items-center justify-center py-24 text-[var(--text-3)]">
         <RotateCw :size="20" class="animate-spin mr-2" /> Loading users…
       </div>
 
@@ -50,65 +50,65 @@
       </div>
 
       <!-- Empty -->
-      <div v-else-if="!owners.length" class="py-20 text-center text-[#5a6a82]">
+      <div v-else-if="!owners.length" class="py-20 text-center text-[var(--text-3)]">
         <Users :size="40" class="mx-auto mb-3 opacity-40" />
         <p class="text-[14px]">No owners yet. Add the first one.</p>
       </div>
 
       <!-- Table -->
-      <div v-else class="rounded-2xl overflow-hidden" style="border:1px solid #1c2230">
+      <div v-else class="rounded-2xl overflow-hidden" style="border:1px solid var(--bg-4)">
         <table class="w-full text-[13px]">
           <thead>
-            <tr style="background:#0f1218; border-bottom:1px solid #1c2230">
-              <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[#5a6a82] font-semibold w-8"></th>
-              <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[#5a6a82] font-semibold">#</th>
-              <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[#5a6a82] font-semibold">Name</th>
-              <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[#5a6a82] font-semibold">Email</th>
-              <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[#5a6a82] font-semibold">Contact</th>
-              <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[#5a6a82] font-semibold">Managers</th>
-              <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[#5a6a82] font-semibold">Created</th>
-              <th class="text-right px-5 py-3 text-[11px] uppercase tracking-wider text-[#5a6a82] font-semibold">Actions</th>
+            <tr style="background:var(--bg-2); border-bottom:1px solid var(--bg-4)">
+              <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[var(--text-3)] font-semibold w-8"></th>
+              <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[var(--text-3)] font-semibold">#</th>
+              <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[var(--text-3)] font-semibold">Name</th>
+              <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[var(--text-3)] font-semibold">Email</th>
+              <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[var(--text-3)] font-semibold">Contact</th>
+              <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[var(--text-3)] font-semibold">Managers</th>
+              <th class="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-[var(--text-3)] font-semibold">Created</th>
+              <th class="text-right px-5 py-3 text-[11px] uppercase tracking-wider text-[var(--text-3)] font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
             <template v-for="(u, i) in owners" :key="u.id">
               <tr
-                class="transition-colors hover:bg-[#0f1420] cursor-pointer"
-                style="border-bottom:1px solid #161b24"
+                class="transition-colors hover:bg-[var(--bg-2)] cursor-pointer"
+                style="border-bottom:1px solid var(--bg-3)"
                 @click="toggleExpand(u.id)"
               >
-                <td class="px-5 py-3.5 text-[#5a6a82]">
+                <td class="px-5 py-3.5 text-[var(--text-3)]">
                   <ChevronRight v-if="!managersOf(u.id).length" :size="15" class="opacity-20" />
                   <ChevronDown v-else-if="expanded.has(u.id)" :size="15" />
                   <ChevronRight v-else :size="15" />
                 </td>
-                <td class="px-5 py-3.5 text-[#5a6a82]">{{ i + 1 }}</td>
+                <td class="px-5 py-3.5 text-[var(--text-3)]">{{ i + 1 }}</td>
                 <td class="px-5 py-3.5">
                   <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-[var(--text)] flex-shrink-0"
                       :style="{ background: avatarColor(u.name) }">
                       {{ initials(u.name) }}
                     </div>
                     <div class="min-w-0">
-                      <div class="text-white font-medium truncate">{{ u.name }}</div>
-                      <div class="text-[11px] text-[#5a6a82] truncate">{{ u.business_name || '—' }}</div>
+                      <div class="text-[var(--text)] font-medium truncate">{{ u.name }}</div>
+                      <div class="text-[11px] text-[var(--text-3)] truncate">{{ u.business_name || '—' }}</div>
                     </div>
                   </div>
                 </td>
-                <td class="px-5 py-3.5 text-[#8a9ab5]">{{ u.email }}</td>
-                <td class="px-5 py-3.5 text-[#8a9ab5]">{{ u.contact || '—' }}</td>
+                <td class="px-5 py-3.5 text-[var(--text-2)]">{{ u.email }}</td>
+                <td class="px-5 py-3.5 text-[var(--text-2)]">{{ u.contact || '—' }}</td>
                 <td class="px-5 py-3.5">
                   <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold" style="background:rgba(99,102,241,0.1); color:#818cf8">
                     {{ managersOf(u.id).length }}
                   </span>
                 </td>
-                <td class="px-5 py-3.5 text-[#5a6a82] text-[12px]">{{ formatDate(u.created_at) }}</td>
+                <td class="px-5 py-3.5 text-[var(--text-3)] text-[12px]">{{ formatDate(u.created_at) }}</td>
                 <td class="px-5 py-3.5 text-right" @click.stop>
                   <div class="flex items-center justify-end gap-2">
                     <button
                       @click="openEdit(u)"
-                      class="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors text-[#8a9ab5] hover:text-white"
-                      style="background:#161b24; border:1px solid #242d3e"
+                      class="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors text-[var(--text-2)] hover:text-[var(--text)]"
+                      style="background:var(--bg-3); border:1px solid var(--border)"
                     >Edit</button>
                     <button
                       @click="openDelete(u)"
@@ -121,40 +121,40 @@
 
               <!-- Nested managers -->
               <tr v-if="expanded.has(u.id) && managersOf(u.id).length" :key="`${u.id}-managers`">
-                <td colspan="8" class="p-0" style="background:#0a0c10">
+                <td colspan="8" class="p-0" style="background:var(--bg)">
                   <table class="w-full text-[12.5px]">
                     <tbody>
                       <tr
                         v-for="m in managersOf(u.id)"
                         :key="m.id"
-                        class="transition-colors hover:bg-[#0f1420]"
-                        style="border-bottom:1px solid #161b24"
+                        class="transition-colors hover:bg-[var(--bg-2)]"
+                        style="border-bottom:1px solid var(--bg-3)"
                       >
                         <td class="px-5 py-2.5 w-8"></td>
                         <td class="px-5 py-2.5"></td>
                         <td class="px-5 py-2.5">
-                          <div class="flex items-center gap-3 pl-4" style="border-left:2px solid #242d3e">
-                            <div class="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
+                          <div class="flex items-center gap-3 pl-4" style="border-left:2px solid var(--border)">
+                            <div class="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-[var(--text)] flex-shrink-0"
                               :style="{ background: avatarColor(m.name) }">
                               {{ initials(m.name) }}
                             </div>
-                            <span class="text-[#c8d2e0]">{{ m.name }}</span>
+                            <span class="text-[var(--text)]">{{ m.name }}</span>
                           </div>
                         </td>
-                        <td class="px-5 py-2.5 text-[#8a9ab5]">{{ m.email }}</td>
-                        <td class="px-5 py-2.5 text-[#8a9ab5]">{{ m.contact || '—' }}</td>
+                        <td class="px-5 py-2.5 text-[var(--text-2)]">{{ m.email }}</td>
+                        <td class="px-5 py-2.5 text-[var(--text-2)]">{{ m.contact || '—' }}</td>
                         <td class="px-5 py-2.5">
                           <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold" style="background:rgba(16,185,129,0.1); color:#10b981">
                             Manager
                           </span>
                         </td>
-                        <td class="px-5 py-2.5 text-[#5a6a82] text-[12px]">{{ formatDate(m.created_at) }}</td>
+                        <td class="px-5 py-2.5 text-[var(--text-3)] text-[12px]">{{ formatDate(m.created_at) }}</td>
                         <td class="px-5 py-2.5 text-right">
                           <div class="flex items-center justify-end gap-2">
                             <button
                               @click="openEdit(m)"
-                              class="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors text-[#8a9ab5] hover:text-white"
-                              style="background:#161b24; border:1px solid #242d3e"
+                              class="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors text-[var(--text-2)] hover:text-[var(--text)]"
+                              style="background:var(--bg-3); border:1px solid var(--border)"
                             >Edit</button>
                             <button
                               @click="openDelete(m)"
@@ -179,11 +179,11 @@
       <div v-if="modal.open" class="fixed inset-0 z-50 flex items-center justify-center px-4"
         style="background:rgba(0,0,0,0.7); backdrop-filter:blur(4px)"
         @mousedown.self="closeModal">
-        <div class="w-full max-w-[440px] rounded-2xl p-6" style="background:#0f1218; border:1px solid #242d3e">
-          <h3 class="font-display font-bold text-[18px] text-white mb-1">
+        <div class="w-full max-w-[440px] rounded-2xl p-6" style="background:var(--bg-2); border:1px solid var(--border)">
+          <h3 class="font-display font-bold text-[18px] text-[var(--text)] mb-1">
             {{ modal.mode === 'add' ? 'Add Owner' : (modal.userType === 'sub_user' ? 'Edit Manager' : 'Edit Owner') }}
           </h3>
-          <p class="text-[12.5px] text-[#5a6a82] mb-5">
+          <p class="text-[12.5px] text-[var(--text-3)] mb-5">
             {{ modal.mode === 'add' ? 'Fill in the details to create a new owner account.' : 'Update account information.' }}
           </p>
 
@@ -221,7 +221,7 @@
                     required
                   />
                   <button type="button" @click="showPass = !showPass"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-[#5a6a82] hover:text-white text-sm">
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-3)] hover:text-[var(--text)] text-sm">
                     <component :is="showPass ? EyeOff : Eye" :size="16" />
                   </button>
                 </div>
@@ -239,12 +239,12 @@
             <!-- Actions -->
             <div class="flex gap-3 justify-end">
               <button type="button" @click="closeModal"
-                class="px-4 py-2 rounded-xl text-[13px] font-medium text-[#8a9ab5] hover:text-white transition-colors"
-                style="background:#161b24; border:1px solid #242d3e">
+                class="px-4 py-2 rounded-xl text-[13px] font-medium text-[var(--text-2)] hover:text-[var(--text)] transition-colors"
+                style="background:var(--bg-3); border:1px solid var(--border)">
                 Cancel
               </button>
               <button type="submit"
-                class="px-5 py-2 rounded-xl text-[13px] font-semibold text-white transition-all flex items-center gap-2"
+                class="px-5 py-2 rounded-xl text-[13px] font-semibold text-[var(--text)] transition-all flex items-center gap-2"
                 style="background:linear-gradient(135deg,#6366f1,#4f46e5)"
                 :disabled="submitting">
                 <RotateCw v-if="submitting" :size="14" class="animate-spin" />
@@ -261,14 +261,14 @@
       <div v-if="deleteModal.open" class="fixed inset-0 z-50 flex items-center justify-center px-4"
         style="background:rgba(0,0,0,0.7); backdrop-filter:blur(4px)"
         @mousedown.self="deleteModal.open = false">
-        <div class="w-full max-w-[380px] rounded-2xl p-6" style="background:#0f1218; border:1px solid #242d3e">
+        <div class="w-full max-w-[380px] rounded-2xl p-6" style="background:var(--bg-2); border:1px solid var(--border)">
           <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
             style="background:rgba(239,68,68,0.1)">
             <Trash2 :size="22" class="text-[#ef4444]" />
           </div>
-          <h3 class="font-display font-bold text-[18px] text-white mb-1">Delete User</h3>
-          <p class="text-[13px] text-[#5a6a82] mb-5">
-            Are you sure you want to delete <strong class="text-white">{{ deleteModal.user?.name }}</strong>?
+          <h3 class="font-display font-bold text-[18px] text-[var(--text)] mb-1">Delete User</h3>
+          <p class="text-[13px] text-[var(--text-3)] mb-5">
+            Are you sure you want to delete <strong class="text-[var(--text)]">{{ deleteModal.user?.name }}</strong>?
             This action cannot be undone.
           </p>
 
@@ -281,12 +281,12 @@
 
           <div class="flex gap-3 justify-end">
             <button @click="deleteModal.open = false"
-              class="px-4 py-2 rounded-xl text-[13px] font-medium text-[#8a9ab5] hover:text-white transition-colors"
-              style="background:#161b24; border:1px solid #242d3e">
+              class="px-4 py-2 rounded-xl text-[13px] font-medium text-[var(--text-2)] hover:text-[var(--text)] transition-colors"
+              style="background:var(--bg-3); border:1px solid var(--border)">
               Cancel
             </button>
             <button @click="confirmDelete"
-              class="px-5 py-2 rounded-xl text-[13px] font-semibold text-white transition-all flex items-center gap-2"
+              class="px-5 py-2 rounded-xl text-[13px] font-semibold text-[var(--text)] transition-all flex items-center gap-2"
               style="background:linear-gradient(135deg,#ef4444,#dc2626)"
               :disabled="deleting">
               <RotateCw v-if="deleting" :size="14" class="animate-spin" />
@@ -300,7 +300,7 @@
     <!-- Toast -->
     <Transition name="toast">
       <div v-if="toast.show"
-        class="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl text-[13px] font-medium text-white flex items-center gap-2"
+        class="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl text-[13px] font-medium text-[var(--text)] flex items-center gap-2"
         :style="toast.type === 'success'
           ? 'background:#10b981; box-shadow:0 4px 20px rgba(16,185,129,0.3)'
           : 'background:#ef4444; box-shadow:0 4px 20px rgba(239,68,68,0.3)'">
@@ -479,7 +479,7 @@ onMounted(loadUsers)
 .field-label {
   display: block;
   font-size: 11.5px;
-  color: #8a9ab5;
+  color: var(--text-2);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 6px;

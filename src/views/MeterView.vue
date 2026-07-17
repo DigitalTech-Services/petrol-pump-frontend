@@ -12,30 +12,33 @@
       <KpiCard label="MS Nozzles"    :value="`${nozzleCount('MS')} Active`"    :icon="Gauge" color="#f59e0b" sub="From Nozzle Config"/>
       <KpiCard label="HSD Nozzles"   :value="`${nozzleCount('HSD')} Active`"   :icon="Gauge" color="#10b981" sub="From Nozzle Config"/>
       <KpiCard label="Speed Nozzles" :value="`${nozzleCount('Speed')} Active`" :icon="Gauge" color="#3b82f6" sub="From Nozzle Config"/>
-      <KpiCard label="Total Fuel Used" :value="fmt(store.totalUsed) + ' L'" :icon="BarChart3" color="#6366f1" sub="All nozzles this month"/>
+      <KpiCard label="Total Fuel Used" :value="fmt(store.totalUsed) + ' L'" :icon="BarChart3" color="#6366f1" sub="All nozzles, selected month"/>
     </div>
 
-    <!-- Fuel type tabs -->
-    <div class="tab-bar mb-5">
-      <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='MS'}"    @click="tab='MS'"><Fuel :size="14" /> MS (Petrol)</button>
-      <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='HSD'}"   @click="tab='HSD'"><Fuel :size="14" class="text-[#10b981]" /> HSD (Diesel)</button>
-      <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='Speed'}" @click="tab='Speed'"><Fuel :size="14" class="text-[#3b82f6]" /> Speed (Premium)</button>
+    <!-- Month filter + Fuel type tabs -->
+    <div class="flex flex-wrap items-center gap-3 mb-5">
+      <input type="month" v-model="selectedMonth" class="form-input" />
+      <div class="tab-bar">
+        <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='MS'}"    @click="tab='MS'"><Fuel :size="14" /> MS (Petrol)</button>
+        <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='HSD'}"   @click="tab='HSD'"><Fuel :size="14" class="text-[#10b981]" /> HSD (Diesel)</button>
+        <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='Speed'}" @click="tab='Speed'"><Fuel :size="14" class="text-[#3b82f6]" /> Speed (Premium)</button>
+      </div>
     </div>
 
     <div class="card">
       <div class="card-header">
-        <div class="font-display font-bold text-[15px] text-white">{{ tab }} Nozzle Meter</div>
+        <div class="font-display font-bold text-[15px] text-[var(--text)]">{{ tab }} Nozzle Meter</div>
         <span class="badge ml-2" :class="badgeClass(tab)">{{ tabReadings.length }} entries</span>
       </div>
 
       <!-- Loading state -->
-      <div v-if="store.loading" class="p-8 text-center text-[#5a6a82] text-[13px]">Loading meter readings…</div>
+      <div v-if="store.loading" class="p-8 text-center text-[var(--text-3)] text-[13px]">Loading meter readings…</div>
 
       <!-- Error state -->
       <div v-else-if="store.error" class="p-6 text-center text-red-400 text-[13px]">{{ store.error }}</div>
 
       <!-- No nozzles configured for this fuel type -->
-      <div v-else-if="!tabNozzles.length" class="p-8 text-center text-[#5a6a82] text-[13px]">
+      <div v-else-if="!tabNozzles.length" class="p-8 text-center text-[var(--text-3)] text-[13px]">
         No active {{ tab }} nozzles configured. Add one in Settings → Nozzle Configuration.
       </div>
 
@@ -52,10 +55,10 @@
           </thead>
           <tbody>
             <tr v-if="tabReadings.length === 0">
-              <td :colspan="2 + tabNozzles.length * 3 + 2" class="text-center text-[#5a6a82] py-6 text-[13px]">No {{ tab }} readings found. Add the first one.</td>
+              <td :colspan="2 + tabNozzles.length * 3 + 2" class="text-center text-[var(--text-3)] py-6 text-[13px]">No {{ tab }} readings found. Add the first one.</td>
             </tr>
             <tr v-for="(r, i) in tabReadings" :key="r.id ?? r.date">
-              <td class="font-mono-custom text-[11px] text-[#5a6a82]">{{ i + 1 }}</td>
+              <td class="font-mono-custom text-[11px] text-[var(--text-3)]">{{ i + 1 }}</td>
               <td><span class="font-mono-custom text-[12px] text-[#f59e0b]">{{ r.date }}</span></td>
               <template v-for="n in tabNozzles" :key="n.nozzleId">
                 <td class="font-mono-custom text-[11.5px]">{{ r.nozzles[n.nozzleId]?.opening ?? '—' }}</td>
@@ -67,7 +70,7 @@
                 <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditReading(r)"><Pencil :size="11" /></button>
                 <button class="btn btn-ghost py-0.5 px-2 text-[11px] text-red-400" @click="confirmDelete(r)"><Trash2 :size="11" /></button>
               </td>
-              <td v-else class="text-[11px] text-[#5a6a82]">—</td>
+              <td v-else class="text-[11px] text-[var(--text-3)]">—</td>
             </tr>
           </tbody>
           <tfoot v-if="tabReadings.length > 0">
@@ -91,17 +94,17 @@
         <label class="field-label">Reading Date *</label>
         <input type="date" v-model="meterForm.date" class="form-input w-full" />
       </div>
-      <div v-if="!activeNozzles.length" class="text-center text-[13px] text-[#5a6a82] py-6">
+      <div v-if="!activeNozzles.length" class="text-center text-[13px] text-[var(--text-3)] py-6">
         No active nozzles configured yet. Add one in Settings → Nozzle Configuration first.
       </div>
       <template v-for="group in nozzleGroups" :key="group.fuel">
-        <div class="text-[11px] font-semibold text-[#5a6a82] uppercase tracking-wide mb-2 mt-3">{{ group.fuel }}</div>
+        <div class="text-[11px] font-semibold text-[var(--text-3)] uppercase tracking-wide mb-2 mt-3">{{ group.fuel }}</div>
         <div v-for="n in group.items" :key="n.nozzleId"
-          class="p-4 rounded-xl mb-3" style="background:#161b24;border:1px solid #1c2230">
+          class="p-4 rounded-xl mb-3" style="background:var(--bg-3);border:1px solid var(--bg-4)">
           <div class="flex items-center gap-2 mb-3">
             <span class="badge" :class="badgeClass(group.fuel)">{{ n.nozzleId }}</span>
-            <span class="text-[13px] font-medium text-white">{{ n.pump }}</span>
-            <span class="ml-auto text-[12px] text-[#5a6a82]">Used: <span class="text-[#f59e0b] font-semibold">{{ fmt(nozzleUsed(meterForm, n.nozzleId)) }} L</span></span>
+            <span class="text-[13px] font-medium text-[var(--text)]">{{ n.pump }}</span>
+            <span class="ml-auto text-[12px] text-[var(--text-3)]">Used: <span class="text-[#f59e0b] font-semibold">{{ fmt(nozzleUsed(meterForm, n.nozzleId)) }} L</span></span>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
@@ -116,7 +119,7 @@
         </div>
       </template>
       <div class="p-3 rounded-lg flex justify-between mt-2" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2)">
-        <span class="text-[13px] font-medium text-white">Total Day Consumption</span>
+        <span class="text-[13px] font-medium text-[var(--text)]">Total Day Consumption</span>
         <span class="font-display font-bold text-[18px] text-[#f59e0b]">{{ fmt(calcTotal(meterForm)) }} L</span>
       </div>
       <template #footer>
@@ -134,9 +137,9 @@
       <div class="space-y-4" v-if="editData">
         <div><label class="field-label">Date</label><input type="date" v-model="editData.date" class="form-input w-full" /></div>
         <template v-for="group in editNozzleGroups" :key="group.fuel">
-          <div class="text-[11px] font-semibold text-[#5a6a82] uppercase tracking-wide mb-1">{{ group.fuel }}</div>
+          <div class="text-[11px] font-semibold text-[var(--text-3)] uppercase tracking-wide mb-1">{{ group.fuel }}</div>
           <div v-for="n in group.items" :key="n.nozzleId"
-            class="p-3 rounded-xl" style="background:#161b24;border:1px solid #1c2230">
+            class="p-3 rounded-xl" style="background:var(--bg-3);border:1px solid var(--bg-4)">
             <div class="text-[12px] font-semibold text-[#f59e0b] mb-2">{{ n.nozzleId }} · {{ n.pump }}</div>
             <div class="grid grid-cols-2 gap-3">
               <div><label class="field-label">Opening</label><input type="number" step="0.01" v-model.number="editData.nozzles[n.nozzleId].opening" class="form-input w-full" /></div>
@@ -260,17 +263,16 @@ function buildNozzleForm(nozzleIds, existing) {
   return next
 }
 
-const currentMonth = computed(() => {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-})
+const now = new Date()
+const selectedMonth = ref(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`)
 
 function loadAll() {
   store.fetchNozzles(selectedStation.selectedStationId)
-  store.fetchReadings(currentMonth.value, selectedStation.selectedStationId)
+  store.fetchReadings(selectedMonth.value, selectedStation.selectedStationId)
 }
 
 onMounted(loadAll)
+watch(selectedMonth, loadAll)
 watch(() => selectedStation.selectedStationId, loadAll)
 
 function openAddReading() {
@@ -347,7 +349,7 @@ function doExport() {
     ]),
     fmt(tabTotal(r)),
   ])
-  exportCSV(`${tab.value}_Meter_Readings`, headers, rows)
+  exportCSV(`${tab.value}_Meter_Readings_${selectedMonth.value}`, headers, rows)
   ui.success('CSV exported!')
 }
 
@@ -363,5 +365,5 @@ function doPrint() {
 </script>
 
 <style scoped>
-.field-label { display:block; font-size:11.5px; color:#8a9ab5; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px }
+.field-label { display:block; font-size:11.5px; color:var(--text-2); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px }
 </style>

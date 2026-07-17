@@ -16,20 +16,20 @@
           :style="{
             maxWidth: maxWidth,
             maxHeight: '92vh',
-            background: '#0f1218',
-            border: '1px solid #2e3a50'
+            background: 'var(--bg-2)',
+            border: '1px solid var(--border-2)'
           }"
         >
           <!-- Header -->
-          <div class="flex items-center gap-3 px-6 py-4 flex-shrink-0" style="border-bottom:1px solid #242d3e">
+          <div class="flex items-center gap-3 px-6 py-4 flex-shrink-0" style="border-bottom:1px solid var(--border)">
             <component v-if="icon" :is="icon" :size="20" class="flex-shrink-0 text-[#f59e0b]" />
             <div class="flex-1 min-w-0">
-              <div class="font-display font-bold text-[17px] text-white">{{ title }}</div>
-              <div v-if="subtitle" class="text-[12px] text-[#5a6a82] mt-0.5">{{ subtitle }}</div>
+              <div class="font-display font-bold text-[17px] text-[var(--text)]">{{ title }}</div>
+              <div v-if="subtitle" class="text-[12px] text-[var(--text-3)] mt-0.5">{{ subtitle }}</div>
             </div>
             <button
               @click="$emit('update:modelValue', false)"
-              class="w-8 h-8 rounded-lg flex items-center justify-center text-[#5a6a82] hover:text-white hover:bg-[#1c2230] transition-all flex-shrink-0 text-lg"
+              class="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--bg-4)] transition-all flex-shrink-0 text-lg"
             ><X :size="16" /></button>
           </div>
 
@@ -39,7 +39,7 @@
           </div>
 
           <!-- Footer -->
-          <div v-if="$slots.footer" class="flex-shrink-0 px-6 py-4" style="border-top:1px solid #242d3e">
+          <div v-if="$slots.footer" class="flex-shrink-0 px-6 py-4" style="border-top:1px solid var(--border)">
             <slot name="footer" />
           </div>
         </div>

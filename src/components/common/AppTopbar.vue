@@ -1,18 +1,18 @@
 <template>
   <header
     class="flex items-center gap-4 px-6 flex-shrink-0"
-    style="height:60px; background:#0f1218; border-bottom:1px solid #242d3e; position:sticky; top:0; z-index:30;"
+    style="height:60px; background:var(--bg-2); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:30;"
   >
     <!-- Mobile menu toggle -->
     <button
-      class="lg:hidden text-[#8a9ab5] hover:text-white transition-colors"
+      class="lg:hidden text-[var(--text-2)] hover:text-[var(--text)] transition-colors"
       @click="ui.toggleSidebar()"
     ><Menu :size="22" /></button>
 
     <!-- Breadcrumb / Page Title -->
     <div class="min-w-0">
-      <h2 class="font-display font-bold text-[19px] text-white leading-none">{{ title }}</h2>
-      <div class="text-[11px] text-[#5a6a82] mt-0.5 hidden sm:block">{{ subtitle }}</div>
+      <h2 class="font-display font-bold text-[19px] text-[var(--text)] leading-none">{{ title }}</h2>
+      <div class="text-[11px] text-[var(--text-3)] mt-0.5 hidden sm:block">{{ subtitle }}</div>
     </div>
 
     <!-- Spacer -->

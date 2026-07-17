@@ -10,7 +10,7 @@
     </PageHeader>
 
     <!-- Loading -->
-    <div v-if="loading" class="text-center py-16 text-[#5a6a82] text-[14px]">Loading timesheet…</div>
+    <div v-if="loading" class="text-center py-16 text-[var(--text-3)] text-[14px]">Loading timesheet…</div>
 
     <template v-else>
       <!-- KPIs -->
@@ -26,45 +26,45 @@
         <div v-for="s in timesheetData" :key="s.id"
           class="rounded-xl p-5 transition-all duration-200 hover:-translate-y-1"
           :class="auth.canWrite ? 'cursor-pointer' : ''"
-          style="background:#0f1218;border:1px solid #242d3e"
+          style="background:var(--bg-2);border:1px solid var(--border)"
           @click="auth.canWrite && openEditAttendance(s)">
           <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 rounded-full flex items-center justify-center font-display font-bold text-[14px] text-white flex-shrink-0" :style="{background:s.color}">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center font-display font-bold text-[14px] text-[var(--text)] flex-shrink-0" :style="{background:s.color}">
               {{ s.name.slice(0,2).toUpperCase() }}
             </div>
             <div class="flex-1 min-w-0">
-              <div class="font-display font-bold text-[15px] text-white">{{ s.name }}</div>
-              <div class="text-[11.5px] text-[#5a6a82]">{{ s.role }}</div>
+              <div class="font-display font-bold text-[15px] text-[var(--text)]">{{ s.name }}</div>
+              <div class="text-[11.5px] text-[var(--text-3)]">{{ s.role }}</div>
             </div>
             <div class="text-right">
               <div class="font-display font-bold text-[22px]" :style="{color:s.color}">{{ s.daysWorked }}</div>
-              <div class="text-[10px] text-[#5a6a82]">/ 30 days</div>
+              <div class="text-[10px] text-[var(--text-3)]">/ 30 days</div>
             </div>
           </div>
           <div class="mb-3">
             <div class="fuel-bar-track">
               <div class="fuel-bar-fill" :style="{width:(s.daysWorked/30*100)+'%',background:s.color}" />
             </div>
-            <div class="flex justify-between text-[10.5px] text-[#5a6a82] mt-1">
+            <div class="flex justify-between text-[10.5px] text-[var(--text-3)] mt-1">
               <span>{{ Math.round(s.daysWorked/30*100) }}% attendance</span>
               <span>{{ 30-s.daysWorked }} absent</span>
             </div>
           </div>
-          <div class="grid grid-cols-3 gap-2 pt-3" style="border-top:1px solid #1c2230">
+          <div class="grid grid-cols-3 gap-2 pt-3" style="border-top:1px solid var(--bg-4)">
             <div class="text-center">
-              <div class="text-[9.5px] text-[#5a6a82] uppercase tracking-wide mb-1">Hours/Day</div>
+              <div class="text-[9.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Hours/Day</div>
               <div class="font-display font-bold text-[13px] text-[#3b82f6]">{{ s.totalHours }}h</div>
             </div>
             <div class="text-center">
-              <div class="text-[9.5px] text-[#5a6a82] uppercase tracking-wide mb-1">Rate</div>
+              <div class="text-[9.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Rate</div>
               <div class="font-display font-bold text-[13px] text-[#f59e0b]">₹{{ s.ratePerDay }}</div>
             </div>
             <div class="text-center">
-              <div class="text-[9.5px] text-[#5a6a82] uppercase tracking-wide mb-1">Salary</div>
+              <div class="text-[9.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Salary</div>
               <div class="font-display font-bold text-[13px] text-positive">₹{{ fmtK(s.salary) }}</div>
             </div>
           </div>
-          <div v-if="auth.canWrite" class="mt-3 text-center text-[10.5px] text-[#5a6a82] hover:text-[#f59e0b] transition-colors flex items-center justify-center gap-1"><Pencil :size="10" /> Click to edit</div>
+          <div v-if="auth.canWrite" class="mt-3 text-center text-[10.5px] text-[var(--text-3)] hover:text-[#f59e0b] transition-colors flex items-center justify-center gap-1"><Pencil :size="10" /> Click to edit</div>
         </div>
       </div>
 
@@ -72,8 +72,8 @@
       <div class="card">
         <div class="card-header">
           <div>
-            <div class="font-display font-bold text-[15px] text-white">Attendance Register — {{ monthLabel }}</div>
-            <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Complete shift & salary register</div>
+            <div class="font-display font-bold text-[15px] text-[var(--text)]">Attendance Register — {{ monthLabel }}</div>
+            <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">Complete shift & salary register</div>
           </div>
           <button class="btn btn-ghost ml-auto text-[12px] flex items-center gap-1.5" @click="doPrint"><Printer :size="13" /> Print Register</button>
         </div>
@@ -84,20 +84,20 @@
             </thead>
             <tbody>
               <tr v-for="(s,i) in timesheetData" :key="s.id">
-                <td class="font-mono-custom text-[11px] text-[#5a6a82]">{{ i+1 }}</td>
+                <td class="font-mono-custom text-[11px] text-[var(--text-3)]">{{ i+1 }}</td>
                 <td>
                   <div class="flex items-center gap-2.5">
-                    <div class="w-7 h-7 rounded-full flex items-center justify-center font-display font-bold text-[11px] text-white flex-shrink-0" :style="{background:s.color}">{{ s.name.slice(0,2).toUpperCase() }}</div>
-                    <span class="font-medium text-white">{{ s.name }}</span>
+                    <div class="w-7 h-7 rounded-full flex items-center justify-center font-display font-bold text-[11px] text-[var(--text)] flex-shrink-0" :style="{background:s.color}">{{ s.name.slice(0,2).toUpperCase() }}</div>
+                    <span class="font-medium text-[var(--text)]">{{ s.name }}</span>
                   </div>
                 </td>
                 <td><span class="badge badge-gray">{{ s.role }}</span></td>
-                <td><span class="font-display font-bold text-[15px] text-positive">{{ s.daysWorked }}</span> <span class="text-[#5a6a82] text-[11px]">days</span></td>
-                <td><span class="font-display font-bold text-[15px]" :class="(30-s.daysWorked)>5?'text-negative':'text-[#5a6a82]'">{{ 30-s.daysWorked }}</span></td>
-                <td class="font-mono-custom text-[12px] text-[#8a9ab5]">{{ s.inTime }}</td>
-                <td class="font-mono-custom text-[12px] text-[#8a9ab5]">{{ s.outTime }}</td>
+                <td><span class="font-display font-bold text-[15px] text-positive">{{ s.daysWorked }}</span> <span class="text-[var(--text-3)] text-[11px]">days</span></td>
+                <td><span class="font-display font-bold text-[15px]" :class="(30-s.daysWorked)>5?'text-negative':'text-[var(--text-3)]'">{{ 30-s.daysWorked }}</span></td>
+                <td class="font-mono-custom text-[12px] text-[var(--text-2)]">{{ s.inTime }}</td>
+                <td class="font-mono-custom text-[12px] text-[var(--text-2)]">{{ s.outTime }}</td>
                 <td><span class="badge badge-gray text-[#3b82f6]">{{ s.totalHours }}h</span></td>
-                <td class="amt text-[#8a9ab5]">₹{{ s.ratePerDay }}</td>
+                <td class="amt text-[var(--text-2)]">₹{{ s.ratePerDay }}</td>
                 <td class="amt text-positive font-semibold">₹{{ fmt(s.salary) }}</td>
                 <td class="amt text-negative">{{ s.advance>0?'₹'+fmt(s.advance):'—' }}</td>
                 <td><span class="font-display font-bold text-[15px]" :class="s.netPayable<0?'text-negative':'text-[#f59e0b]'">₹{{ fmt(s.netPayable) }}</span></td>
@@ -106,12 +106,12 @@
                     <div class="flex-1 fuel-bar-track" style="min-width:50px">
                       <div class="fuel-bar-fill" :style="{width:(s.daysWorked/30*100)+'%',background:s.color}" />
                     </div>
-                    <span class="text-[11px] text-[#8a9ab5]">{{ Math.round(s.daysWorked/30*100) }}%</span>
+                    <span class="text-[11px] text-[var(--text-2)]">{{ Math.round(s.daysWorked/30*100) }}%</span>
                   </div>
                 </td>
                 <td>
                   <button v-if="auth.canWrite" class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditAttendance(s)"><Pencil :size="11" /> Edit</button>
-                  <span v-else class="text-[11px] text-[#5a6a82]">—</span>
+                  <span v-else class="text-[11px] text-[var(--text-3)]">—</span>
                 </td>
               </tr>
             </tbody>
@@ -143,38 +143,38 @@
       <div class="space-y-2">
         <div v-for="s in timesheetData" :key="s.id"
           class="p-3 rounded-lg"
-          style="background:#161b24;border:1px solid #1c2230">
+          style="background:var(--bg-3);border:1px solid var(--bg-4)">
           <!-- Top row: avatar + name + present toggle -->
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center font-display font-bold text-[12px] text-white flex-shrink-0" :style="{background:s.color}">{{ s.name.slice(0,2).toUpperCase() }}</div>
+              <div class="w-8 h-8 rounded-full flex items-center justify-center font-display font-bold text-[12px] text-[var(--text)] flex-shrink-0" :style="{background:s.color}">{{ s.name.slice(0,2).toUpperCase() }}</div>
               <div>
-                <div class="font-medium text-white text-[13.5px]">{{ s.name }}</div>
-                <div class="text-[11px] text-[#5a6a82]">{{ s.role }}</div>
+                <div class="font-medium text-[var(--text)] text-[13.5px]">{{ s.name }}</div>
+                <div class="text-[11px] text-[var(--text-3)]">{{ s.role }}</div>
               </div>
             </div>
             <div class="flex items-center gap-3">
-              <span class="text-[12px] text-[#5a6a82]">{{ s.daysWorked }}/30 days</span>
+              <span class="text-[12px] text-[var(--text-3)]">{{ s.daysWorked }}/30 days</span>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" v-model="attendanceMap[s.id]" class="sr-only peer">
-                <div class="w-10 h-5 rounded-full peer-checked:bg-[#10b981] bg-[#242d3e] transition-colors relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:w-4 after:h-4 after:transition-all peer-checked:after:translate-x-5"></div>
+                <div class="w-10 h-5 rounded-full peer-checked:bg-[#10b981] bg-[var(--border)] transition-colors relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:w-4 after:h-4 after:transition-all peer-checked:after:translate-x-5"></div>
               </label>
               <span class="text-[12px] w-14" :class="attendanceMap[s.id]?'text-positive':'text-negative'">{{ attendanceMap[s.id]?'Present':'Absent' }}</span>
             </div>
           </div>
           <!-- In / Out time — only shown when marked Present -->
-          <div v-if="attendanceMap[s.id]" class="grid grid-cols-3 gap-2 mt-2.5 pt-2.5" style="border-top:1px solid #242d3e">
+          <div v-if="attendanceMap[s.id]" class="grid grid-cols-3 gap-2 mt-2.5 pt-2.5" style="border-top:1px solid var(--border)">
             <div>
-              <div class="text-[10px] text-[#5a6a82] uppercase mb-1">In Time</div>
+              <div class="text-[10px] text-[var(--text-3)] uppercase mb-1">In Time</div>
               <input type="time" v-model="attendanceTimeMap[s.id].in" class="form-input w-full text-[12px] py-1" />
             </div>
             <div>
-              <div class="text-[10px] text-[#5a6a82] uppercase mb-1">Out Time</div>
+              <div class="text-[10px] text-[var(--text-3)] uppercase mb-1">Out Time</div>
               <input type="time" v-model="attendanceTimeMap[s.id].out" class="form-input w-full text-[12px] py-1" />
             </div>
             <div>
-              <div class="text-[10px] text-[#5a6a82] uppercase mb-1">Hours Worked</div>
-              <div class="p-1.5 rounded-lg flex items-center justify-center" style="background:#0f1218;border:1px solid #242d3e;height:34px">
+              <div class="text-[10px] text-[var(--text-3)] uppercase mb-1">Hours Worked</div>
+              <div class="p-1.5 rounded-lg flex items-center justify-center" style="background:var(--bg-2);border:1px solid var(--border);height:34px">
                 <span class="font-display font-bold text-[14px] text-[#3b82f6]">
                   {{ calcHours(attendanceTimeMap[s.id].in, attendanceTimeMap[s.id].out) }}h
                 </span>
@@ -183,8 +183,8 @@
           </div>
         </div>
       </div>
-      <div class="mt-4 p-3 rounded-lg flex justify-between" style="background:#161b24;border:1px solid #1c2230">
-        <span class="text-[#8a9ab5] text-[13px]">Present today:</span>
+      <div class="mt-4 p-3 rounded-lg flex justify-between" style="background:var(--bg-3);border:1px solid var(--bg-4)">
+        <span class="text-[var(--text-2)] text-[13px]">Present today:</span>
         <span class="font-display font-bold text-[16px] text-positive">{{ Object.values(attendanceMap).filter(Boolean).length }} / {{ timesheetData.length }}</span>
       </div>
       <template #footer>
@@ -200,19 +200,19 @@
     <!-- ═══ EDIT ATTENDANCE MODAL ═══ -->
     <AppModal v-model="showEditAtt" :title="'Edit — '+(editAttData?.name||'')" :icon="Pencil" max-width="480px">
       <div class="space-y-4" v-if="editAttData">
-        <div class="flex items-center gap-3 p-3 rounded-lg mb-2" style="background:#161b24;border:1px solid #1c2230">
-          <div class="w-12 h-12 rounded-full flex items-center justify-center font-display font-bold text-[16px] text-white" :style="{background:editAttData.color}">{{ editAttData.name.slice(0,2).toUpperCase() }}</div>
+        <div class="flex items-center gap-3 p-3 rounded-lg mb-2" style="background:var(--bg-3);border:1px solid var(--bg-4)">
+          <div class="w-12 h-12 rounded-full flex items-center justify-center font-display font-bold text-[16px] text-[var(--text)]" :style="{background:editAttData.color}">{{ editAttData.name.slice(0,2).toUpperCase() }}</div>
           <div>
-            <div class="font-display font-bold text-[16px] text-white">{{ editAttData.name }}</div>
-            <div class="text-[12px] text-[#5a6a82]">{{ editAttData.role }} · ₹{{ editAttData.ratePerDay }}/day</div>
+            <div class="font-display font-bold text-[16px] text-[var(--text)]">{{ editAttData.name }}</div>
+            <div class="text-[12px] text-[var(--text-3)]">{{ editAttData.role }} · ₹{{ editAttData.ratePerDay }}/day</div>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="field-label">Days Present</label>
-            <div class="p-2.5 rounded-lg flex items-center" style="background:#161b24;border:1px solid #1c2230;height:42px">
+            <div class="p-2.5 rounded-lg flex items-center" style="background:var(--bg-3);border:1px solid var(--bg-4);height:42px">
               <span class="font-display font-bold text-[18px] text-positive">{{ editAttData.daysWorked }}</span>
-              <span class="text-[11px] text-[#5a6a82] ml-1">/ 30 days</span>
+              <span class="text-[11px] text-[var(--text-3)] ml-1">/ 30 days</span>
             </div>
           </div>
           <div>
@@ -227,19 +227,19 @@
         <div class="grid grid-cols-3 gap-4">
           <div>
             <label class="field-label">Last In Time</label>
-            <div class="p-2 rounded-lg flex items-center" style="background:#161b24;border:1px solid #1c2230;height:42px">
-              <span class="font-mono-custom text-[13px] text-[#8a9ab5]">{{ editAttData.inTime || '—' }}</span>
+            <div class="p-2 rounded-lg flex items-center" style="background:var(--bg-3);border:1px solid var(--bg-4);height:42px">
+              <span class="font-mono-custom text-[13px] text-[var(--text-2)]">{{ editAttData.inTime || '—' }}</span>
             </div>
           </div>
           <div>
             <label class="field-label">Last Out Time</label>
-            <div class="p-2 rounded-lg flex items-center" style="background:#161b24;border:1px solid #1c2230;height:42px">
-              <span class="font-mono-custom text-[13px] text-[#8a9ab5]">{{ editAttData.outTime || '—' }}</span>
+            <div class="p-2 rounded-lg flex items-center" style="background:var(--bg-3);border:1px solid var(--bg-4);height:42px">
+              <span class="font-mono-custom text-[13px] text-[var(--text-2)]">{{ editAttData.outTime || '—' }}</span>
             </div>
           </div>
           <div>
             <label class="field-label">Avg Hours/Day</label>
-            <div class="p-2.5 rounded-lg flex items-center justify-center" style="background:#161b24;border:1px solid #1c2230;height:42px">
+            <div class="p-2.5 rounded-lg flex items-center justify-center" style="background:var(--bg-3);border:1px solid var(--bg-4);height:42px">
               <span class="font-display font-bold text-[20px] text-[#3b82f6]">{{ editAttData.totalHours }}h</span>
             </div>
           </div>
@@ -251,23 +251,23 @@
           </div>
           <div>
             <label class="field-label">Total Advance (₹)</label>
-            <div class="p-2.5 rounded-lg flex items-center" style="background:#161b24;border:1px solid #1c2230;height:42px">
+            <div class="p-2.5 rounded-lg flex items-center" style="background:var(--bg-3);border:1px solid var(--bg-4);height:42px">
               <span class="font-display font-bold text-[18px] text-negative">₹{{ fmt(editAttData.advance) }}</span>
             </div>
           </div>
         </div>
         <!-- Live Preview -->
-        <div class="grid grid-cols-3 gap-3 p-3 rounded-lg" style="background:#161b24;border:1px solid #1c2230">
+        <div class="grid grid-cols-3 gap-3 p-3 rounded-lg" style="background:var(--bg-3);border:1px solid var(--bg-4)">
           <div class="text-center">
-            <div class="text-[10px] text-[#5a6a82] uppercase mb-1">Gross Salary</div>
+            <div class="text-[10px] text-[var(--text-3)] uppercase mb-1">Gross Salary</div>
             <div class="font-display font-bold text-[16px] text-positive">₹{{ fmt(editAttData.daysWorked*editAttData.ratePerDay) }}</div>
           </div>
           <div class="text-center">
-            <div class="text-[10px] text-[#5a6a82] uppercase mb-1">Advance</div>
+            <div class="text-[10px] text-[var(--text-3)] uppercase mb-1">Advance</div>
             <div class="font-display font-bold text-[16px] text-negative">₹{{ fmt(editAttData.advance) }}</div>
           </div>
           <div class="text-center">
-            <div class="text-[10px] text-[#5a6a82] uppercase mb-1">Net Payable</div>
+            <div class="text-[10px] text-[var(--text-3)] uppercase mb-1">Net Payable</div>
             <div class="font-display font-bold text-[16px] text-[#f59e0b]">₹{{ fmt(editAttData.daysWorked*editAttData.ratePerDay - editAttData.advance) }}</div>
           </div>
         </div>
@@ -460,5 +460,5 @@ function doPrint() {
 </script>
 
 <style scoped>
-.field-label{display:block;font-size:11.5px;color:#8a9ab5;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.field-label{display:block;font-size:11.5px;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
 </style>

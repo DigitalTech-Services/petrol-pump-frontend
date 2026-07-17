@@ -30,15 +30,15 @@
     <div class="card">
       <div class="card-header">
         <div>
-          <div class="font-display font-bold text-[15px] text-white">{{ tabLabel }} Stock — {{ monthLabel }}</div>
-          <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Opening, receipts, closing and daily variation</div>
+          <div class="font-display font-bold text-[15px] text-[var(--text)]">{{ tabLabel }} Stock — {{ monthLabel }}</div>
+          <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">Opening, receipts, closing and daily variation</div>
         </div>
         <div class="ml-auto flex gap-2">
           <span class="badge badge-green text-[11px]">{{ store.records.length }} records</span>
         </div>
       </div>
 
-      <div v-if="store.loading" class="p-8 text-center text-[#5a6a82] text-[13px]">Loading stock data…</div>
+      <div v-if="store.loading" class="p-8 text-center text-[var(--text-3)] text-[13px]">Loading stock data…</div>
       <div v-else-if="store.error" class="p-6 text-center text-red-400 text-[13px]">{{ store.error }}</div>
 
       <div v-else class="overflow-x-auto">
@@ -52,13 +52,13 @@
           </thead>
           <tbody>
             <tr v-if="store.records.length === 0">
-              <td colspan="9" class="text-center text-[#5a6a82] py-6 text-[13px]">No stock entries found. Add the first entry.</td>
+              <td colspan="9" class="text-center text-[var(--text-3)] py-6 text-[13px]">No stock entries found. Add the first entry.</td>
             </tr>
             <tr v-for="(r, i) in store.records" :key="r.id">
-              <td class="font-mono-custom text-[11px] text-[#5a6a82]">{{ i+1 }}</td>
+              <td class="font-mono-custom text-[11px] text-[var(--text-3)]">{{ i+1 }}</td>
               <td><span class="font-mono-custom text-[12px] text-[#f59e0b]">{{ r.date }}</span></td>
               <td class="amt">{{ fmt(r.open) }}</td>
-              <td class="amt" :class="r.recv > 0 ? 'text-positive' : 'text-[#5a6a82]'">
+              <td class="amt" :class="r.recv > 0 ? 'text-positive' : 'text-[var(--text-3)]'">
                 {{ r.recv > 0 ? '+' + fmt(r.recv) : '—' }}
               </td>
               <td class="amt">{{ fmt(r.net) }}</td>
@@ -74,7 +74,7 @@
                   <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditModal(r)"><Pencil :size="11" /> Edit</button>
                   <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDeleteModal(r)"><Trash2 :size="11" /></button>
                 </div>
-                <span v-else class="text-[11px] text-[#5a6a82]">—</span>
+                <span v-else class="text-[11px] text-[var(--text-3)]">—</span>
               </td>
             </tr>
           </tbody>
@@ -133,12 +133,12 @@
 
         <!-- Auto calculated row -->
         <div class="grid grid-cols-2 gap-3">
-          <div class="p-3 rounded-lg" style="background:#161b24;border:1px solid #1c2230">
-            <div class="text-[10.5px] text-[#5a6a82] uppercase tracking-wide mb-1">Net Stock</div>
+          <div class="p-3 rounded-lg" style="background:var(--bg-3);border:1px solid var(--bg-4)">
+            <div class="text-[10.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Net Stock</div>
             <div class="font-display font-bold text-[18px] text-[#f59e0b]">{{ fmt(calcNetStock) }} L</div>
           </div>
-          <div class="p-3 rounded-lg" style="background:#161b24;border:1px solid #1c2230">
-            <div class="text-[10.5px] text-[#5a6a82] uppercase tracking-wide mb-1">Variation (est.)</div>
+          <div class="p-3 rounded-lg" style="background:var(--bg-3);border:1px solid var(--bg-4)">
+            <div class="text-[10.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Variation (est.)</div>
             <div class="font-display font-bold text-[18px]" :class="calcVariation >= 0 ? 'text-positive' : 'text-negative'">
               {{ calcVariation >= 0 ? '+' : '' }}{{ fmt(calcVariation) }} L
             </div>
@@ -190,7 +190,7 @@
     <AppModal v-model="showDelete" title="Delete Stock Entry" :icon="AlertTriangle" max-width="420px">
       <div v-if="deleteTarget" class="text-center py-4">
         <Trash2 :size="48" class="mx-auto mb-4 text-[#ef4444] opacity-70" />
-        <p class="text-[14px] text-[#e8edf5] mb-2">
+        <p class="text-[14px] text-[var(--text)] mb-2">
           Delete {{ tabLabel }} stock entry for <span class="text-[#f59e0b] font-bold">{{ deleteTarget.date }}</span>?
         </p>
         <p class="text-[12px] text-negative mt-3">This cannot be undone.</p>
@@ -347,5 +347,5 @@ function doPrint() {
 </script>
 
 <style scoped>
-.field-label { display:block; font-size:11.5px; color:#8a9ab5; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; }
+.field-label { display:block; font-size:11.5px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; }
 </style>

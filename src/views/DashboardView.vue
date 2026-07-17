@@ -29,12 +29,12 @@
       <div class="card">
         <div class="card-header">
           <div>
-            <div class="font-display font-bold text-[15px] text-white">Daily Revenue</div>
-            <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Day-wise sales revenue (₹) — {{ monthLabel }}</div>
+            <div class="font-display font-bold text-[15px] text-[var(--text)]">Daily Revenue</div>
+            <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">Day-wise sales revenue (₹) — {{ monthLabel }}</div>
           </div>
         </div>
         <div class="card-body">
-          <div v-if="store.loading" class="flex items-center justify-center h-[240px] text-[#5a6a82]">
+          <div v-if="store.loading" class="flex items-center justify-center h-[240px] text-[var(--text-3)]">
             <RotateCw :size="20" class="animate-spin mr-2" /> Loading…
           </div>
           <BaseChart v-else type="bar" :data="revenueChartData" :options="revenueOpts" :height="240" />
@@ -44,12 +44,12 @@
       <div class="card">
         <div class="card-header">
           <div>
-            <div class="font-display font-bold text-[15px] text-white">Fuel Volume Mix</div>
-            <div class="text-[11.5px] text-[#5a6a82] mt-0.5">MS vs HSD vs Speed (litres) — {{ monthLabel }}</div>
+            <div class="font-display font-bold text-[15px] text-[var(--text)]">Fuel Volume Mix</div>
+            <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">MS vs HSD vs Speed (litres) — {{ monthLabel }}</div>
           </div>
         </div>
         <div class="card-body">
-          <div v-if="store.loading" class="flex items-center justify-center h-[240px] text-[#5a6a82]">
+          <div v-if="store.loading" class="flex items-center justify-center h-[240px] text-[var(--text-3)]">
             <RotateCw :size="20" class="animate-spin mr-2" /> Loading…
           </div>
           <BaseChart v-else type="line" :data="fuelMixChartData" :options="lineOpts" :height="240" />
@@ -63,25 +63,25 @@
       <!-- Payment Split Donut -->
       <div class="card">
         <div class="card-header">
-          <div class="font-display font-bold text-[15px] text-white">Payment Split</div>
+          <div class="font-display font-bold text-[15px] text-[var(--text)]">Payment Split</div>
         </div>
         <div class="card-body flex flex-col items-center">
-          <div v-if="store.loading" class="flex items-center justify-center h-[200px] text-[#5a6a82]">
+          <div v-if="store.loading" class="flex items-center justify-center h-[200px] text-[var(--text-3)]">
             <RotateCw :size="20" class="animate-spin mr-2" /> Loading…
           </div>
           <template v-else>
             <BaseChart type="doughnut" :data="paymentChartData" :options="doughnutOpts" :height="200" />
             <div class="mt-4 w-full space-y-2 text-[12px]">
               <div class="flex justify-between">
-                <span class="text-[#8a9ab5]">Cash</span>
+                <span class="text-[var(--text-2)]">Cash</span>
                 <span class="amt text-[#10b981]">{{ store.paymentSplit ? '₹' + fmt(store.paymentSplit.cash, 0) : '—' }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-[#8a9ab5]">PhonePe / UPI</span>
+                <span class="text-[var(--text-2)]">PhonePe / UPI</span>
                 <span class="amt text-[#6366f1]">{{ store.paymentSplit ? '₹' + fmt(store.paymentSplit.phone_pe, 0) : '—' }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-[#8a9ab5]">Card (Pine)</span>
+                <span class="text-[var(--text-2)]">Card (Pine)</span>
                 <span class="amt text-[#3b82f6]">{{ store.paymentSplit ? '₹' + fmt(store.paymentSplit.card, 0) : '—' }}</span>
               </div>
             </div>
@@ -93,27 +93,27 @@
       <div class="card">
         <div class="card-header">
           <div>
-            <div class="font-display font-bold text-[15px] text-white">Fuel Stock</div>
-            <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Current inventory levels</div>
+            <div class="font-display font-bold text-[15px] text-[var(--text)]">Fuel Stock</div>
+            <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">Current inventory levels</div>
           </div>
         </div>
         <div class="card-body">
-          <div v-if="store.loading" class="flex items-center justify-center py-8 text-[#5a6a82]">
+          <div v-if="store.loading" class="flex items-center justify-center py-8 text-[var(--text-3)]">
             <RotateCw :size="20" class="animate-spin mr-2" /> Loading…
           </div>
           <div v-else-if="!hasStockLevels" class="flex items-center justify-center py-8 text-center">
             <div>
-              <Fuel :size="32" class="mx-auto mb-2 text-[#2a3548]" />
-              <div class="text-[12px] text-[#5a6a82]">No stock entries recorded {{ monthLabel }}.</div>
-              <div class="text-[11px] text-[#3a4a62] mt-1">Add a stock entry to see levels here.</div>
+              <Fuel :size="32" class="mx-auto mb-2 text-[var(--faint)]" />
+              <div class="text-[12px] text-[var(--text-3)]">No stock entries recorded {{ monthLabel }}.</div>
+              <div class="text-[11px] text-[var(--faint)] mt-1">Add a stock entry to see levels here.</div>
             </div>
           </div>
           <div v-else class="space-y-3">
             <div v-for="s in stockRows" :key="s.key" class="flex items-center justify-between py-2.5 px-3 rounded-lg"
-              style="background:#161b24; border:1px solid #1c2230">
+              style="background:var(--bg-3); border:1px solid var(--bg-4)">
               <div class="flex items-center gap-2.5">
                 <span class="badge" :class="s.badge">{{ s.label }}</span>
-                <span class="text-[11px] text-[#5a6a82]">{{ s.date ? `as of ${s.date}` : 'No entries' }}</span>
+                <span class="text-[11px] text-[var(--text-3)]">{{ s.date ? `as of ${s.date}` : 'No entries' }}</span>
               </div>
               <span class="font-display font-bold text-[15px]" :style="{ color: s.color }">
                 {{ s.closing !== null ? fmt(s.closing) + ' L' : '—' }}
@@ -126,17 +126,17 @@
       <!-- Quick Stats -->
       <div class="card">
         <div class="card-header">
-          <div class="font-display font-bold text-[15px] text-white">Quick Stats</div>
+          <div class="font-display font-bold text-[15px] text-[var(--text)]">Quick Stats</div>
         </div>
         <div class="card-body space-y-3">
           <div v-for="stat in quickStats" :key="stat.label"
             class="flex items-center justify-between py-2.5 px-3 rounded-lg"
-            style="background:#161b24; border:1px solid #1c2230">
+            style="background:var(--bg-3); border:1px solid var(--bg-4)">
             <div class="flex items-center gap-2.5">
               <component :is="stat.icon" :size="18" />
               <div>
-                <div class="text-[12.5px] font-medium text-white">{{ stat.label }}</div>
-                <div class="text-[10.5px] text-[#5a6a82]">{{ stat.sub }}</div>
+                <div class="text-[12.5px] font-medium text-[var(--text)]">{{ stat.label }}</div>
+                <div class="text-[10.5px] text-[var(--text-3)]">{{ stat.sub }}</div>
               </div>
             </div>
             <div class="font-display font-bold text-[15px]" :style="{ color: stat.color }">
@@ -152,8 +152,8 @@
     <div class="card">
       <div class="card-header">
         <div>
-          <div class="font-display font-bold text-[15px] text-white">Recent Sales</div>
-          <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Last 7 days with data — {{ monthLabel }}</div>
+          <div class="font-display font-bold text-[15px] text-[var(--text)]">Recent Sales</div>
+          <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">Last 7 days with data — {{ monthLabel }}</div>
         </div>
         <RouterLink v-if="auth.isManager" to="/sales" class="btn btn-ghost ml-auto text-[12px] py-1.5">View All →</RouterLink>
       </div>
@@ -167,12 +167,12 @@
           </thead>
           <tbody>
             <template v-if="store.loading">
-              <tr><td colspan="9" class="text-center py-6 text-[#5a6a82]">
+              <tr><td colspan="9" class="text-center py-6 text-[var(--text-3)]">
                 <RotateCw :size="13" class="animate-spin inline mr-1.5" />Loading…
               </td></tr>
             </template>
             <template v-else-if="!recentSales.length">
-              <tr><td colspan="9" class="text-center py-6 text-[#5a6a82]">No sales data for {{ monthLabel }}.</td></tr>
+              <tr><td colspan="9" class="text-center py-6 text-[var(--text-3)]">No sales data for {{ monthLabel }}.</td></tr>
             </template>
             <template v-else>
               <tr v-for="r in recentSales" :key="r.date">
@@ -316,7 +316,7 @@ const paymentChartData = computed(() => ({
       : [0, 0, 0],
     backgroundColor: [chartColors.cash, chartColors.phone, chartColors.card],
     borderWidth: 2,
-    borderColor: '#0a0c10',
+    borderColor: 'var(--bg)',
   }],
 }))
 

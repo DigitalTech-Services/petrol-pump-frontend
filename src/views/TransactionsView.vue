@@ -31,7 +31,7 @@
         <option value="">All Banks</option>
         <option>BOM</option><option>ICICI</option><option>HDFC</option><option>SBI</option>
       </select>
-      <span class="self-center text-[12px] text-[#5a6a82] ml-auto">
+      <span class="self-center text-[12px] text-[var(--text-3)] ml-auto">
         {{ filtered.length }} records · Total: ₹{{ fmt(filteredTotal) }}
       </span>
     </div>
@@ -41,11 +41,11 @@
       <!-- Table -->
       <div class="lg:col-span-2 card">
         <div class="card-header">
-          <div class="font-display font-bold text-[15px] text-white">Transfers — {{ monthLabel }}</div>
+          <div class="font-display font-bold text-[15px] text-[var(--text)]">Transfers — {{ monthLabel }}</div>
           <span class="badge badge-blue ml-2">{{ filtered.length }} records</span>
         </div>
 
-        <div v-if="loading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
+        <div v-if="loading" class="card-body text-center text-[13px] text-[var(--text-3)] py-8">
           <RotateCw :size="14" class="animate-spin inline-block mr-2" />Loading…
         </div>
         <div v-else-if="loadError" class="card-body text-center py-8">
@@ -59,23 +59,23 @@
             </thead>
             <tbody>
               <tr v-for="(t, i) in filtered" :key="t.id">
-                <td class="font-mono-custom text-[11px] text-[#5a6a82]">{{ i + 1 }}</td>
+                <td class="font-mono-custom text-[11px] text-[var(--text-3)]">{{ i + 1 }}</td>
                 <td><span class="font-mono-custom text-[12px] text-[#f59e0b]">{{ fmtDate(t.date) }}</span></td>
                 <td><span class="badge badge-blue">{{ t.bank }}</span></td>
                 <td><span class="badge" :class="t.type === 'PhonePe' ? 'badge-indigo' : 'badge-blue'">{{ t.type }}</span></td>
                 <td class="amt-lg text-positive">₹{{ fmt(t.amount) }}</td>
-                <td class="font-mono-custom text-[11px] text-[#5a6a82]">{{ t.ref_number || '—' }}</td>
-                <td class="text-[12px] text-[#5a6a82]">{{ t.remarks || '—' }}</td>
+                <td class="font-mono-custom text-[11px] text-[var(--text-3)]">{{ t.ref_number || '—' }}</td>
+                <td class="text-[12px] text-[var(--text-3)]">{{ t.remarks || '—' }}</td>
                 <td>
                   <div v-if="auth.canWrite" class="flex gap-1.5">
                     <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEdit(t)"><Pencil :size="11" /></button>
                     <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDelete(t)"><Trash2 :size="11" /></button>
                   </div>
-                  <span v-else class="text-[11px] text-[#5a6a82]">—</span>
+                  <span v-else class="text-[11px] text-[var(--text-3)]">—</span>
                 </td>
               </tr>
               <tr v-if="!filtered.length && !loading">
-                <td colspan="8" class="text-center text-[12.5px] text-[#5a6a82] py-6">
+                <td colspan="8" class="text-center text-[12.5px] text-[var(--text-3)] py-6">
                   No transactions found for this period.
                 </td>
               </tr>
@@ -90,22 +90,22 @@
       <!-- Chart + type breakdown -->
       <div class="card">
         <div class="card-header">
-          <div class="font-display font-bold text-[15px] text-white">Transfer Trend</div>
+          <div class="font-display font-bold text-[15px] text-[var(--text)]">Transfer Trend</div>
         </div>
         <div class="card-body">
           <BaseChart type="line" :data="txChartData" :options="lineOpts" :height="430" />
         </div>
         <div class="px-5 pb-5 space-y-2">
           <div v-for="t in summary.by_type" :key="t.type"
-            class="flex justify-between p-2.5 rounded-lg" style="background:#161b24">
-            <span class="text-[12px] text-[#8a9ab5]">{{ t.type }}</span>
+            class="flex justify-between p-2.5 rounded-lg" style="background:var(--bg-3)">
+            <span class="text-[12px] text-[var(--text-2)]">{{ t.type }}</span>
             <span class="amt" :class="t.type === 'PhonePe' ? 'text-[#6366f1]' : 'text-[#3b82f6]'">₹{{ fmt(t.total) }}</span>
           </div>
-          <div v-if="!summary.by_type.length && !loading" class="flex justify-between p-2.5 rounded-lg" style="background:#161b24">
-            <span class="text-[12px] text-[#5a6a82]">No data yet</span>
+          <div v-if="!summary.by_type.length && !loading" class="flex justify-between p-2.5 rounded-lg" style="background:var(--bg-3)">
+            <span class="text-[12px] text-[var(--text-3)]">No data yet</span>
           </div>
-          <div class="flex justify-between p-2.5 rounded-lg" style="background:#161b24; border:1px solid #2e3a50">
-            <span class="text-[13px] font-semibold text-white">Grand Total</span>
+          <div class="flex justify-between p-2.5 rounded-lg" style="background:var(--bg-3); border:1px solid var(--border-2)">
+            <span class="text-[13px] font-semibold text-[var(--text)]">Grand Total</span>
             <span class="amt-lg text-[#f59e0b]">₹{{ fmt(summary.total) }}</span>
           </div>
         </div>
@@ -149,7 +149,7 @@
         </div>
         <div v-if="txForm.amount" class="p-3 rounded-lg flex justify-between"
           style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.2)">
-          <span class="text-[13px] text-[#8a9ab5]">Transaction Amount</span>
+          <span class="text-[13px] text-[var(--text-2)]">Transaction Amount</span>
           <span class="font-display font-bold text-[18px] text-positive">₹{{ fmt(txForm.amount) }}</span>
         </div>
       </div>
@@ -204,11 +204,11 @@
     <AppModal v-model="showDelete" title="Delete Transaction" :icon="AlertTriangle" max-width="400px">
       <div v-if="deleteTarget" class="text-center py-4">
         <Trash2 :size="48" class="mx-auto mb-4 text-[#ef4444] opacity-70" />
-        <p class="text-[14px] text-[#e8edf5] mb-1">
+        <p class="text-[14px] text-[var(--text)] mb-1">
           Delete <span class="text-positive font-bold">₹{{ fmt(deleteTarget.amount) }}</span>
           on <span class="text-[#f59e0b]">{{ fmtDate(deleteTarget.date) }}</span>?
         </p>
-        <p class="text-[12px] text-[#5a6a82] mt-1">{{ deleteTarget.ref_number || deleteTarget.remarks || '' }}</p>
+        <p class="text-[12px] text-[var(--text-3)] mt-1">{{ deleteTarget.ref_number || deleteTarget.remarks || '' }}</p>
         <p class="text-[12px] text-negative mt-3">This cannot be undone.</p>
       </div>
       <template #footer>
@@ -439,5 +439,5 @@ const lineOpts = {
 </script>
 
 <style scoped>
-.field-label { display:block; font-size:11.5px; color:#8a9ab5; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px }
+.field-label { display:block; font-size:11.5px; color:var(--text-2); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px }
 </style>

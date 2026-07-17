@@ -17,7 +17,7 @@
       <button class="tab-btn flex items-center gap-1.5" :class="{ active: tab === 'staff' }"     @click="tab = 'staff'"><Users :size="14" /> Staff</button>
     </div>
 
-    <div v-if="loading" class="flex items-center justify-center py-24 text-[#5a6a82]">
+    <div v-if="loading" class="flex items-center justify-center py-24 text-[var(--text-3)]">
       <RotateCw :size="20" class="animate-spin mr-2" /> Loading report…
     </div>
 
@@ -35,18 +35,18 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         <div class="card">
           <div class="card-header">
-            <div class="font-display font-bold text-[15px] text-white flex items-center gap-2"><ClipboardList :size="16" /> {{ monthLabel }} — P&L Summary</div>
+            <div class="font-display font-bold text-[15px] text-[var(--text)] flex items-center gap-2"><ClipboardList :size="16" /> {{ monthLabel }} — P&L Summary</div>
           </div>
           <div class="card-body">
             <div class="space-y-0">
               <div v-for="row in plRows" :key="row.label"
                 class="flex items-center justify-between py-3"
-                :style="{ borderBottom: row.divider ? '2px solid #2e3a50' : '1px solid #1c2230' }">
-                <span class="text-[13px]" :class="row.bold ? 'font-bold text-white font-display text-[15px]' : 'text-[#8a9ab5]'"
+                :style="{ borderBottom: row.divider ? '2px solid var(--border-2)' : '1px solid var(--bg-4)' }">
+                <span class="text-[13px]" :class="row.bold ? 'font-bold text-[var(--text)] font-display text-[15px]' : 'text-[var(--text-2)]'"
                   :style="{ paddingLeft: row.indent ? '16px' : '0' }">
                   {{ row.label }}
                 </span>
-                <span class="font-mono-custom text-[13px]" :class="row.class || 'text-[#e8edf5]'"
+                <span class="font-mono-custom text-[13px]" :class="row.class || 'text-[var(--text)]'"
                   :style="{ fontSize: row.bold ? '16px' : '13px' }">
                   {{ row.value }}
                 </span>
@@ -58,21 +58,21 @@
         <!-- Collection breakdown -->
         <div class="card">
           <div class="card-header">
-            <div class="font-display font-bold text-[15px] text-white flex items-center gap-2"><CreditCard :size="16" /> Collection Breakdown</div>
+            <div class="font-display font-bold text-[15px] text-[var(--text)] flex items-center gap-2"><CreditCard :size="16" /> Collection Breakdown</div>
           </div>
           <div class="card-body">
             <BaseChart type="doughnut" :data="collectionChart" :options="doughnutOpts" :height="220" />
             <div class="mt-4 space-y-2">
               <div class="flex justify-between items-center">
-                <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-full" style="background:#10b981"/><span class="text-[12.5px] text-[#8a9ab5]">Cash</span></div>
+                <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-full" style="background:#10b981"/><span class="text-[12.5px] text-[var(--text-2)]">Cash</span></div>
                 <span class="amt text-[#10b981]">{{ fmtINR(monthly?.collection?.cash) }} ({{ monthly?.collection?.cash_pct ?? 0 }}%)</span>
               </div>
               <div class="flex justify-between items-center">
-                <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-full" style="background:#6366f1"/><span class="text-[12.5px] text-[#8a9ab5]">PhonePe/UPI</span></div>
+                <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-full" style="background:#6366f1"/><span class="text-[12.5px] text-[var(--text-2)]">PhonePe/UPI</span></div>
                 <span class="amt text-[#6366f1]">{{ fmtINR(monthly?.collection?.phone_pe) }} ({{ monthly?.collection?.phone_pe_pct ?? 0 }}%)</span>
               </div>
               <div class="flex justify-between items-center">
-                <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-full" style="background:#3b82f6"/><span class="text-[12.5px] text-[#8a9ab5]">Card (Pine Labs)</span></div>
+                <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 rounded-full" style="background:#3b82f6"/><span class="text-[12.5px] text-[var(--text-2)]">Card (Pine Labs)</span></div>
                 <span class="amt text-[#3b82f6]">{{ fmtINR(monthly?.collection?.card) }} ({{ monthly?.collection?.card_pct ?? 0 }}%)</span>
               </div>
             </div>
@@ -83,7 +83,7 @@
       <!-- Revenue Chart -->
       <div class="card">
         <div class="card-header">
-          <div class="font-display font-bold text-[15px] text-white">Daily Revenue vs Collections — {{ monthLabel }}</div>
+          <div class="font-display font-bold text-[15px] text-[var(--text)]">Daily Revenue vs Collections — {{ monthLabel }}</div>
         </div>
         <div class="card-body">
           <BaseChart type="line" :data="revVsCollChart" :options="lineOpts" :height="280" />
@@ -95,26 +95,26 @@
     <template v-if="tab === 'fuel'">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div class="card" v-for="f in fuelCards" :key="f.key">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-white flex items-center gap-2"><Fuel :size="16" :class="f.iconClass" /> {{ f.title }}</div></div>
+          <div class="card-header"><div class="font-display font-bold text-[15px] text-[var(--text)] flex items-center gap-2"><Fuel :size="16" :class="f.iconClass" /> {{ f.title }}</div></div>
           <div class="card-body space-y-3">
-            <div class="flex justify-between"><span class="text-[#8a9ab5]">Total Volume</span><span class="amt font-semibold" :style="{color:f.color}">{{ fmt(f.stats.total_volume) }} L</span></div>
-            <div class="flex justify-between"><span class="text-[#8a9ab5]">Rate/Litre</span><span class="amt">₹{{ fmt(f.stats.rate) }}</span></div>
-            <div class="flex justify-between"><span class="text-[#8a9ab5]">Revenue</span><span class="amt font-semibold" :style="{color:f.color}">{{ fmtINR(f.stats.revenue) }}</span></div>
-            <div class="flex justify-between"><span class="text-[#8a9ab5]">Avg Daily</span><span class="amt">{{ fmt(f.stats.avg_daily, 0) }} L</span></div>
-            <div class="flex justify-between"><span class="text-[#8a9ab5]">Peak Day</span><span class="amt">{{ fmt(f.stats.peak_volume, 0) }} L ({{ f.stats.peak_date ?? '—' }})</span></div>
+            <div class="flex justify-between"><span class="text-[var(--text-2)]">Total Volume</span><span class="amt font-semibold" :style="{color:f.color}">{{ fmt(f.stats.total_volume) }} L</span></div>
+            <div class="flex justify-between"><span class="text-[var(--text-2)]">Rate/Litre</span><span class="amt">₹{{ fmt(f.stats.rate) }}</span></div>
+            <div class="flex justify-between"><span class="text-[var(--text-2)]">Revenue</span><span class="amt font-semibold" :style="{color:f.color}">{{ fmtINR(f.stats.revenue) }}</span></div>
+            <div class="flex justify-between"><span class="text-[var(--text-2)]">Avg Daily</span><span class="amt">{{ fmt(f.stats.avg_daily, 0) }} L</span></div>
+            <div class="flex justify-between"><span class="text-[var(--text-2)]">Peak Day</span><span class="amt">{{ fmt(f.stats.peak_volume, 0) }} L ({{ f.stats.peak_date ?? '—' }})</span></div>
             <div class="fuel-bar-track mt-2"><div class="fuel-bar-fill" :style="{ width: f.stats.pct_of_total + '%', background: f.color }"/></div>
-            <div class="text-[11px] text-[#5a6a82]">{{ f.stats.pct_of_total }}% of total fuel volume</div>
+            <div class="text-[11px] text-[var(--text-3)]">{{ f.stats.pct_of_total }}% of total fuel volume</div>
           </div>
         </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-white">MS Daily Volume</div></div>
+          <div class="card-header"><div class="font-display font-bold text-[15px] text-[var(--text)]">MS Daily Volume</div></div>
           <div class="card-body"><BaseChart type="bar" :data="msBarChart" :options="barOpts" :height="260" /></div>
         </div>
         <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-white">HSD Daily Volume</div></div>
+          <div class="card-header"><div class="font-display font-bold text-[15px] text-[var(--text)]">HSD Daily Volume</div></div>
           <div class="card-body"><BaseChart type="bar" :data="hsdBarChart" :options="barOpts" :height="260" /></div>
         </div>
       </div>
@@ -124,26 +124,26 @@
     <template v-if="tab === 'financial'">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-white">Revenue vs Cash vs PhonePe</div></div>
+          <div class="card-header"><div class="font-display font-bold text-[15px] text-[var(--text)]">Revenue vs Cash vs PhonePe</div></div>
           <div class="card-body"><BaseChart type="line" :data="revVsCollChart" :options="lineOpts" :height="260" /></div>
         </div>
         <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-white">Daily Expenses Trend</div></div>
+          <div class="card-header"><div class="font-display font-bold text-[15px] text-[var(--text)]">Daily Expenses Trend</div></div>
           <div class="card-body"><BaseChart type="bar" :data="expBarChart" :options="expOpts" :height="260" /></div>
         </div>
       </div>
       <!-- Expense table -->
       <div class="card">
-        <div class="card-header"><div class="font-display font-bold text-[15px] text-white">Expense Category Breakdown</div></div>
+        <div class="card-header"><div class="font-display font-bold text-[15px] text-[var(--text)]">Expense Category Breakdown</div></div>
         <div class="card-body">
-          <div v-if="!expCategories.length" class="text-center py-8 text-[#5a6a82] text-[13px]">No expenses recorded for {{ monthLabel }}.</div>
+          <div v-if="!expCategories.length" class="text-center py-8 text-[var(--text-3)] text-[13px]">No expenses recorded for {{ monthLabel }}.</div>
           <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div v-for="cat in expCategories" :key="cat.label"
-              class="p-4 rounded-xl" style="background:#161b24; border:1px solid #1c2230">
+              class="p-4 rounded-xl" style="background:var(--bg-3); border:1px solid var(--bg-4)">
               <component :is="cat.icon" :size="24" class="mb-2" :style="{color: cat.color}" />
-              <div class="text-[12px] text-[#5a6a82] mb-1">{{ cat.label }}</div>
+              <div class="text-[12px] text-[var(--text-3)] mb-1">{{ cat.label }}</div>
               <div class="font-display font-bold text-[18px]" :style="{ color: cat.color }">₹{{ fmt(cat.value, 0) }}</div>
-              <div class="text-[11px] text-[#5a6a82] mt-1">{{ cat.sub }}</div>
+              <div class="text-[11px] text-[var(--text-3)] mt-1">{{ cat.sub }}</div>
             </div>
           </div>
         </div>
@@ -154,18 +154,18 @@
     <template v-if="tab === 'staff'">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-white">Staff Salary Distribution</div></div>
+          <div class="card-header"><div class="font-display font-bold text-[15px] text-[var(--text)]">Staff Salary Distribution</div></div>
           <div class="card-body"><BaseChart type="bar" :data="staffSalaryChart" :options="staffBarOpts" :height="280" /></div>
         </div>
         <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-white">Salary vs Advance vs Net</div></div>
+          <div class="card-header"><div class="font-display font-bold text-[15px] text-[var(--text)]">Salary vs Advance vs Net</div></div>
           <div class="card-body"><BaseChart type="bar" :data="staffCompChart" :options="staffGroupOpts" :height="280" /></div>
         </div>
       </div>
 
       <!-- Staff Commission Summary -->
       <div class="card">
-        <div class="card-header"><div class="font-display font-bold text-[15px] text-white">Staff Payroll Summary</div></div>
+        <div class="card-header"><div class="font-display font-bold text-[15px] text-[var(--text)]">Staff Payroll Summary</div></div>
         <div class="overflow-x-auto">
           <table class="data-table">
             <thead>
@@ -173,14 +173,14 @@
             </thead>
             <tbody>
               <tr v-if="!staffSummary.length">
-                <td colspan="7" class="text-center text-[#5a6a82] py-6 text-[13px]">No staff records found.</td>
+                <td colspan="7" class="text-center text-[var(--text-3)] py-6 text-[13px]">No staff records found.</td>
               </tr>
               <tr v-for="s in staffSummary" :key="s.name">
                 <td>
                   <div class="flex items-center gap-2">
-                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white font-display"
+                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-[var(--text)] font-display"
                       :style="{ background: s.color }">{{ s.name.slice(0,2).toUpperCase() }}</div>
-                    <span class="font-medium text-white">{{ s.name }}</span>
+                    <span class="font-medium text-[var(--text)]">{{ s.name }}</span>
                   </div>
                 </td>
                 <td><span class="badge badge-gray">{{ s.role }}</span></td>
@@ -193,7 +193,7 @@
                     <div class="flex-1 fuel-bar-track" style="min-width:60px">
                       <div class="fuel-bar-fill" :style="{ width: Math.min(100, s.gross ? s.advance / s.gross * 100 : 0) + '%', background: s.color }" />
                     </div>
-                    <span class="text-[11px] text-[#5a6a82]">{{ s.gross ? Math.round(s.advance / s.gross * 100) : 0 }}%</span>
+                    <span class="text-[11px] text-[var(--text-3)]">{{ s.gross ? Math.round(s.advance / s.gross * 100) : 0 }}%</span>
                   </div>
                 </td>
               </tr>
@@ -297,7 +297,7 @@ const collectionChart = computed(() => ({
   datasets: [{
     data: [monthly.value?.collection?.cash ?? 0, monthly.value?.collection?.phone_pe ?? 0, monthly.value?.collection?.card ?? 0],
     backgroundColor: ['#10b981','#6366f1','#3b82f6'],
-    borderWidth: 2, borderColor: '#0a0c10',
+    borderWidth: 2, borderColor: 'var(--bg)',
   }]
 }))
 
@@ -341,12 +341,12 @@ const CATEGORY_ICONS = {
   'DG Diesel':         { icon: Zap,     color:'#ef4444' },
   'Maintenance':       { icon: Wrench,  color:'#8b5cf6' },
   'Stationary':        { icon: Package, color:'#3b82f6' },
-  'Other':             { icon: MoreHorizontal, color:'#5a6a82' },
+  'Other':             { icon: MoreHorizontal, color:'var(--text-3)' },
 }
 
 const expCategories = computed(() => (pnl.value?.by_category ?? []).map(c => ({
   icon:  CATEGORY_ICONS[c.category]?.icon  ?? Receipt,
-  color: CATEGORY_ICONS[c.category]?.color ?? '#5a6a82',
+  color: CATEGORY_ICONS[c.category]?.color ?? 'var(--text-3)',
   label: c.category,
   value: c.total,
   sub:   `${c.count} record${c.count !== 1 ? 's' : ''}`,

@@ -23,7 +23,7 @@
             class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left mb-1 transition-all duration-150 text-[13.5px]"
             :class="activeSection === s.key
               ? 'bg-[rgba(245,158,11,0.12)] text-[#f59e0b] border border-[rgba(245,158,11,0.2)]'
-              : 'text-[#8a9ab5] hover:bg-[#161b24] hover:text-white'"
+              : 'text-[var(--text-2)] hover:bg-[var(--bg-3)] hover:text-[var(--text)]'"
             @click="activeSection = s.key"
           >
             <component :is="s.icon" :size="16" class="flex-shrink-0" />
@@ -39,9 +39,9 @@
         <template v-if="['station','fuel','nozzles'].includes(activeSection) && noStationSelected">
           <div class="card">
             <div class="card-body text-center py-12">
-              <Building2 :size="32" class="mx-auto mb-3 text-[#2a3548]" />
-              <div class="text-[13px] text-[#8a9ab5]">Select a station from the top bar to view its settings.</div>
-              <div class="text-[11px] text-[#5a6a82] mt-1">"All Stations" has no single configuration to show.</div>
+              <Building2 :size="32" class="mx-auto mb-3 text-[var(--faint)]" />
+              <div class="text-[13px] text-[var(--text-2)]">Select a station from the top bar to view its settings.</div>
+              <div class="text-[11px] text-[var(--text-3)] mt-1">"All Stations" has no single configuration to show.</div>
             </div>
           </div>
         </template>
@@ -52,11 +52,11 @@
             <div class="card-header">
               <Building2 :size="18" class="text-[#f59e0b]" />
               <div>
-                <div class="font-display font-bold text-[15px] text-white">Station Details</div>
-                <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Basic information about your fuel station</div>
+                <div class="font-display font-bold text-[15px] text-[var(--text)]">Station Details</div>
+                <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">Basic information about your fuel station</div>
               </div>
             </div>
-            <div v-if="stationLoading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
+            <div v-if="stationLoading" class="card-body text-center text-[13px] text-[var(--text-3)] py-8">
               <RotateCw :size="14" class="animate-spin inline-block mr-2" />Loading…
             </div>
             <div v-else-if="stationError" class="card-body text-center py-8">
@@ -81,12 +81,12 @@
             <div class="card-header">
               <Fuel :size="18" class="text-[#f59e0b]" />
               <div>
-                <div class="font-display font-bold text-[15px] text-white">Fuel Rates</div>
-                <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Current fuel prices (auto-affects revenue calculations)</div>
+                <div class="font-display font-bold text-[15px] text-[var(--text)]">Fuel Rates</div>
+                <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">Current fuel prices (auto-affects revenue calculations)</div>
               </div>
               <span class="ml-auto badge badge-green">Live Rates</span>
             </div>
-            <div v-if="fuelLoading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
+            <div v-if="fuelLoading" class="card-body text-center text-[13px] text-[var(--text-3)] py-8">
               <RotateCw :size="14" class="animate-spin inline-block mr-2" />Loading…
             </div>
             <div v-else-if="fuelError" class="card-body text-center py-8">
@@ -95,18 +95,18 @@
             </div>
             <div v-else class="card-body space-y-5">
               <div v-for="fuel in fuelRates" :key="fuel.key"
-                class="p-4 rounded-xl" style="background:#161b24; border:1px solid #1c2230">
+                class="p-4 rounded-xl" style="background:var(--bg-3); border:1px solid var(--bg-4)">
                 <div class="flex items-center gap-3 mb-4">
-                  <div class="w-9 h-9 rounded-lg flex items-center justify-center font-display font-bold text-[13px] text-white"
+                  <div class="w-9 h-9 rounded-lg flex items-center justify-center font-display font-bold text-[13px] text-[var(--text)]"
                     :style="{ background: fuel.color }">{{ fuel.abbr }}</div>
                   <div>
-                    <div class="font-display font-bold text-[15px] text-white">{{ fuel.name }}</div>
-                    <div class="text-[11px] text-[#5a6a82]">{{ fuel.type }}</div>
+                    <div class="font-display font-bold text-[15px] text-[var(--text)]">{{ fuel.name }}</div>
+                    <div class="text-[11px] text-[var(--text-3)]">{{ fuel.type }}</div>
                   </div>
                   <div class="ml-auto text-right">
                     <div>
                       <span class="font-display font-bold text-[22px]" :style="{ color: fuel.color }">₹{{ fuel.rate }}</span>
-                      <span class="text-[11px] text-[#5a6a82]">/L</span>
+                      <span class="text-[11px] text-[var(--text-3)]">/L</span>
                     </div>
                     <div class="text-[11px] font-semibold" :class="margin(fuel) >= 0 ? 'text-positive' : 'text-negative'">
                       {{ margin(fuel) >= 0 ? '+' : '−' }}₹{{ fmt(Math.abs(margin(fuel))) }}/L {{ margin(fuel) >= 0 ? 'profit' : 'loss' }}
@@ -121,8 +121,8 @@
                   <div><label class="field-label">Effective Date</label>
                     <input type="date" v-model="fuel.effectiveDate" :disabled="!auth.canWrite" class="form-input w-full" /></div>
                 </div>
-                <div class="mt-3 p-2.5 rounded-lg flex items-center justify-between" style="background:#0f1218;border:1px solid #1c2230">
-                  <span class="text-[12px] text-[#8a9ab5]">Profit / Loss per Litre</span>
+                <div class="mt-3 p-2.5 rounded-lg flex items-center justify-between" style="background:var(--bg-2);border:1px solid var(--bg-4)">
+                  <span class="text-[12px] text-[var(--text-2)]">Profit / Loss per Litre</span>
                   <span class="font-display font-bold text-[15px]" :class="margin(fuel) >= 0 ? 'text-positive' : 'text-negative'">
                     {{ margin(fuel) >= 0 ? '+' : '−' }}₹{{ fmt(Math.abs(margin(fuel))) }}
                   </span>
@@ -138,13 +138,13 @@
             <div class="card-header">
               <Wrench :size="18" class="text-[#f59e0b]" />
               <div>
-                <div class="font-display font-bold text-[15px] text-white">Nozzle Configuration</div>
-                <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Pump and nozzle assignments</div>
+                <div class="font-display font-bold text-[15px] text-[var(--text)]">Nozzle Configuration</div>
+                <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">Pump and nozzle assignments</div>
               </div>
               <button v-if="auth.canWrite" class="btn btn-primary ml-auto text-[12px] py-1 flex items-center gap-1" @click="openAddNozzle"><Plus :size="12" /> Add Nozzle</button>
             </div>
 
-            <div v-if="nozzlesLoading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
+            <div v-if="nozzlesLoading" class="card-body text-center text-[13px] text-[var(--text-3)] py-8">
               <RotateCw :size="14" class="animate-spin inline-block mr-2" />Loading…
             </div>
             <div v-else-if="nozzlesError" class="card-body text-center py-8">
@@ -168,12 +168,12 @@
                         <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditNozzle(n)"><Pencil :size="11" /> Edit</button>
                         <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDeleteNozzle(n)"><Trash2 :size="11" /></button>
                       </div>
-                      <span v-else class="text-[11px] text-[#5a6a82]">—</span>
+                      <span v-else class="text-[11px] text-[var(--text-3)]">—</span>
                     </td>
                   </tr>
                   <tr v-if="!nozzles.length">
-                    <td colspan="6" class="text-center text-[12.5px] text-[#5a6a82] py-6">
-                      No nozzles configured. Click <strong class="text-white">+ Add Nozzle</strong> to create one.
+                    <td colspan="6" class="text-center text-[12.5px] text-[var(--text-3)] py-6">
+                      No nozzles configured. Click <strong class="text-[var(--text)]">+ Add Nozzle</strong> to create one.
                     </td>
                   </tr>
                 </tbody>
@@ -187,11 +187,11 @@
               class="fixed inset-0 z-50 flex items-center justify-center px-4"
               style="background:rgba(0,0,0,0.7); backdrop-filter:blur(4px)"
               @mousedown.self="nozzleModal.open = false">
-              <div class="w-full max-w-[440px] rounded-2xl p-6" style="background:#0f1218; border:1px solid #242d3e">
-                <h3 class="font-display font-bold text-[17px] text-white mb-1">
+              <div class="w-full max-w-[440px] rounded-2xl p-6" style="background:var(--bg-2); border:1px solid var(--border)">
+                <h3 class="font-display font-bold text-[17px] text-[var(--text)] mb-1">
                   {{ nozzleModal.mode === 'add' ? 'Add Nozzle' : 'Edit Nozzle' }}
                 </h3>
-                <p class="text-[12px] text-[#5a6a82] mb-5">
+                <p class="text-[12px] text-[var(--text-3)] mb-5">
                   {{ nozzleModal.mode === 'add' ? 'Register a new nozzle on a pump.' : 'Update nozzle details.' }}
                 </p>
                 <form @submit.prevent="submitNozzle">
@@ -223,11 +223,11 @@
                     </div>
                   </div>
                   <div class="mb-5 flex items-center justify-between p-3 rounded-xl"
-                    style="background:#161b24; border:1px solid #1c2230">
-                    <span class="text-[13px] text-white">Active Status</span>
+                    style="background:var(--bg-3); border:1px solid var(--bg-4)">
+                    <span class="text-[13px] text-[var(--text)]">Active Status</span>
                     <label class="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" v-model="nozzleForm.active" class="sr-only peer">
-                      <div class="w-10 h-5 rounded-full peer-checked:bg-[#f59e0b] bg-[#242d3e] transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:w-4 after:h-4 after:transition-all peer-checked:after:translate-x-5"></div>
+                      <div class="w-10 h-5 rounded-full peer-checked:bg-[#f59e0b] bg-[var(--border)] transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:w-4 after:h-4 after:transition-all peer-checked:after:translate-x-5"></div>
                     </label>
                   </div>
                   <Transition name="fade">
@@ -238,8 +238,8 @@
                   </Transition>
                   <div class="flex gap-3 justify-end">
                     <button type="button" @click="nozzleModal.open = false"
-                      class="px-4 py-2 rounded-xl text-[12.5px] font-medium text-[#8a9ab5] hover:text-white"
-                      style="background:#161b24; border:1px solid #242d3e">Cancel</button>
+                      class="px-4 py-2 rounded-xl text-[12.5px] font-medium text-[var(--text-2)] hover:text-[var(--text)]"
+                      style="background:var(--bg-3); border:1px solid var(--border)">Cancel</button>
                     <button type="submit"
                       class="btn btn-primary px-5 py-2 flex items-center gap-2"
                       :disabled="nozzleSubmitting">
@@ -258,10 +258,10 @@
               class="fixed inset-0 z-50 flex items-center justify-center px-4"
               style="background:rgba(0,0,0,0.7); backdrop-filter:blur(4px)"
               @mousedown.self="nozzleDeleteModal.open = false">
-              <div class="w-full max-w-[360px] rounded-2xl p-6" style="background:#0f1218; border:1px solid #242d3e">
-                <h3 class="font-display font-bold text-[17px] text-white mb-1">Remove Nozzle</h3>
-                <p class="text-[13px] text-[#5a6a82] mb-5">
-                  Remove nozzle <strong class="text-white">{{ nozzleDeleteModal.nozzle?.nozzleId }}</strong>?
+              <div class="w-full max-w-[360px] rounded-2xl p-6" style="background:var(--bg-2); border:1px solid var(--border)">
+                <h3 class="font-display font-bold text-[17px] text-[var(--text)] mb-1">Remove Nozzle</h3>
+                <p class="text-[13px] text-[var(--text-3)] mb-5">
+                  Remove nozzle <strong class="text-[var(--text)]">{{ nozzleDeleteModal.nozzle?.nozzleId }}</strong>?
                   This action cannot be undone.
                 </p>
                 <Transition name="fade">
@@ -272,8 +272,8 @@
                 </Transition>
                 <div class="flex gap-3 justify-end">
                   <button @click="nozzleDeleteModal.open = false"
-                    class="px-4 py-2 rounded-xl text-[12.5px] font-medium text-[#8a9ab5] hover:text-white"
-                    style="background:#161b24; border:1px solid #242d3e">Cancel</button>
+                    class="px-4 py-2 rounded-xl text-[12.5px] font-medium text-[var(--text-2)] hover:text-[var(--text)]"
+                    style="background:var(--bg-3); border:1px solid var(--border)">Cancel</button>
                   <button @click="confirmDeleteNozzle"
                     class="btn btn-danger px-5 py-2 flex items-center gap-2"
                     :disabled="nozzleDeleting">
@@ -292,13 +292,13 @@
             <div class="card-header">
               <User :size="18" class="text-[#f59e0b]" />
               <div>
-                <div class="font-display font-bold text-[15px] text-white">User Management</div>
-                <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Manage manager accounts for this station</div>
+                <div class="font-display font-bold text-[15px] text-[var(--text)]">User Management</div>
+                <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">Manage manager accounts for this station</div>
               </div>
               <button class="btn btn-primary ml-auto text-[12px] py-1 flex items-center gap-1" @click="openAddManager"><Plus :size="12" /> Add Manager</button>
             </div>
 
-            <div v-if="managersLoading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
+            <div v-if="managersLoading" class="card-body text-center text-[13px] text-[var(--text-3)] py-8">
               <RotateCw :size="14" class="animate-spin inline-block mr-2" />Loading…
             </div>
             <div v-else-if="managersError" class="card-body text-center py-8">
@@ -314,33 +314,33 @@
                   <tr>
                     <td>
                       <div class="flex items-center gap-2.5">
-                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold font-display text-white"
+                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold font-display text-[var(--text)]"
                           style="background:linear-gradient(135deg,#f59e0b,#d97706)">
                           {{ initials(auth.fullName) }}
                         </div>
-                        <span class="font-medium text-white">{{ auth.fullName }}</span>
+                        <span class="font-medium text-[var(--text)]">{{ auth.fullName }}</span>
                       </div>
                     </td>
-                    <td class="font-mono-custom text-[12px] text-[#8a9ab5]">{{ auth.user?.email }}</td>
-                    <td class="text-[12px] text-[#8a9ab5]">{{ auth.user?.contact || '—' }}</td>
+                    <td class="font-mono-custom text-[12px] text-[var(--text-2)]">{{ auth.user?.email }}</td>
+                    <td class="text-[12px] text-[var(--text-2)]">{{ auth.user?.contact || '—' }}</td>
                     <td><span class="badge badge-ms">Owner</span></td>
-                    <td class="text-[12px] text-[#5a6a82]">—</td>
-                    <td><span class="text-[11px] text-[#5a6a82]">Current account</span></td>
+                    <td class="text-[12px] text-[var(--text-3)]">—</td>
+                    <td><span class="text-[11px] text-[var(--text-3)]">Current account</span></td>
                   </tr>
                   <tr v-for="m in managers" :key="m.id">
                     <td>
                       <div class="flex items-center gap-2.5">
-                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold font-display text-white"
+                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold font-display text-[var(--text)]"
                           :style="{ background: avatarColor(m.name) }">
                           {{ initials(m.name) }}
                         </div>
-                        <span class="font-medium text-white">{{ m.name }}</span>
+                        <span class="font-medium text-[var(--text)]">{{ m.name }}</span>
                       </div>
                     </td>
-                    <td class="font-mono-custom text-[12px] text-[#8a9ab5]">{{ m.email }}</td>
-                    <td class="text-[12px] text-[#8a9ab5]">{{ m.contact || '—' }}</td>
+                    <td class="font-mono-custom text-[12px] text-[var(--text-2)]">{{ m.email }}</td>
+                    <td class="text-[12px] text-[var(--text-2)]">{{ m.contact || '—' }}</td>
                     <td><span class="badge badge-blue">Manager</span></td>
-                    <td class="text-[12px] text-[#5a6a82]">{{ formatDate(m.created_at) }}</td>
+                    <td class="text-[12px] text-[var(--text-3)]">{{ formatDate(m.created_at) }}</td>
                     <td>
                       <div class="flex gap-1.5">
                         <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditManager(m)"><Pencil :size="11" /> Edit</button>
@@ -349,8 +349,8 @@
                     </td>
                   </tr>
                   <tr v-if="!managers.length">
-                    <td colspan="6" class="text-center text-[12.5px] text-[#5a6a82] py-6">
-                      No managers added yet. Click <strong class="text-white">+ Add Manager</strong> to create one.
+                    <td colspan="6" class="text-center text-[12.5px] text-[var(--text-3)] py-6">
+                      No managers added yet. Click <strong class="text-[var(--text)]">+ Add Manager</strong> to create one.
                     </td>
                   </tr>
                 </tbody>
@@ -364,11 +364,11 @@
               class="fixed inset-0 z-50 flex items-center justify-center px-4"
               style="background:rgba(0,0,0,0.7); backdrop-filter:blur(4px)"
               @mousedown.self="managerModal.open = false">
-              <div class="w-full max-w-[420px] rounded-2xl p-6" style="background:#0f1218; border:1px solid #242d3e">
-                <h3 class="font-display font-bold text-[17px] text-white mb-1">
+              <div class="w-full max-w-[420px] rounded-2xl p-6" style="background:var(--bg-2); border:1px solid var(--border)">
+                <h3 class="font-display font-bold text-[17px] text-[var(--text)] mb-1">
                   {{ managerModal.mode === 'add' ? 'Add Manager' : 'Edit Manager' }}
                 </h3>
-                <p class="text-[12px] text-[#5a6a82] mb-5">
+                <p class="text-[12px] text-[var(--text-3)] mb-5">
                   {{ managerModal.mode === 'add' ? 'Create a new manager account.' : 'Update manager details.' }}
                 </p>
                 <form @submit.prevent="submitManager">
@@ -391,7 +391,7 @@
                         <input v-model="managerForm.password" :type="showManagerPass ? 'text' : 'password'"
                           class="form-input w-full pr-10" placeholder="••••••••" required />
                         <button type="button" @click="showManagerPass = !showManagerPass"
-                          class="absolute right-3 top-1/2 -translate-y-1/2 text-[#5a6a82] hover:text-white text-sm">
+                          class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-3)] hover:text-[var(--text)] text-sm">
                           <component :is="showManagerPass ? EyeOff : Eye" :size="16" />
                         </button>
                       </div>
@@ -405,8 +405,8 @@
                   </Transition>
                   <div class="flex gap-3 justify-end">
                     <button type="button" @click="managerModal.open = false"
-                      class="px-4 py-2 rounded-xl text-[12.5px] font-medium text-[#8a9ab5] hover:text-white"
-                      style="background:#161b24; border:1px solid #242d3e">Cancel</button>
+                      class="px-4 py-2 rounded-xl text-[12.5px] font-medium text-[var(--text-2)] hover:text-[var(--text)]"
+                      style="background:var(--bg-3); border:1px solid var(--border)">Cancel</button>
                     <button type="submit"
                       class="btn btn-primary px-5 py-2 flex items-center gap-2"
                       :disabled="managerSubmitting">
@@ -425,10 +425,10 @@
               class="fixed inset-0 z-50 flex items-center justify-center px-4"
               style="background:rgba(0,0,0,0.7); backdrop-filter:blur(4px)"
               @mousedown.self="deleteModal.open = false">
-              <div class="w-full max-w-[360px] rounded-2xl p-6" style="background:#0f1218; border:1px solid #242d3e">
-                <h3 class="font-display font-bold text-[17px] text-white mb-1">Remove Manager</h3>
-                <p class="text-[13px] text-[#5a6a82] mb-5">
-                  Remove <strong class="text-white">{{ deleteModal.manager?.name }}</strong> as manager?
+              <div class="w-full max-w-[360px] rounded-2xl p-6" style="background:var(--bg-2); border:1px solid var(--border)">
+                <h3 class="font-display font-bold text-[17px] text-[var(--text)] mb-1">Remove Manager</h3>
+                <p class="text-[13px] text-[var(--text-3)] mb-5">
+                  Remove <strong class="text-[var(--text)]">{{ deleteModal.manager?.name }}</strong> as manager?
                   They will lose access immediately.
                 </p>
                 <Transition name="fade">
@@ -439,8 +439,8 @@
                 </Transition>
                 <div class="flex gap-3 justify-end">
                   <button @click="deleteModal.open = false"
-                    class="px-4 py-2 rounded-xl text-[12.5px] font-medium text-[#8a9ab5] hover:text-white"
-                    style="background:#161b24; border:1px solid #242d3e">Cancel</button>
+                    class="px-4 py-2 rounded-xl text-[12.5px] font-medium text-[var(--text-2)] hover:text-[var(--text)]"
+                    style="background:var(--bg-3); border:1px solid var(--border)">Cancel</button>
                   <button @click="confirmDeleteManager"
                     class="btn btn-danger px-5 py-2 flex items-center gap-2"
                     :disabled="deleting">
@@ -458,9 +458,9 @@
           <div class="card">
             <div class="card-header">
               <Bell :size="18" class="text-[#f59e0b]" />
-              <div><div class="font-display font-bold text-[15px] text-white">Notification Preferences</div></div>
+              <div><div class="font-display font-bold text-[15px] text-[var(--text)]">Notification Preferences</div></div>
             </div>
-            <div v-if="notifLoading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
+            <div v-if="notifLoading" class="card-body text-center text-[13px] text-[var(--text-3)] py-8">
               <RotateCw :size="14" class="animate-spin inline-block mr-2" />Loading…
             </div>
             <div v-else-if="notifError" class="card-body text-center py-8">
@@ -470,18 +470,52 @@
             <div v-else class="card-body space-y-4">
               <div v-for="notif in notifications" :key="notif.key"
                 class="flex items-center justify-between p-4 rounded-xl"
-                style="background:#161b24; border:1px solid #1c2230">
+                style="background:var(--bg-3); border:1px solid var(--bg-4)">
                 <div class="flex items-center gap-3">
                   <span class="text-lg">{{ notif.icon }}</span>
                   <div>
-                    <div class="font-medium text-white text-[13.5px]">{{ notif.label }}</div>
-                    <div class="text-[11.5px] text-[#5a6a82]">{{ notif.sub }}</div>
+                    <div class="font-medium text-[var(--text)] text-[13.5px]">{{ notif.label }}</div>
+                    <div class="text-[11.5px] text-[var(--text-3)]">{{ notif.sub }}</div>
                   </div>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" v-model="notif.enabled" class="sr-only peer">
-                  <div class="w-10 h-5 rounded-full peer-checked:bg-[#f59e0b] bg-[#242d3e] transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:w-4 after:h-4 after:transition-all peer-checked:after:translate-x-5"></div>
+                  <div class="w-10 h-5 rounded-full peer-checked:bg-[#f59e0b] bg-[var(--border)] transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:w-4 after:h-4 after:transition-all peer-checked:after:translate-x-5"></div>
                 </label>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Appearance (personal preference — available to owner and manager alike) -->
+        <template v-else-if="activeSection === 'appearance'">
+          <div class="card">
+            <div class="card-header">
+              <Palette :size="18" class="text-[#f59e0b]" />
+              <div>
+                <div class="font-display font-bold text-[15px] text-[var(--text)]">Appearance</div>
+                <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">Choose how Petromines looks on this device</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="grid grid-cols-2 gap-4 max-w-md">
+                <button
+                  v-for="t in THEMES" :key="t.key"
+                  class="rounded-xl p-4 text-left transition-all"
+                  :class="themeStore.theme === t.key ? 'border-2' : 'border border-[var(--border)] hover:border-[var(--border-2)]'"
+                  :style="themeStore.theme === t.key ? 'border-color:#f59e0b' : ''"
+                  @click="themeStore.setTheme(t.key)"
+                >
+                  <div class="h-14 rounded-lg mb-3 flex items-center justify-center gap-1.5"
+                    :style="t.key === 'light' ? 'background:#f5f6f8; border:1px solid #dde2ea' : 'background:#0a0c10; border:1px solid #242d3e'">
+                    <span class="w-2.5 h-2.5 rounded-full" style="background:#f59e0b" />
+                    <span class="w-8 h-2.5 rounded-full" :style="t.key === 'light' ? 'background:#e4e8ee' : 'background:#1c2230'" />
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-[13.5px] font-medium text-[var(--text)]">{{ t.label }}</span>
+                    <CheckCircle2 v-if="themeStore.theme === t.key" :size="16" class="text-[#f59e0b]" />
+                  </div>
+                </button>
               </div>
             </div>
           </div>
@@ -497,17 +531,19 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useUiStore } from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'
 import { useSelectedStationStore } from '@/stores/selectedStation'
+import { useThemeStore, THEMES } from '@/stores/theme'
 import { userApi, settingsApi } from '@/services/api'
 import { fmt } from '@/utils/format'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import {
-  Building2, Fuel, Wrench, User, Bell,
+  Building2, Fuel, Wrench, User, Bell, Palette, CheckCircle2,
   RotateCw, Save, AlertTriangle, Plus, Pencil, Trash2, Eye, EyeOff
 } from 'lucide-vue-next'
 
 const ui              = useUiStore()
 const auth            = useAuthStore()
 const selectedStation = useSelectedStationStore()
+const themeStore      = useThemeStore()
 const activeSection = ref('station')
 const saving = ref(false)
 
@@ -521,6 +557,7 @@ const sections = computed(() => [
   ...(auth.isOwner ? [{ key:'users', icon: User, label:'User Access' }] : []),
   // Notifications are manager-personal, not station data — no owner view.
   ...(auth.isOwner ? [] : [{ key:'notifications', icon: Bell, label:'Notifications' }]),
+  { key:'appearance', icon: Palette, label:'Appearance' },
 ])
 
 // ── Station Details ──────────────────────────────────────────────
@@ -944,7 +981,7 @@ watch(() => selectedStation.selectedStationId, () => {
 .field-label {
   display: block;
   font-size: 11.5px;
-  color: #8a9ab5;
+  color: var(--text-2);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 6px;

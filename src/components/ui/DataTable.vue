@@ -4,8 +4,8 @@
     <!-- Header -->
     <div v-if="title || $slots.actions" class="card-header">
       <div class="flex-1 min-w-0">
-        <div class="font-display font-bold text-[15px] text-white">{{ title }}</div>
-        <div v-if="subtitle" class="text-[11.5px] text-[#5a6a82] mt-0.5">{{ subtitle }}</div>
+        <div class="font-display font-bold text-[15px] text-[var(--text)]">{{ title }}</div>
+        <div v-if="subtitle" class="text-[11.5px] text-[var(--text-3)] mt-0.5">{{ subtitle }}</div>
       </div>
       <div class="flex items-center gap-2 ml-auto flex-shrink-0">
         <slot name="actions" />
@@ -13,7 +13,7 @@
     </div>
 
     <!-- Filters slot -->
-    <div v-if="$slots.filters" class="px-5 py-3" style="border-bottom:1px solid #1c2230">
+    <div v-if="$slots.filters" class="px-5 py-3" style="border-bottom:1px solid var(--bg-4)">
       <slot name="filters" />
     </div>
 
@@ -44,7 +44,7 @@
           <!-- Empty state -->
           <template v-else-if="!rows.length">
             <tr>
-              <td :colspan="columns.length" class="text-center py-16 text-[#5a6a82]">
+              <td :colspan="columns.length" class="text-center py-16 text-[var(--text-3)]">
                 <InboxIcon :size="40" class="mx-auto mb-3 opacity-40" />
                 <div class="font-medium">No records found</div>
                 <div class="text-[12px] mt-1">Try adjusting your filters</div>
@@ -64,8 +64,8 @@
     </div>
 
     <!-- Pagination -->
-    <div v-if="totalPages > 1" class="flex items-center justify-between px-5 py-3" style="border-top:1px solid #1c2230">
-      <div class="text-[12px] text-[#5a6a82]">
+    <div v-if="totalPages > 1" class="flex items-center justify-between px-5 py-3" style="border-top:1px solid var(--bg-4)">
+      <div class="text-[12px] text-[var(--text-3)]">
         Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ Math.min(currentPage * pageSize, total) }} of {{ total }}
       </div>
       <div class="flex gap-1.5">

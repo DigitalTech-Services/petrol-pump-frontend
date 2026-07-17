@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center px-4" style="background:#0a0c10">
+  <div class="min-h-screen flex items-center justify-center px-4" style="background:var(--bg)">
 
     <!-- Background glow -->
     <div class="absolute inset-0 pointer-events-none overflow-hidden">
@@ -12,17 +12,17 @@
       <!-- Logo -->
       <div class="text-center mb-8">
         <div
-          class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 font-display font-bold text-3xl text-white"
+          class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 font-display font-bold text-3xl text-[var(--text)]"
           style="background:linear-gradient(135deg,#6366f1,#4f46e5); box-shadow:0 0 50px rgba(99,102,241,0.35)"
         >A</div>
-        <h1 class="font-display font-bold text-[30px] text-white tracking-wide">Admin Portal</h1>
-        <p class="text-[13px] text-[#5a6a82] mt-1.5">Kailas Petromines · User Management</p>
+        <h1 class="font-display font-bold text-[30px] text-[var(--text)] tracking-wide">Admin Portal</h1>
+        <p class="text-[13px] text-[var(--text-3)] mt-1.5">Kailas Petromines · User Management</p>
       </div>
 
       <!-- Login Card -->
       <div class="card p-7">
-        <h2 class="font-display font-bold text-[20px] text-white mb-0.5">Admin Sign In</h2>
-        <p class="text-[13px] text-[#5a6a82] mb-5">Enter your admin credentials</p>
+        <h2 class="font-display font-bold text-[20px] text-[var(--text)] mb-0.5">Admin Sign In</h2>
+        <p class="text-[13px] text-[var(--text-3)] mb-5">Enter your admin credentials</p>
 
         <form @submit.prevent="handleLogin">
 
@@ -54,7 +54,7 @@
               <button
                 type="button"
                 @click="showPass = !showPass"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-[#5a6a82] hover:text-white transition-colors text-sm"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-3)] hover:text-[var(--text)] transition-colors text-sm"
               ><component :is="showPass ? EyeOff : Eye" :size="16" /></button>
             </div>
           </div>
@@ -62,7 +62,7 @@
           <!-- Submit -->
           <button
             type="submit"
-            class="w-full justify-center py-2.5 text-[14px] font-semibold rounded-xl text-white transition-all duration-150 flex items-center gap-2"
+            class="w-full justify-center py-2.5 text-[14px] font-semibold rounded-xl text-[var(--text)] transition-all duration-150 flex items-center gap-2"
             style="background:linear-gradient(135deg,#6366f1,#4f46e5); box-shadow:0 0 20px rgba(99,102,241,0.3)"
             :disabled="loading"
           >
@@ -81,8 +81,8 @@
         </form>
       </div>
 
-      <p class="text-center text-[11.5px] text-[#5a6a82] mt-5">
-        <router-link to="/login" class="hover:text-[#8a9ab5] transition-colors">← User Login</router-link>
+      <p class="text-center text-[11.5px] text-[var(--text-3)] mt-5">
+        <router-link to="/login" class="hover:text-[var(--text-2)] transition-colors">← User Login</router-link>
       </p>
     </div>
   </div>
@@ -122,7 +122,7 @@ async function handleLogin() {
 .field-label {
   display: block;
   font-size: 11.5px;
-  color: #8a9ab5;
+  color: var(--text-2);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 6px;

@@ -25,13 +25,13 @@
         <option value="ms">MS Volume ↓</option>
         <option value="expenses">Expenses ↓</option>
       </select>
-      <span class="self-center text-[12px] text-[#5a6a82] ml-auto">{{ filtered.length }} records</span>
+      <span class="self-center text-[12px] text-[var(--text-3)] ml-auto">{{ filtered.length }} records</span>
     </div>
 
     <!-- Table -->
     <div class="card">
       <!-- Loading -->
-      <div v-if="store.loading" class="p-8 text-center text-[#5a6a82] text-[13px]">Loading sales data…</div>
+      <div v-if="store.loading" class="p-8 text-center text-[var(--text-3)] text-[13px]">Loading sales data…</div>
 
       <!-- Error -->
       <div v-else-if="store.error" class="p-6 text-center text-red-400 text-[13px]">{{ store.error }}</div>
@@ -49,10 +49,10 @@
           </thead>
           <tbody>
             <tr v-if="filtered.length === 0">
-              <td colspan="14" class="text-center text-[#5a6a82] py-6 text-[13px]">No records found. Add the first sale entry.</td>
+              <td colspan="14" class="text-center text-[var(--text-3)] py-6 text-[13px]">No records found. Add the first sale entry.</td>
             </tr>
             <tr v-for="(r, i) in filtered" :key="r.id ?? r.date + i">
-              <td class="font-mono-custom text-[11px] text-[#5a6a82]">{{ i + 1 }}</td>
+              <td class="font-mono-custom text-[11px] text-[var(--text-3)]">{{ i + 1 }}</td>
               <td><span class="font-mono-custom text-[12px] text-[#f59e0b]">{{ r.date }}</span></td>
               <td><span class="badge badge-ms">{{ fmt(r.ms) }}</span></td>
               <td><span class="badge badge-hsd">{{ fmt(r.hsd) }}</span></td>
@@ -64,13 +64,13 @@
               <td class="amt text-[#3b82f6]">{{ r.card > 0 ? fmt(r.card) : '—' }}</td>
               <td class="amt text-negative">{{ fmt(r.exp) }}</td>
               <td class="amt text-[#f59e0b]">{{ fmt(r.balance) }}</td>
-              <td><div class="text-[11.5px] text-[#5a6a82] truncate max-w-[160px]" :title="r.narration">{{ r.narration }}</div></td>
+              <td><div class="text-[11.5px] text-[var(--text-3)] truncate max-w-[160px]" :title="r.narration">{{ r.narration }}</div></td>
               <td>
                 <div v-if="auth.canWrite" class="flex gap-1.5">
                   <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEdit(r)"><Pencil :size="11" /></button>
                   <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDelete(r)"><Trash2 :size="11" /></button>
                 </div>
-                <span v-else class="text-[11px] text-[#5a6a82]">—</span>
+                <span v-else class="text-[11px] text-[var(--text-3)]">—</span>
               </td>
             </tr>
           </tbody>
@@ -111,7 +111,7 @@
         </div>
 
         <!-- MS -->
-        <div class="p-4 rounded-xl" style="background:#161b24;border:1px solid rgba(245,158,11,0.2)">
+        <div class="p-4 rounded-xl" style="background:var(--bg-3);border:1px solid rgba(245,158,11,0.2)">
           <div class="flex items-center gap-2 mb-3"><span class="badge badge-ms">MS Petrol</span></div>
           <div class="grid grid-cols-2 gap-3">
             <div><label class="field-label">Volume (L)</label><input type="number" step="0.01" v-model.number="saleForm.ms" class="form-input w-full" placeholder="0.00" /></div>
@@ -120,7 +120,7 @@
         </div>
 
         <!-- HSD -->
-        <div class="p-4 rounded-xl" style="background:#161b24;border:1px solid rgba(16,185,129,0.2)">
+        <div class="p-4 rounded-xl" style="background:var(--bg-3);border:1px solid rgba(16,185,129,0.2)">
           <div class="flex items-center gap-2 mb-3"><span class="badge badge-hsd">HSD Diesel</span></div>
           <div class="grid grid-cols-2 gap-3">
             <div><label class="field-label">Volume (L)</label><input type="number" step="0.01" v-model.number="saleForm.hsd" class="form-input w-full" placeholder="0.00" /></div>
@@ -129,7 +129,7 @@
         </div>
 
         <!-- Speed -->
-        <div class="p-4 rounded-xl" style="background:#161b24;border:1px solid rgba(59,130,246,0.2)">
+        <div class="p-4 rounded-xl" style="background:var(--bg-3);border:1px solid rgba(59,130,246,0.2)">
           <div class="flex items-center gap-2 mb-3"><span class="badge badge-speed">Speed Premium</span></div>
           <div class="grid grid-cols-2 gap-3">
             <div><label class="field-label">Volume (L)</label><input type="number" step="0.01" v-model.number="saleForm.speed" class="form-input w-full" placeholder="0.00" /></div>
@@ -138,8 +138,8 @@
         </div>
 
         <!-- Collections -->
-        <div class="p-4 rounded-xl" style="background:#161b24;border:1px solid #1c2230">
-          <div class="text-[12px] font-semibold text-white mb-3 flex items-center gap-1.5"><Banknote :size="14" /> Collections</div>
+        <div class="p-4 rounded-xl" style="background:var(--bg-3);border:1px solid var(--bg-4)">
+          <div class="text-[12px] font-semibold text-[var(--text)] mb-3 flex items-center gap-1.5"><Banknote :size="14" /> Collections</div>
           <div class="grid grid-cols-3 gap-3">
             <div><label class="field-label">Cash (₹)</label><input type="number" step="0.01" v-model.number="saleForm.cash" class="form-input w-full" placeholder="0.00" /></div>
             <div><label class="field-label">PhonePe (₹)</label><input type="number" step="0.01" v-model.number="saleForm.phonepay" class="form-input w-full" placeholder="0.00" /></div>
@@ -154,11 +154,11 @@
         <!-- Live Preview -->
         <div class="grid grid-cols-2 gap-3 p-4 rounded-xl" style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2)">
           <div>
-            <div class="text-[10.5px] text-[#5a6a82] uppercase tracking-wide mb-1">Gross Revenue</div>
+            <div class="text-[10.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Gross Revenue</div>
             <div class="font-display font-bold text-[20px] text-[#f59e0b]">₹{{ fmt(addRevenue) }}</div>
           </div>
           <div>
-            <div class="text-[10.5px] text-[#5a6a82] uppercase tracking-wide mb-1">Cash Balance</div>
+            <div class="text-[10.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Cash Balance</div>
             <div class="font-display font-bold text-[20px]" :class="addBalance >= 0 ? 'text-positive' : 'text-negative'">₹{{ fmt(addBalance) }}</div>
           </div>
         </div>
@@ -210,13 +210,13 @@
           <div><label class="field-label">Card (₹)</label><input type="number" step="0.01" v-model.number="editData.card" class="form-input w-full" /></div>
           <div><label class="field-label">Credit Sale (₹)</label><input type="number" step="0.01" v-model.number="editData.credit" class="form-input w-full" /></div>
         </div>
-        <div class="grid grid-cols-2 gap-3 p-3 rounded-lg" style="background:#161b24">
+        <div class="grid grid-cols-2 gap-3 p-3 rounded-lg" style="background:var(--bg-3)">
           <div>
-            <div class="text-[11px] text-[#5a6a82] mb-1">Revenue</div>
+            <div class="text-[11px] text-[var(--text-3)] mb-1">Revenue</div>
             <div class="font-display font-bold text-[16px] text-[#f59e0b]">₹{{ fmt(editRevenue) }}</div>
           </div>
           <div>
-            <div class="text-[11px] text-[#5a6a82] mb-1">Balance</div>
+            <div class="text-[11px] text-[var(--text-3)] mb-1">Balance</div>
             <div class="font-display font-bold text-[16px] text-positive">₹{{ fmt(editBalance) }}</div>
           </div>
         </div>
@@ -236,10 +236,10 @@
     <AppModal v-model="showDelete" title="Delete Sale Record" :icon="AlertTriangle" max-width="420px">
       <div v-if="deleteTarget" class="text-center py-4">
         <Trash2 :size="48" class="mx-auto mb-4 text-[#ef4444] opacity-70" />
-        <p class="text-[14px] text-[#e8edf5] mb-2">
+        <p class="text-[14px] text-[var(--text)] mb-2">
           Delete sale record for <span class="text-[#f59e0b] font-bold">{{ deleteTarget.date }}</span>?
         </p>
-        <p class="text-[13px] text-[#8a9ab5]">Revenue: <span class="text-positive">₹{{ fmt(deleteTarget.revenue) }}</span></p>
+        <p class="text-[13px] text-[var(--text-2)]">Revenue: <span class="text-positive">₹{{ fmt(deleteTarget.revenue) }}</span></p>
         <p class="text-[12px] text-negative mt-3">This cannot be undone.</p>
       </div>
       <template #footer>
@@ -430,5 +430,5 @@ function doPrint() {
 </script>
 
 <style scoped>
-.field-label { display:block; font-size:11.5px; color:#8a9ab5; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px }
+.field-label { display:block; font-size:11.5px; color:var(--text-2); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px }
 </style>

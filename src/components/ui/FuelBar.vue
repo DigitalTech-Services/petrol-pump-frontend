@@ -1,7 +1,7 @@
 <template>
   <div class="mb-3.5">
     <div class="flex justify-between text-[12px] mb-1.5">
-      <span class="text-[#8a9ab5]">{{ label }}</span>
+      <span class="text-[var(--text-2)]">{{ label }}</span>
       <span :style="{ color }">{{ value }}</span>
     </div>
     <div class="fuel-bar-track">

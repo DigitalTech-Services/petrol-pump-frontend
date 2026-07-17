@@ -24,10 +24,10 @@ import { useUiStore } from '@/stores/ui'
 const ui = useUiStore()
 
 const toastClass = (type) => ({
-  success: 'bg-[#0f1218] border-[#10b981]/40 text-[#10b981]',
-  error:   'bg-[#0f1218] border-[#ef4444]/40 text-[#ef4444]',
-  info:    'bg-[#0f1218] border-[#3b82f6]/40 text-[#3b82f6]',
-}[type] || 'bg-[#0f1218] border-[#242d3e] text-[#e8edf5]')
+  success: 'bg-[var(--bg-2)] border-[#10b981]/40 text-[#10b981]',
+  error:   'bg-[var(--bg-2)] border-[#ef4444]/40 text-[#ef4444]',
+  info:    'bg-[var(--bg-2)] border-[#3b82f6]/40 text-[#3b82f6]',
+}[type] || 'bg-[var(--bg-2)] border-[var(--border)] text-[var(--text)]')
 
 const toastIcon = (type) => ({ success: '✓', error: '✕', info: 'ℹ' }[type] || '·')
 </script>

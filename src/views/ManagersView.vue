@@ -13,12 +13,12 @@
     <div class="card">
       <div class="card-header">
         <div>
-          <div class="font-display font-bold text-[15px] text-white">Manager Accounts</div>
-          <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Each manager logs in separately and only sees the sales, stock, staff and settings of their assigned station</div>
+          <div class="font-display font-bold text-[15px] text-[var(--text)]">Manager Accounts</div>
+          <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">Each manager logs in separately and only sees the sales, stock, staff and settings of their assigned station</div>
         </div>
       </div>
 
-      <div v-if="store.loading" class="p-8 text-center text-[#5a6a82] text-[13px]">Loading managers…</div>
+      <div v-if="store.loading" class="p-8 text-center text-[var(--text-3)] text-[13px]">Loading managers…</div>
       <div v-else-if="store.error" class="p-6 text-center text-red-400 text-[13px]">{{ store.error }}</div>
 
       <div v-else class="overflow-x-auto">
@@ -30,16 +30,16 @@
           </thead>
           <tbody>
             <tr v-if="store.records.length === 0">
-              <td colspan="6" class="text-center text-[#5a6a82] py-6 text-[13px]">No managers yet. Add the first manager account.</td>
+              <td colspan="6" class="text-center text-[var(--text-3)] py-6 text-[13px]">No managers yet. Add the first manager account.</td>
             </tr>
             <tr v-for="(m, i) in store.records" :key="m.id">
-              <td class="font-mono-custom text-[11px] text-[#5a6a82]">{{ i + 1 }}</td>
-              <td class="text-white font-medium">{{ m.name }}</td>
-              <td class="text-[#8a9ab5]">{{ m.email }}</td>
+              <td class="font-mono-custom text-[11px] text-[var(--text-3)]">{{ i + 1 }}</td>
+              <td class="text-[var(--text)] font-medium">{{ m.name }}</td>
+              <td class="text-[var(--text-2)]">{{ m.email }}</td>
               <td class="font-mono-custom text-[12px]">{{ m.contact }}</td>
               <td>
-                <span v-if="m.stationName" class="text-[#8a9ab5]">{{ m.stationName }}</span>
-                <span v-else class="text-[11px] text-[#5a6a82] italic">Unassigned</span>
+                <span v-if="m.stationName" class="text-[var(--text-2)]">{{ m.stationName }}</span>
+                <span v-else class="text-[11px] text-[var(--text-3)] italic">Unassigned</span>
               </td>
               <td>
                 <div class="flex gap-1.5">
@@ -105,7 +105,7 @@
     <AppModal v-model="showDelete" title="Delete Manager" :icon="AlertTriangle" max-width="420px">
       <div v-if="deleteTarget" class="text-center py-4">
         <Trash2 :size="48" class="mx-auto mb-4 text-[#ef4444] opacity-70" />
-        <p class="text-[14px] text-[#e8edf5] mb-2">
+        <p class="text-[14px] text-[var(--text)] mb-2">
           Delete manager <span class="text-[#f59e0b] font-bold">{{ deleteTarget.name }}</span>?
         </p>
         <p class="text-[12px] text-negative mt-3">Their login will stop working. Their existing records are kept.</p>
@@ -203,5 +203,5 @@ async function confirmDelete() {
 </script>
 
 <style scoped>
-.field-label { display:block; font-size:11.5px; color:#8a9ab5; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; }
+.field-label { display:block; font-size:11.5px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; }
 </style>

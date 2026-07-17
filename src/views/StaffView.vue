@@ -21,7 +21,7 @@
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="flex items-center justify-center py-16 text-[#5a6a82]">
+    <div v-if="loading" class="flex items-center justify-center py-16 text-[var(--text-3)]">
       <RotateCw :size="22" class="animate-spin mr-3" /> Loading staff…
     </div>
 
@@ -30,39 +30,39 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
         <div v-for="s in staffList" :key="s.id"
           class="rounded-xl overflow-hidden transition-all duration-200 hover:-translate-y-1"
-          style="background:#0f1218;border:1px solid #242d3e">
+          style="background:var(--bg-2);border:1px solid var(--border)">
           <div class="h-1" :style="{background:s.color}" />
           <div class="p-5">
             <div class="flex items-center gap-3 mb-4">
-              <div class="w-11 h-11 rounded-full flex items-center justify-center font-display font-bold text-[16px] text-white flex-shrink-0"
+              <div class="w-11 h-11 rounded-full flex items-center justify-center font-display font-bold text-[16px] text-[var(--text)] flex-shrink-0"
                 :style="{background:s.color}">{{ s.name.slice(0,2).toUpperCase() }}</div>
               <div class="flex-1 min-w-0">
-                <div class="font-display font-bold text-[15px] text-white leading-tight">{{ s.name }}</div>
-                <div class="text-[11.5px] text-[#5a6a82]">{{ s.role }}</div>
+                <div class="font-display font-bold text-[15px] text-[var(--text)] leading-tight">{{ s.name }}</div>
+                <div class="text-[11.5px] text-[var(--text-3)]">{{ s.role }}</div>
               </div>
               <div v-if="auth.canWrite" class="flex gap-1">
-                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[#5a6a82] hover:text-[#f59e0b] hover:bg-[#1c2230] transition-all" @click="openEditStaff(s)" title="Edit"><Pencil :size="13" /></button>
-                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[#5a6a82] hover:text-[#f59e0b] hover:bg-[#1c2230] transition-all" @click="openAddAdvance(s)" title="Add Advance"><Banknote :size="13" /></button>
-                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[#5a6a82] hover:text-[#ef4444] hover:bg-[#1c2230] transition-all" @click="deleteStaff(s)" title="Delete"><Trash2 :size="13" /></button>
+                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-3)] hover:text-[#f59e0b] hover:bg-[var(--bg-4)] transition-all" @click="openEditStaff(s)" title="Edit"><Pencil :size="13" /></button>
+                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-3)] hover:text-[#f59e0b] hover:bg-[var(--bg-4)] transition-all" @click="openAddAdvance(s)" title="Add Advance"><Banknote :size="13" /></button>
+                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-3)] hover:text-[#ef4444] hover:bg-[var(--bg-4)] transition-all" @click="deleteStaff(s)" title="Delete"><Trash2 :size="13" /></button>
               </div>
             </div>
-            <div class="grid grid-cols-3 gap-2 pt-3" style="border-top:1px solid #1c2230">
+            <div class="grid grid-cols-3 gap-2 pt-3" style="border-top:1px solid var(--bg-4)">
               <div class="text-center">
-                <div class="text-[9.5px] text-[#5a6a82] uppercase tracking-wide mb-1">Days</div>
-                <div class="font-display font-bold text-[14px] text-white">{{ s.daysWorked }}/30</div>
+                <div class="text-[9.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Days</div>
+                <div class="font-display font-bold text-[14px] text-[var(--text)]">{{ s.daysWorked }}/30</div>
               </div>
               <div class="text-center">
-                <div class="text-[9.5px] text-[#5a6a82] uppercase tracking-wide mb-1">Salary</div>
+                <div class="text-[9.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Salary</div>
                 <div class="font-display font-bold text-[14px] text-positive">₹{{ fmtK(s.workingSalary) }}</div>
               </div>
               <div class="text-center">
-                <div class="text-[9.5px] text-[#5a6a82] uppercase tracking-wide mb-1">Net</div>
+                <div class="text-[9.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Net</div>
                 <div class="font-display font-bold text-[14px]" :style="{color:s.finalPayout<0?'#ef4444':'#f59e0b'}">₹{{ fmtK(s.finalPayout) }}</div>
               </div>
             </div>
             <div class="mt-3">
               <div class="fuel-bar-track"><div class="fuel-bar-fill" :style="{width:Math.max(4,(s.daysWorked/30*100))+'%',background:s.color}" /></div>
-              <div class="text-[10px] text-[#5a6a82] mt-1">{{ Math.round(s.daysWorked/30*100) }}% attendance</div>
+              <div class="text-[10px] text-[var(--text-3)] mt-1">{{ Math.round(s.daysWorked/30*100) }}% attendance</div>
             </div>
           </div>
         </div>
@@ -70,7 +70,7 @@
         <!-- Add New Card -->
         <button v-if="auth.canWrite" @click="openAddStaff"
           class="rounded-xl flex flex-col items-center justify-center gap-3 h-[180px] transition-all hover:border-[#f59e0b] hover:text-[#f59e0b]"
-          style="background:#0f1218;border:2px dashed #242d3e;color:#5a6a82">
+          style="background:var(--bg-2);border:2px dashed var(--border);color:var(--text-3)">
           <Plus :size="28" />
           <span class="font-display font-bold text-[14px]">Add New Staff</span>
         </button>
@@ -81,7 +81,7 @@
     <template v-if="!loading && viewMode==='table'">
       <div class="card mb-6">
         <div class="card-header">
-          <div class="font-display font-bold text-[15px] text-white">Staff Salary Register — April 2026</div>
+          <div class="font-display font-bold text-[15px] text-[var(--text)]">Staff Salary Register — April 2026</div>
         </div>
         <div class="overflow-x-auto">
           <table class="data-table">
@@ -90,16 +90,16 @@
             </thead>
             <tbody>
               <tr v-for="(s,i) in staffList" :key="s.id">
-                <td class="font-mono-custom text-[11px] text-[#5a6a82]">{{ i+1 }}</td>
+                <td class="font-mono-custom text-[11px] text-[var(--text-3)]">{{ i+1 }}</td>
                 <td>
                   <div class="flex items-center gap-2.5">
-                    <div class="w-7 h-7 rounded-full flex items-center justify-center font-display font-bold text-[11px] text-white flex-shrink-0" :style="{background:s.color}">{{ s.name.slice(0,2).toUpperCase() }}</div>
-                    <span class="font-medium text-white">{{ s.name }}</span>
+                    <div class="w-7 h-7 rounded-full flex items-center justify-center font-display font-bold text-[11px] text-[var(--text)] flex-shrink-0" :style="{background:s.color}">{{ s.name.slice(0,2).toUpperCase() }}</div>
+                    <span class="font-medium text-[var(--text)]">{{ s.name }}</span>
                   </div>
                 </td>
                 <td><span class="badge badge-gray">{{ s.role }}</span></td>
-                <td><span class="font-mono-custom">{{ s.daysWorked }}</span><span class="text-[#5a6a82] text-[11px]">/30</span></td>
-                <td class="amt text-[#8a9ab5]">₹{{ s.ratePerDay }}</td>
+                <td><span class="font-mono-custom">{{ s.daysWorked }}</span><span class="text-[var(--text-3)] text-[11px]">/30</span></td>
+                <td class="amt text-[var(--text-2)]">₹{{ s.ratePerDay }}</td>
                 <td class="amt text-positive font-semibold">₹{{ fmt(s.workingSalary) }}</td>
                 <td class="amt text-negative">{{ s.totalAdvance>0?'₹'+fmt(s.totalAdvance):'—' }}</td>
                 <td><span class="font-display font-bold text-[15px]" :class="s.finalPayout<0?'text-negative':'text-[#f59e0b]'">₹{{ fmt(s.finalPayout) }}</span></td>
@@ -110,7 +110,7 @@
                     <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openAddAdvance(s)" style="color:#f59e0b"><Banknote :size="11" /> Adv</button>
                     <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="deleteStaff(s)" style="color:#ef4444"><Trash2 :size="11" /></button>
                   </div>
-                  <span v-else class="text-[11px] text-[#5a6a82]">—</span>
+                  <span v-else class="text-[11px] text-[var(--text-3)]">—</span>
                 </td>
               </tr>
             </tbody>
@@ -132,8 +132,8 @@
     <div class="card">
       <div class="card-header">
         <div>
-          <div class="font-display font-bold text-[15px] text-white">Advance Tracker</div>
-          <div class="text-[11.5px] text-[#5a6a82] mt-0.5">Daily advance payments per staff</div>
+          <div class="font-display font-bold text-[15px] text-[var(--text)]">Advance Tracker</div>
+          <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">Daily advance payments per staff</div>
         </div>
         <button class="btn btn-ghost ml-auto text-[12px] flex items-center gap-1.5" @click="exportAdvanceCSV"><Download :size="13" /> Export</button>
       </div>
@@ -151,7 +151,7 @@
               <td><span class="font-mono-custom text-[12px] text-[#f59e0b]">{{ row.date }}</span></td>
               <td v-for="n in advanceNames" :key="n">
                 <span v-if="row[n]>0" class="badge badge-red text-[11px]">₹{{ fmt(row[n]) }}</span>
-                <span v-else class="text-[#2e3a50]">—</span>
+                <span v-else class="text-[var(--border-2)]">—</span>
               </td>
               <td class="amt text-[#f59e0b] font-semibold">{{ fmt(advanceNames.reduce((a,n)=>a+(row[n]||0),0)) }}</td>
             </tr>
@@ -196,7 +196,7 @@
           <div><label class="field-label">Days Worked</label><input type="number" max="30" v-model.number="staffForm.daysWorked" class="form-input w-full" placeholder="30" /></div>
           <div>
             <label class="field-label">Calculated Salary</label>
-            <div class="p-2.5 rounded-lg" style="background:#161b24;border:1px solid #1c2230">
+            <div class="p-2.5 rounded-lg" style="background:var(--bg-3);border:1px solid var(--bg-4)">
               <span class="font-display font-bold text-[18px] text-positive">₹{{ fmt((staffForm.ratePerDay||0)*(staffForm.daysWorked||0)) }}</span>
             </div>
           </div>
@@ -229,12 +229,12 @@
           <div><label class="field-label">Rate/Day (₹)</label><input type="number" v-model.number="editStaffData.ratePerDay" class="form-input w-full" /></div>
           <div><label class="field-label">Total Advance (₹)</label><input type="number" v-model.number="editStaffData.totalAdvance" class="form-input w-full" /></div>
         </div>
-        <div class="p-3 rounded-lg flex justify-between" style="background:#161b24;border:1px solid #1c2230">
-          <span class="text-[#8a9ab5]">Calculated Salary</span>
+        <div class="p-3 rounded-lg flex justify-between" style="background:var(--bg-3);border:1px solid var(--bg-4)">
+          <span class="text-[var(--text-2)]">Calculated Salary</span>
           <span class="font-display font-bold text-[16px] text-positive">₹{{ fmt((editStaffData.ratePerDay||0)*(editStaffData.daysWorked||0)) }}</span>
         </div>
-        <div class="p-3 rounded-lg flex justify-between" style="background:#161b24;border:1px solid #1c2230">
-          <span class="text-[#8a9ab5]">Net Payable</span>
+        <div class="p-3 rounded-lg flex justify-between" style="background:var(--bg-3);border:1px solid var(--bg-4)">
+          <span class="text-[var(--text-2)]">Net Payable</span>
           <span class="font-display font-bold text-[16px] text-[#f59e0b]">₹{{ fmt((editStaffData.ratePerDay||0)*(editStaffData.daysWorked||0)-(editStaffData.totalAdvance||0)) }}</span>
         </div>
       </div>
@@ -249,19 +249,19 @@
     <!-- ═══ ADD ADVANCE MODAL ═══ -->
     <AppModal v-model="showAdvance" :title="'Add Advance — '+(advanceTarget?.name||'')" :icon="Banknote" max-width="420px">
       <div class="space-y-4">
-        <div class="flex items-center gap-3 p-3 rounded-lg mb-2" style="background:#161b24;border:1px solid #1c2230">
-          <div class="w-10 h-10 rounded-full flex items-center justify-center font-display font-bold text-[14px] text-white"
+        <div class="flex items-center gap-3 p-3 rounded-lg mb-2" style="background:var(--bg-3);border:1px solid var(--bg-4)">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center font-display font-bold text-[14px] text-[var(--text)]"
             :style="{background:advanceTarget?.color}">{{ advanceTarget?.name?.slice(0,2).toUpperCase() }}</div>
           <div>
-            <div class="font-display font-bold text-[15px] text-white">{{ advanceTarget?.name }}</div>
-            <div class="text-[12px] text-[#5a6a82]">Current advance: ₹{{ fmt(advanceTarget?.totalAdvance||0) }}</div>
+            <div class="font-display font-bold text-[15px] text-[var(--text)]">{{ advanceTarget?.name }}</div>
+            <div class="text-[12px] text-[var(--text-3)]">Current advance: ₹{{ fmt(advanceTarget?.totalAdvance||0) }}</div>
           </div>
         </div>
         <div><label class="field-label">Date *</label><input type="date" v-model="advanceForm.date" class="form-input w-full" /></div>
         <div><label class="field-label">Amount (₹) *</label><input type="number" v-model.number="advanceForm.amount" class="form-input w-full" placeholder="0" /></div>
         <div><label class="field-label">Reason</label><input v-model="advanceForm.reason" class="form-input w-full" placeholder="Personal, medical, travel…" /></div>
         <div v-if="advanceForm.amount" class="p-3 rounded-lg" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2)">
-          <span class="text-[12px] text-[#8a9ab5]">New total advance will be: </span>
+          <span class="text-[12px] text-[var(--text-2)]">New total advance will be: </span>
           <span class="font-display font-bold text-[15px] text-negative">₹{{ fmt((advanceTarget?.totalAdvance||0)+(advanceForm.amount||0)) }}</span>
         </div>
       </div>
@@ -499,5 +499,5 @@ function exportAdvanceCSV() {
 </script>
 
 <style scoped>
-.field-label{display:block;font-size:11.5px;color:#8a9ab5;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.field-label{display:block;font-size:11.5px;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
 </style>

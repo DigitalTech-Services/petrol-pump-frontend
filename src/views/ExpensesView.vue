@@ -24,18 +24,18 @@
         <option value="">All Categories</option>
         <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
       </select>
-      <span class="self-center text-[12px] text-[#5a6a82] ml-auto">{{ filtered.length }} records · Total: ₹{{ fmt(filteredTotal) }}</span>
+      <span class="self-center text-[12px] text-[var(--text-3)] ml-auto">{{ filtered.length }} records · Total: ₹{{ fmt(filteredTotal) }}</span>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <!-- Table -->
       <div class="lg:col-span-2 card">
         <div class="card-header">
-          <div class="font-display font-bold text-[15px] text-white">Daily Expenses — {{ monthLabel }}</div>
+          <div class="font-display font-bold text-[15px] text-[var(--text)]">Daily Expenses — {{ monthLabel }}</div>
         </div>
 
         <!-- Loading -->
-        <div v-if="loading" class="card-body text-center text-[13px] text-[#5a6a82] py-8">
+        <div v-if="loading" class="card-body text-center text-[13px] text-[var(--text-3)] py-8">
           <RotateCw :size="14" class="animate-spin inline-block mr-2" />Loading…
         </div>
 
@@ -51,22 +51,22 @@
             <thead><tr><th>#</th><th>Date</th><th>Amount (₹)</th><th>Category</th><th>Narration / Notes</th><th>Paid By</th><th>Actions</th></tr></thead>
             <tbody>
               <tr v-for="(r, i) in filtered" :key="r.id">
-                <td class="font-mono-custom text-[11px] text-[#5a6a82]">{{ i + 1 }}</td>
+                <td class="font-mono-custom text-[11px] text-[var(--text-3)]">{{ i + 1 }}</td>
                 <td><span class="font-mono-custom text-[12px] text-[#f59e0b]">{{ fmtDate(r.date) }}</span></td>
                 <td class="amt" :class="r.amount > 10000 ? 'text-negative' : r.amount > 3000 ? 'text-[#f59e0b]' : ''">{{ fmt(r.amount) }}</td>
                 <td><span class="badge badge-gray text-[11px]">{{ r.category }}</span></td>
-                <td class="max-w-[260px]"><div class="text-[12px] text-[#8a9ab5] truncate" :title="r.narration">{{ r.narration }}</div></td>
-                <td class="text-[12px] text-[#8a9ab5]">{{ r.paid_by || '—' }}</td>
+                <td class="max-w-[260px]"><div class="text-[12px] text-[var(--text-2)] truncate" :title="r.narration">{{ r.narration }}</div></td>
+                <td class="text-[12px] text-[var(--text-2)]">{{ r.paid_by || '—' }}</td>
                 <td>
                   <div v-if="auth.canWrite" class="flex gap-1.5">
                     <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="openEditExpense(r)"><Pencil :size="11" /></button>
                     <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDeleteExpense(r)"><Trash2 :size="11" /></button>
                   </div>
-                  <span v-else class="text-[11px] text-[#5a6a82]">—</span>
+                  <span v-else class="text-[11px] text-[var(--text-3)]">—</span>
                 </td>
               </tr>
               <tr v-if="!filtered.length && !loading">
-                <td colspan="7" class="text-center text-[12.5px] text-[#5a6a82] py-6">
+                <td colspan="7" class="text-center text-[12.5px] text-[var(--text-3)] py-6">
                   No expenses found for this period.
                 </td>
               </tr>
@@ -80,7 +80,7 @@
 
       <!-- Chart -->
       <div class="card">
-        <div class="card-header"><div class="font-display font-bold text-[15px] text-white">Expense Trend</div></div>
+        <div class="card-header"><div class="font-display font-bold text-[15px] text-[var(--text)]">Expense Trend</div></div>
         <div class="card-body">
           <BaseChart type="bar" :data="expChartData" :options="barOpts" :height="460" />
         </div>
@@ -162,11 +162,11 @@
     <AppModal v-model="showDelete" title="Delete Expense" :icon="AlertTriangle" max-width="420px">
       <div v-if="deleteTarget" class="text-center py-4">
         <Trash2 :size="48" class="mx-auto mb-4 text-[#ef4444] opacity-70" />
-        <p class="text-[14px] text-[#e8edf5] mb-2">
+        <p class="text-[14px] text-[var(--text)] mb-2">
           Delete expense of <span class="font-bold text-negative">₹{{ fmt(deleteTarget.amount) }}</span>
           on <span class="text-[#f59e0b]">{{ fmtDate(deleteTarget.date) }}</span>?
         </p>
-        <p class="text-[12px] text-[#5a6a82]">"{{ deleteTarget.narration }}"</p>
+        <p class="text-[12px] text-[var(--text-3)]">"{{ deleteTarget.narration }}"</p>
         <p class="text-[12px] text-negative mt-3">This action cannot be undone.</p>
       </div>
       <template #footer>
@@ -393,5 +393,5 @@ const barOpts = {
 </script>
 
 <style scoped>
-.field-label { display:block; font-size:11.5px; color:#8a9ab5; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px }
+.field-label { display:block; font-size:11.5px; color:var(--text-2); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px }
 </style>

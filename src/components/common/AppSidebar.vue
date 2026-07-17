@@ -1,17 +1,17 @@
 <template>
   <aside class="fixed top-0 left-0 h-full z-50 flex flex-col transition-transform duration-300" :class="[
     ui.sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-  ]" style="width:248px; background:#0f1218; border-right:1px solid #242d3e;">
+  ]" style="width:248px; background:var(--bg-2); border-right:1px solid var(--border);">
     <!-- Logo -->
-    <div class="flex items-center gap-3 px-5 py-[18px]" style="border-bottom:1px solid #242d3e">
+    <div class="flex items-center gap-3 px-5 py-[18px]" style="border-bottom:1px solid var(--border)">
       <div
-        class="w-9 h-9 rounded-[10px] flex items-center justify-center font-display font-bold text-[18px] text-[#0a0c10] flex-shrink-0"
+        class="w-9 h-9 rounded-[10px] flex items-center justify-center font-display font-bold text-[18px] text-[var(--bg)] flex-shrink-0"
         style="background:linear-gradient(135deg,#f59e0b,#d97706); box-shadow:0 0 20px rgba(245,158,11,0.3)">
         K
       </div>
       <div class="min-w-0">
-        <div class="font-display font-bold text-[15px] text-white leading-tight truncate">{{ auth.stationName }}</div>
-        <div class="text-[10px] text-[#5a6a82] uppercase tracking-widest truncate">{{ stationCaption }}</div>
+        <div class="font-display font-bold text-[15px] text-[var(--text)] leading-tight truncate">{{ auth.stationName }}</div>
+        <div class="text-[10px] text-[var(--text-3)] uppercase tracking-widest truncate">{{ stationCaption }}</div>
       </div>
     </div>
 
@@ -83,18 +83,18 @@
     </nav>
 
     <!-- User card -->
-    <div class="px-3 py-3" style="border-top:1px solid #242d3e">
-      <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-[#161b24] transition-colors">
+    <div class="px-3 py-3" style="border-top:1px solid var(--border)">
+      <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-[var(--bg-3)] transition-colors">
         <div
-          class="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold font-display text-white flex-shrink-0"
+          class="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold font-display text-[var(--text)] flex-shrink-0"
           style="background:linear-gradient(135deg,#f59e0b,#6366f1)">
           {{ initials }}
         </div>
         <div class="min-w-0 flex-1">
-          <div class="text-[13px] font-semibold text-white truncate">{{ auth.fullName }}</div>
-          <div class="text-[11px] text-[#5a6a82] capitalize">{{ auth.role }}</div>
+          <div class="text-[13px] font-semibold text-[var(--text)] truncate">{{ auth.fullName }}</div>
+          <div class="text-[11px] text-[var(--text-3)] capitalize">{{ auth.role }}</div>
         </div>
-        <button @click="handleLogout" class="text-[#5a6a82] hover:text-[#ef4444] transition-colors flex-shrink-0"
+        <button @click="handleLogout" class="text-[var(--text-3)] hover:text-[#ef4444] transition-colors flex-shrink-0"
           title="Logout">
           <LogOut :size="16" />
         </button>
@@ -170,7 +170,7 @@ async function handleLogout() {
 <style scoped>
 .nav-label {
   font-size: 9px;
-  color: #5a6a82;
+  color: var(--text-3);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   padding: 6px 10px 3px;

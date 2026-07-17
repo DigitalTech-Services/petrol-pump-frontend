@@ -5,7 +5,7 @@
     <div class="max-w-xl">
       <div class="card">
         <div class="card-header">
-          <div class="font-display font-bold text-[15px] text-white">Business Details</div>
+          <div class="font-display font-bold text-[15px] text-[var(--text)]">Business Details</div>
         </div>
         <div class="card-body space-y-4">
           <div>
@@ -70,5 +70,5 @@ async function save() {
 </script>
 
 <style scoped>
-.field-label { display:block; font-size:11.5px; color:#8a9ab5; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; }
+.field-label { display:block; font-size:11.5px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; }
 </style>

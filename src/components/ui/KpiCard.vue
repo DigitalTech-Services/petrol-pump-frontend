@@ -1,13 +1,13 @@
 <template>
   <div class="kpi-card" :style="{ '--kpi-accent': color }">
-    <div class="text-[11px] text-[#5a6a82] uppercase tracking-[0.08em] mb-2">{{ label }}</div>
-    <div class="font-display font-bold text-white leading-none mb-1.5" :style="{ fontSize: valueSize }">
+    <div class="text-[11px] text-[var(--text-3)] uppercase tracking-[0.08em] mb-2">{{ label }}</div>
+    <div class="font-display font-bold text-[var(--text)] leading-none mb-1.5" :style="{ fontSize: valueSize }">
       <template v-if="loading">
         <div class="skeleton h-8 w-24" />
       </template>
       <template v-else>{{ value }}</template>
     </div>
-    <div class="text-[11.5px] text-[#8a9ab5]">
+    <div class="text-[11.5px] text-[var(--text-2)]">
       <span v-if="trend > 0" class="text-[#10b981]">↑ {{ trend }}%</span>
       <span v-else-if="trend < 0" class="text-[#ef4444]">↓ {{ Math.abs(trend) }}%</span>
       <span v-if="sub"> {{ sub }}</span>
