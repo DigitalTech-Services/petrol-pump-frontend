@@ -56,8 +56,8 @@
               <div class="font-display font-bold text-[13px] text-[#3b82f6]">{{ s.totalHours }}h</div>
             </div>
             <div class="text-center">
-              <div class="text-[9.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Rate</div>
-              <div class="font-display font-bold text-[13px] text-[#f59e0b]">₹{{ s.ratePerDay }}</div>
+              <div class="text-[9.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Rate/Hr</div>
+              <div class="font-display font-bold text-[13px] text-[#f59e0b]">₹{{ s.ratePerHour }}</div>
             </div>
             <div class="text-center">
               <div class="text-[9.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Salary</div>
@@ -80,7 +80,7 @@
         <div class="overflow-x-auto">
           <table class="data-table">
             <thead>
-              <tr><th>#</th><th>Employee</th><th>Role</th><th>Days Present</th><th>Days Absent</th><th>In Time</th><th>Out Time</th><th>Hours</th><th>Rate/Day</th><th>Gross Salary</th><th>Advance</th><th>Net Payable</th><th>Attendance %</th><th>Actions</th></tr>
+              <tr><th>#</th><th>Employee</th><th>Role</th><th>Days Present</th><th>Days Absent</th><th>In Time</th><th>Out Time</th><th>Hours</th><th>Rate/Hour</th><th>Gross Salary</th><th>Advance</th><th>Net Payable</th><th>Attendance %</th><th>Actions</th></tr>
             </thead>
             <tbody>
               <tr v-for="(s,i) in timesheetData" :key="s.id">
@@ -97,7 +97,7 @@
                 <td class="font-mono-custom text-[12px] text-[var(--text-2)]">{{ s.inTime }}</td>
                 <td class="font-mono-custom text-[12px] text-[var(--text-2)]">{{ s.outTime }}</td>
                 <td><span class="badge badge-gray text-[#3b82f6]">{{ s.totalHours }}h</span></td>
-                <td class="amt text-[var(--text-2)]">₹{{ s.ratePerDay }}</td>
+                <td class="amt text-[var(--text-2)]">₹{{ s.ratePerHour }}</td>
                 <td class="amt text-positive font-semibold">₹{{ fmt(s.salary) }}</td>
                 <td class="amt text-negative">{{ s.advance>0?'₹'+fmt(s.advance):'—' }}</td>
                 <td><span class="font-display font-bold text-[15px]" :class="s.netPayable<0?'text-negative':'text-[#f59e0b]'">₹{{ fmt(s.netPayable) }}</span></td>
@@ -204,7 +204,7 @@
           <div class="w-12 h-12 rounded-full flex items-center justify-center font-display font-bold text-[16px] text-[var(--text)]" :style="{background:editAttData.color}">{{ editAttData.name.slice(0,2).toUpperCase() }}</div>
           <div>
             <div class="font-display font-bold text-[16px] text-[var(--text)]">{{ editAttData.name }}</div>
-            <div class="text-[12px] text-[var(--text-3)]">{{ editAttData.role }} · ₹{{ editAttData.ratePerDay }}/day</div>
+            <div class="text-[12px] text-[var(--text-3)]">{{ editAttData.role }} · ₹{{ editAttData.ratePerHour }}/hr</div>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
@@ -246,8 +246,10 @@
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="field-label">Rate per Day (₹)</label>
-            <input type="number" v-model.number="editAttData.ratePerDay" class="form-input w-full" @input="recalcEdit" />
+            <label class="field-label">Rate per Hour (₹)</label>
+            <div class="p-2.5 rounded-lg flex items-center" style="background:var(--bg-3);border:1px solid var(--bg-4);height:42px">
+              <span class="font-mono-custom text-[13px] text-[var(--text-2)]">₹{{ editAttData.ratePerHour }}/hr</span>
+            </div>
           </div>
           <div>
             <label class="field-label">Total Advance (₹)</label>
@@ -256,11 +258,14 @@
             </div>
           </div>
         </div>
-        <!-- Live Preview -->
+        <div class="text-[11.5px] text-[var(--text-3)] px-1">
+          To change this employee's rate going forward, use Staff & Salary — {{ monthLabel }}'s gross pay below already reflects the rate in effect on each logged day.
+        </div>
+        <!-- Summary (from the timesheet — already hour-based, not recomputed here) -->
         <div class="grid grid-cols-3 gap-3 p-3 rounded-lg" style="background:var(--bg-3);border:1px solid var(--bg-4)">
           <div class="text-center">
             <div class="text-[10px] text-[var(--text-3)] uppercase mb-1">Gross Salary</div>
-            <div class="font-display font-bold text-[16px] text-positive">₹{{ fmt(editAttData.daysWorked*editAttData.ratePerDay) }}</div>
+            <div class="font-display font-bold text-[16px] text-positive">₹{{ fmt(editAttData.salary) }}</div>
           </div>
           <div class="text-center">
             <div class="text-[10px] text-[var(--text-3)] uppercase mb-1">Advance</div>
@@ -268,7 +273,7 @@
           </div>
           <div class="text-center">
             <div class="text-[10px] text-[var(--text-3)] uppercase mb-1">Net Payable</div>
-            <div class="font-display font-bold text-[16px] text-[#f59e0b]">₹{{ fmt(editAttData.daysWorked*editAttData.ratePerDay - editAttData.advance) }}</div>
+            <div class="font-display font-bold text-[16px] text-[#f59e0b]">₹{{ fmt(editAttData.netPayable) }}</div>
           </div>
         </div>
       </div>
@@ -333,13 +338,13 @@ function calcHours(inTime, outTime) {
 function mapEntry(item, idx) {
   const s = item.staff
   return {
-    id:         s.id,
-    name:       s.name,
-    role:       s.role,
-    daysWorked: item.days_present,
-    shift:      s.shift_hours ?? 8,
-    ratePerDay: s.rate_per_day,
-    salary:     item.gross_salary,
+    id:          s.id,
+    name:        s.name,
+    role:        s.role,
+    daysWorked:  item.days_present,
+    shift:       s.shift_hours ?? 8,
+    ratePerHour: s.rate_per_hour,
+    salary:      item.gross_salary,
     advance:    item.total_advance,
     netPayable: item.net_payable,
     totalHours: item.avg_hours_per_day,
@@ -392,13 +397,6 @@ function openEditAttendance(s) {
   showEditAtt.value = true
 }
 
-function recalcEdit() {
-  if (!editAttData.value) return
-  const d = editAttData.value
-  d.salary     = d.daysWorked * d.ratePerDay
-  d.netPayable = d.salary - d.advance
-}
-
 async function saveAttendance() {
   const records = timesheetData.map(s => ({
     staff_id: s.id,
@@ -424,7 +422,7 @@ async function saveEditAtt() {
   const d = editAttData.value
   saving.value = true
   try {
-    await staffApi.update(d.id, { rate_per_day: d.ratePerDay, shift_hours: d.shift })
+    await staffApi.update(d.id, { shift_hours: d.shift })
     showEditAtt.value = false
     ui.success(`${d.name} updated!`)
     await loadTimesheet()
@@ -436,11 +434,11 @@ async function saveEditAtt() {
 }
 
 function doExport() {
-  const headers = ['Name','Role','Days Present','Days Absent','In Time','Out Time','Hours/Day','Rate/Day','Gross Salary','Advance','Net Payable','Attendance %']
+  const headers = ['Name','Role','Days Present','Days Absent','In Time','Out Time','Hours/Day','Rate/Hour','Gross Salary','Advance','Net Payable','Attendance %']
   const rows = timesheetData.map(s => [
     s.name, s.role, s.daysWorked, 30 - s.daysWorked,
     s.inTime, s.outTime, s.totalHours + 'h',
-    '₹' + s.ratePerDay, '₹' + fmt(s.salary), '₹' + fmt(s.advance),
+    '₹' + s.ratePerHour, '₹' + fmt(s.salary), '₹' + fmt(s.advance),
     '₹' + fmt(s.netPayable), Math.round(s.daysWorked / 30 * 100) + '%'
   ])
   exportCSV('TimeSheet_' + selectedMonth.value, headers, rows)
@@ -452,7 +450,7 @@ function doPrint() {
   const rows = timesheetData.map(s => [
     s.name, s.role, s.daysWorked, 30 - s.daysWorked,
     s.inTime, s.outTime, s.totalHours + 'h',
-    '₹' + s.ratePerDay, '₹' + fmt(s.salary), '₹' + fmt(s.advance), '₹' + fmt(s.netPayable),
+    '₹' + s.ratePerHour, '₹' + fmt(s.salary), '₹' + fmt(s.advance), '₹' + fmt(s.netPayable),
     Math.round(s.daysWorked / 30 * 100) + '%'
   ])
   printTable('Attendance Register — ' + monthLabel.value, headers, rows)

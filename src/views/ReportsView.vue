@@ -169,7 +169,7 @@
         <div class="overflow-x-auto">
           <table class="data-table">
             <thead>
-              <tr><th>Name</th><th>Role</th><th>Days</th><th>Gross</th><th>Advance</th><th>Net</th><th>% Utilised</th></tr>
+              <tr><th>Name</th><th>Role</th><th>Hours</th><th>Gross</th><th>Advance</th><th>Net</th><th>% Utilised</th></tr>
             </thead>
             <tbody>
               <tr v-if="!staffSummary.length">
@@ -184,7 +184,7 @@
                   </div>
                 </td>
                 <td><span class="badge badge-gray">{{ s.role }}</span></td>
-                <td class="amt">{{ s.days }}</td>
+                <td class="amt">{{ fmt(s.hours, 0) }}h</td>
                 <td class="amt text-positive">₹{{ fmt(s.gross) }}</td>
                 <td class="amt text-negative">{{ s.advance > 0 ? '₹' + fmt(s.advance) : '—' }}</td>
                 <td><span class="font-display font-bold text-[14px]" :class="s.net < 0 ? 'text-negative' : 'text-[#f59e0b]'">₹{{ fmt(s.net) }}</span></td>

@@ -1,7 +1,8 @@
 <template>
   <div>
-    <PageHeader title="Staff & Salary" subtitle="Payroll management — April 2026" :crumbs="['Home','Staff']">
+    <PageHeader title="Staff & Salary" :subtitle="`Payroll management — ${monthLabel}`" :crumbs="['Home','Staff']">
       <template #actions>
+        <input type="month" v-model="selectedMonth" class="form-input" />
         <button class="btn btn-ghost flex items-center gap-1.5" @click="toggleView">
           <component :is="viewMode==='cards' ? List : LayoutGrid" :size="14" />
           {{ viewMode==='cards' ? 'Table' : 'Cards' }}
@@ -48,8 +49,8 @@
             </div>
             <div class="grid grid-cols-3 gap-2 pt-3" style="border-top:1px solid var(--bg-4)">
               <div class="text-center">
-                <div class="text-[9.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Days</div>
-                <div class="font-display font-bold text-[14px] text-[var(--text)]">{{ s.daysWorked }}/30</div>
+                <div class="text-[9.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Hours</div>
+                <div class="font-display font-bold text-[14px] text-[var(--text)]">{{ fmt(s.hoursWorked, 0) }}h</div>
               </div>
               <div class="text-center">
                 <div class="text-[9.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Salary</div>
@@ -60,10 +61,7 @@
                 <div class="font-display font-bold text-[14px]" :style="{color:s.finalPayout<0?'#ef4444':'#f59e0b'}">₹{{ fmtK(s.finalPayout) }}</div>
               </div>
             </div>
-            <div class="mt-3">
-              <div class="fuel-bar-track"><div class="fuel-bar-fill" :style="{width:Math.max(4,(s.daysWorked/30*100))+'%',background:s.color}" /></div>
-              <div class="text-[10px] text-[var(--text-3)] mt-1">{{ Math.round(s.daysWorked/30*100) }}% attendance</div>
-            </div>
+            <div class="mt-3 text-[10px] text-[var(--text-3)]">₹{{ s.ratePerHour }}/hr — {{ monthLabel }}</div>
           </div>
         </div>
 
@@ -81,12 +79,12 @@
     <template v-if="!loading && viewMode==='table'">
       <div class="card mb-6">
         <div class="card-header">
-          <div class="font-display font-bold text-[15px] text-[var(--text)]">Staff Salary Register — April 2026</div>
+          <div class="font-display font-bold text-[15px] text-[var(--text)]">Staff Salary Register — {{ monthLabel }}</div>
         </div>
         <div class="overflow-x-auto">
           <table class="data-table">
             <thead>
-              <tr><th>#</th><th>Name</th><th>Role</th><th>Days</th><th>Rate/Day</th><th>Gross Salary</th><th>Advance</th><th>Final Payout</th><th>Status</th><th>Actions</th></tr>
+              <tr><th>#</th><th>Name</th><th>Role</th><th>Hours</th><th>Rate/Hour</th><th>Gross Salary</th><th>Advance</th><th>Final Payout</th><th>Status</th><th>Actions</th></tr>
             </thead>
             <tbody>
               <tr v-for="(s,i) in staffList" :key="s.id">
@@ -98,8 +96,8 @@
                   </div>
                 </td>
                 <td><span class="badge badge-gray">{{ s.role }}</span></td>
-                <td><span class="font-mono-custom">{{ s.daysWorked }}</span><span class="text-[var(--text-3)] text-[11px]">/30</span></td>
-                <td class="amt text-[var(--text-2)]">₹{{ s.ratePerDay }}</td>
+                <td><span class="font-mono-custom">{{ fmt(s.hoursWorked, 0) }}</span><span class="text-[var(--text-3)] text-[11px]">h</span></td>
+                <td class="amt text-[var(--text-2)]">₹{{ s.ratePerHour }}</td>
                 <td class="amt text-positive font-semibold">₹{{ fmt(s.workingSalary) }}</td>
                 <td class="amt text-negative">{{ s.totalAdvance>0?'₹'+fmt(s.totalAdvance):'—' }}</td>
                 <td><span class="font-display font-bold text-[15px]" :class="s.finalPayout<0?'text-negative':'text-[#f59e0b]'">₹{{ fmt(s.finalPayout) }}</span></td>
@@ -184,7 +182,7 @@
           <div><label class="field-label">Join Date</label><input type="date" v-model="staffForm.joinDate" class="form-input w-full" /></div>
         </div>
         <div class="grid grid-cols-2 gap-4">
-          <div><label class="field-label">Rate per Day (₹) *</label><input type="number" v-model.number="staffForm.ratePerDay" class="form-input w-full" placeholder="400" /></div>
+          <div><label class="field-label">Rate per Hour (₹) *</label><input type="number" v-model.number="staffForm.ratePerHour" class="form-input w-full" placeholder="50" /></div>
           <div><label class="field-label">Shift Hours</label>
             <select v-model="staffForm.shiftHours" class="form-select w-full">
               <option value="8">8 Hours</option><option value="10">10 Hours</option>
@@ -192,15 +190,7 @@
             </select>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div><label class="field-label">Days Worked</label><input type="number" max="30" v-model.number="staffForm.daysWorked" class="form-input w-full" placeholder="30" /></div>
-          <div>
-            <label class="field-label">Calculated Salary</label>
-            <div class="p-2.5 rounded-lg" style="background:var(--bg-3);border:1px solid var(--bg-4)">
-              <span class="font-display font-bold text-[18px] text-positive">₹{{ fmt((staffForm.ratePerDay||0)*(staffForm.daysWorked||0)) }}</span>
-            </div>
-          </div>
-        </div>
+        <div class="text-[11.5px] text-[var(--text-3)] px-1">Salary is calculated automatically from hours logged in Time Sheet — no need to enter it manually.</div>
         <div><label class="field-label">Address / Notes</label><textarea v-model="staffForm.notes" class="form-input w-full" rows="2" placeholder="Address, emergency contact, notes…" /></div>
       </div>
       <template #footer>
@@ -224,18 +214,19 @@
             </select>
           </div>
         </div>
-        <div class="grid grid-cols-3 gap-4">
-          <div><label class="field-label">Days Worked</label><input type="number" max="30" v-model.number="editStaffData.daysWorked" class="form-input w-full" /></div>
-          <div><label class="field-label">Rate/Day (₹)</label><input type="number" v-model.number="editStaffData.ratePerDay" class="form-input w-full" /></div>
-          <div><label class="field-label">Total Advance (₹)</label><input type="number" v-model.number="editStaffData.totalAdvance" class="form-input w-full" /></div>
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="field-label">Rate per Hour (₹)</label><input type="number" v-model.number="editStaffData.ratePerHour" class="form-input w-full" /></div>
+        </div>
+        <div class="text-[11.5px] text-[var(--text-3)] px-1">
+          This only affects hours logged from now on — {{ monthLabel }}'s already-logged hours keep the rate that was in effect when they were recorded.
         </div>
         <div class="p-3 rounded-lg flex justify-between" style="background:var(--bg-3);border:1px solid var(--bg-4)">
-          <span class="text-[var(--text-2)]">Calculated Salary</span>
-          <span class="font-display font-bold text-[16px] text-positive">₹{{ fmt((editStaffData.ratePerDay||0)*(editStaffData.daysWorked||0)) }}</span>
+          <span class="text-[var(--text-2)]">{{ monthLabel }} Gross Salary</span>
+          <span class="font-display font-bold text-[16px] text-positive">₹{{ fmt(editStaffData.workingSalary||0) }}</span>
         </div>
         <div class="p-3 rounded-lg flex justify-between" style="background:var(--bg-3);border:1px solid var(--bg-4)">
           <span class="text-[var(--text-2)]">Net Payable</span>
-          <span class="font-display font-bold text-[16px] text-[#f59e0b]">₹{{ fmt((editStaffData.ratePerDay||0)*(editStaffData.daysWorked||0)-(editStaffData.totalAdvance||0)) }}</span>
+          <span class="font-display font-bold text-[16px] text-[#f59e0b]">₹{{ fmt(editStaffData.finalPayout||0) }}</span>
         </div>
       </div>
       <template #footer>
@@ -307,8 +298,15 @@ const savingStaff   = ref(false)
 const editStaffData = ref(null)
 const advanceTarget = ref(null)
 
-const staffForm = reactive({ name:'', role:'Staff', phone:'', joinDate:'', ratePerDay:400, shiftHours:'8', daysWorked:30, notes:'' })
+const staffForm = reactive({ name:'', role:'Staff', phone:'', joinDate:'', ratePerHour:50, shiftHours:'8', notes:'' })
 const advanceForm = reactive({ date:'', amount:null, reason:'' })
+
+const now = new Date()
+const selectedMonth = ref(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`)
+const monthLabel = computed(() => {
+  const [y, m] = selectedMonth.value.split('-')
+  return new Date(y, m - 1).toLocaleString('en-IN', { month: 'long', year: 'numeric' })
+})
 
 const fmtK = n => Math.abs(n)>=1000 ? (n/1000).toFixed(1)+'K' : String(n)
 
@@ -340,11 +338,11 @@ function mapStaff(s) {
     role:         s.role,
     phone:        s.phone,
     joinDate:     s.join_date,
-    daysWorked:   s.days_worked,
-    ratePerDay:   s.rate_per_day,
-    workingSalary:s.working_salary ?? (s.rate_per_day * s.days_worked),
+    hoursWorked:  s.hours_worked ?? 0,
+    ratePerHour:  s.rate_per_hour,
+    workingSalary:s.working_salary ?? 0,
     totalAdvance: s.total_advance ?? 0,
-    finalPayout:  s.final_payout  ?? ((s.rate_per_day * s.days_worked) - (s.total_advance ?? 0)),
+    finalPayout:  s.final_payout  ?? ((s.working_salary ?? 0) - (s.total_advance ?? 0)),
     notes:        s.notes,
     color:        COLORS[s.id % COLORS.length],
   }
@@ -357,7 +355,7 @@ function stationParam() {
 async function loadStaff() {
   loading.value = true
   try {
-    const res = await staffApi.getAll(stationParam())
+    const res = await staffApi.getAll({ month: selectedMonth.value, ...stationParam() })
     staffList.splice(0)
     ;(res.data?.staff ?? []).forEach(s => staffList.push(mapStaff(s)))
   } catch (e) {
@@ -369,7 +367,7 @@ async function loadStaff() {
 
 async function loadAdvances() {
   try {
-    const res = await staffApi.getAdvances(stationParam())
+    const res = await staffApi.getAdvances({ month: selectedMonth.value, ...stationParam() })
     allAdvances.splice(0)
     ;(res.data?.advances ?? []).forEach(a => allAdvances.push(a))
   } catch { /* non-critical */ }
@@ -378,10 +376,11 @@ async function loadAdvances() {
 function loadAll() { loadStaff(); loadAdvances() }
 
 onMounted(loadAll)
+watch(selectedMonth, loadAll)
 watch(() => selectedStation.selectedStationId, loadAll)
 
 function openAddStaff() {
-  Object.assign(staffForm, {name:'',role:'Staff',phone:'',joinDate:'',ratePerDay:400,shiftHours:'8',daysWorked:30,notes:''})
+  Object.assign(staffForm, {name:'',role:'Staff',phone:'',joinDate:'',ratePerHour:50,shiftHours:'8',notes:''})
   showAddStaff.value = true
 }
 function openEditStaff(s) { editStaffData.value = {...s}; showEditStaff.value = true }
@@ -394,18 +393,17 @@ function openAddAdvance(s) {
 }
 
 async function saveStaff() {
-  if (!staffForm.name || !staffForm.ratePerDay) { ui.error('Name and rate are required'); return }
+  if (!staffForm.name || !staffForm.ratePerHour) { ui.error('Name and rate are required'); return }
   savingStaff.value = true
   try {
     const res = await staffApi.create({
-      name:         staffForm.name,
-      role:         staffForm.role,
-      phone:        staffForm.phone || null,
-      join_date:    staffForm.joinDate || null,
-      rate_per_day: staffForm.ratePerDay,
-      shift_hours:  Number(staffForm.shiftHours),
-      days_worked:  staffForm.daysWorked,
-      notes:        staffForm.notes || null,
+      name:          staffForm.name,
+      role:          staffForm.role,
+      phone:         staffForm.phone || null,
+      join_date:     staffForm.joinDate || null,
+      rate_per_hour: staffForm.ratePerHour,
+      shift_hours:   Number(staffForm.shiftHours),
+      notes:         staffForm.notes || null,
     })
     staffList.push(mapStaff(res.data.staff))
     showAddStaff.value = false
@@ -421,17 +419,14 @@ async function saveEditStaff() {
   if (!editStaffData.value) return
   try {
     const s = editStaffData.value
-    const res = await staffApi.update(s.id, {
-      name:         s.name,
-      role:         s.role,
-      rate_per_day: s.ratePerDay,
-      days_worked:  s.daysWorked,
+    await staffApi.update(s.id, {
+      name:          s.name,
+      role:          s.role,
+      rate_per_hour: s.ratePerHour,
     })
-    const i = staffList.findIndex(x => x.id === s.id)
-    if (i !== -1) {
-      const updated = mapStaff(res.data.staff)
-      staffList[i] = updated
-    }
+    // Reload rather than splice in the response — the backend computes gross
+    // salary for its own default month, which may not match selectedMonth.
+    await loadStaff()
     showEditStaff.value = false
     ui.success('Staff updated!')
   } catch (e) {
@@ -477,16 +472,16 @@ async function saveAdvance() {
 }
 
 function doExport() {
-  const headers = ['Name','Role','Days','Rate/Day','Gross Salary','Advance','Final Payout']
-  const rows = staffList.map(s => [s.name, s.role, s.daysWorked, s.ratePerDay, s.workingSalary, s.totalAdvance, s.finalPayout])
-  exportCSV('Staff_Salary', headers, rows)
+  const headers = ['Name','Role','Hours','Rate/Hour','Gross Salary','Advance','Final Payout']
+  const rows = staffList.map(s => [s.name, s.role, s.hoursWorked, s.ratePerHour, s.workingSalary, s.totalAdvance, s.finalPayout])
+  exportCSV(`Staff_Salary_${selectedMonth.value}`, headers, rows)
   ui.success('CSV exported!')
 }
 
 function doPrint() {
-  const headers = ['Name','Role','Days','Rate/Day','Gross','Advance','Net Payout']
-  const rows = staffList.map(s => [s.name, s.role, s.daysWorked, '₹'+s.ratePerDay, '₹'+fmt(s.workingSalary), '₹'+fmt(s.totalAdvance), '₹'+fmt(s.finalPayout)])
-  printTable('Staff Salary Register', headers, rows)
+  const headers = ['Name','Role','Hours','Rate/Hour','Gross','Advance','Net Payout']
+  const rows = staffList.map(s => [s.name, s.role, s.hoursWorked, '₹'+s.ratePerHour, '₹'+fmt(s.workingSalary), '₹'+fmt(s.totalAdvance), '₹'+fmt(s.finalPayout)])
+  printTable(`Staff Salary Register — ${monthLabel.value}`, headers, rows)
 }
 
 function exportAdvanceCSV() {
