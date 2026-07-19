@@ -118,6 +118,7 @@ export const expenseApi = {
   delete:       (id)       => api.delete(`/expenses/${id}`),
   getCategories:()         => api.get('/expenses/categories'),
   getSummary:   (params)   => api.get('/expenses/summary',   { params }),
+  getTotalForDate: (params) => api.get('/expenses/total-for-date', { params }),
 }
 
 // ──────────────────────────────────────────────────────────────────

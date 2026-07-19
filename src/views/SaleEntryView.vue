@@ -106,7 +106,8 @@
             </div>
             <div>
               <label class="field-label">Expenses (₹)</label>
-              <input type="number" step="0.01" v-model.number="form.expenses" class="form-input w-full" placeholder="0.00" />
+              <input type="number" step="0.01" v-model.number="form.expenses" class="form-input w-full" placeholder="0.00" @input="markExpensesEdited" />
+              <div class="text-[11px] text-[var(--text-3)] mt-1">Pre-filled from Expenses logged for this date — edit if needed.</div>
             </div>
           </div>
         </div>
@@ -160,12 +161,13 @@
 </template>
 
 <script setup>
-import { reactive, computed, ref } from 'vue'
+import { reactive, computed, ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSalesStore } from '@/stores/sales'
 import { useUiStore }    from '@/stores/ui'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import { fmt } from '@/utils/format'
+import { expenseApi } from '@/services/api'
 import { Calendar, Fuel, Banknote, Calculator, RotateCw, Save } from 'lucide-vue-next'
 
 const store  = useSalesStore()
@@ -183,6 +185,27 @@ const form = reactive({
   creditSale: null, expenses: null,
   narration: '',
 })
+
+// Pre-fills Expenses from whatever's already logged for this date in the
+// Expenses ledger — still a plain editable field, just seeded instead of blank.
+// Re-seeds when the date changes (so switching dates updates the prefill), but
+// stops re-seeding entirely as soon as the user manually edits the field.
+const expensesAutoFilled = ref(true)
+
+async function seedExpensesForDate(date) {
+  if (!date || !expensesAutoFilled.value) return
+  try {
+    const res = await expenseApi.getTotalForDate({ date })
+    form.expenses = res.data?.total || null
+  } catch { /* non-critical */ }
+}
+
+function markExpensesEdited() {
+  expensesAutoFilled.value = false
+}
+
+onMounted(() => seedExpensesForDate(form.saleDate))
+watch(() => form.saleDate, (newDate) => seedExpensesForDate(newDate))
 
 // Testing volume (fuel dispensed for meter calibration) isn't sold, so it's
 // deducted from the entered volume before revenue is calculated.
