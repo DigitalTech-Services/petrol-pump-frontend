@@ -13,6 +13,23 @@ export const fmtCr = (n) => {
 
 export const fmtINR = (n) => `₹${fmt(n)}`
 
+// Displays any date as day-month(-year), e.g. "19 Jul" or "19 Jul 2026" — the
+// app-wide date order, independent of the browser's locale/OS settings.
+// Accepts an ISO 'YYYY-MM-DD' (optionally with a time part), a Date, or any
+// string the Date constructor can parse.
+export const formatDate = (date, { year = true } = {}) => {
+  if (!date) return '—'
+  let parsed
+  if (date instanceof Date) {
+    parsed = date
+  } else {
+    const str = String(date)
+    parsed = /^\d{4}-\d{2}-\d{2}$/.test(str) ? new Date(`${str}T00:00:00`) : new Date(str.replace(' ', 'T'))
+  }
+  if (isNaN(parsed.getTime())) return String(date)
+  return parsed.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', ...(year ? { year: 'numeric' } : {}) })
+}
+
 export const chartColors = {
   grid: 'rgba(36,45,62,0.8)',
   tick: '#5a6a82',

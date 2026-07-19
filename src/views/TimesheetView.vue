@@ -295,7 +295,7 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard    from '@/components/ui/KpiCard.vue'
 import AppModal   from '@/components/ui/AppModal.vue'
-import { fmt }    from '@/utils/format'
+import { fmt, formatDate } from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'
@@ -320,7 +320,7 @@ const selectedMonth = ref(new Date().toISOString().slice(0, 7))
 
 const monthLabel = computed(() => {
   const [y, m] = selectedMonth.value.split('-')
-  return new Date(+y, +m - 1, 1).toLocaleString('default', { month: 'long', year: 'numeric' })
+  return new Date(+y, +m - 1, 1).toLocaleString('en-IN', { month: 'long', year: 'numeric' })
 })
 
 // Actual number of days in the selected month (28-31) — not a fixed 30.
@@ -415,7 +415,7 @@ async function saveAttendance() {
     await staffApi.bulkAttendance({ date: attendanceDate.value, records })
     showMark.value = false
     const count = records.filter(r => r.status === 'present').length
-    ui.success(`Attendance marked for ${count} staff on ${attendanceDate.value}`)
+    ui.success(`Attendance marked for ${count} staff on ${formatDate(attendanceDate.value)}`)
     await loadTimesheet()
   } catch (e) {
     ui.error(e?.message || 'Failed to save attendance')

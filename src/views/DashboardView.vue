@@ -114,7 +114,7 @@
               style="background:var(--bg-3); border:1px solid var(--bg-4)">
               <div class="flex items-center gap-2.5">
                 <span class="badge" :class="s.badge">{{ s.label }}</span>
-                <span class="text-[11px] text-[var(--text-3)]">{{ s.date ? `as of ${s.date}` : 'No entries' }}</span>
+                <span class="text-[11px] text-[var(--text-3)]">{{ s.date ? `as of ${formatDate(s.date)}` : 'No entries' }}</span>
               </div>
               <span class="font-display font-bold text-[15px]" :style="{ color: s.color }">
                 {{ s.closing !== null ? fmt(s.closing) + ' L' : '—' }}
@@ -204,7 +204,7 @@ import { useSelectedStationStore } from '@/stores/selectedStation'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard   from '@/components/ui/KpiCard.vue'
 import BaseChart from '@/components/charts/BaseChart.vue'
-import { fmt, fmtINR, chartColors } from '@/utils/format'
+import { fmt, fmtINR, formatDate, chartColors } from '@/utils/format'
 import {
   Banknote, Fuel, Smartphone, Receipt, Users,
   Calendar, TrendingUp, Award, CreditCard, BarChart3, RotateCw, Wallet

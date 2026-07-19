@@ -92,6 +92,7 @@ export const meterApi = {
   update:     (id, data) => api.put(`/meters/${id}`,      data),
   delete:     (id)       => api.delete(`/meters/${id}`),
   getNozzles: (params)   => api.get('/meters/nozzles',  { params }),
+  getLastReadings: (params) => api.get('/meters/last-readings', { params }),
 }
 
 // ──────────────────────────────────────────────────────────────────

@@ -70,6 +70,20 @@ export const useMeterStore = defineStore('meter', {
       }
     },
 
+    // Closing readings per nozzle from the most recent prior day's entry (before
+    // the given date), used to pre-fill a new day's opening reading.
+    async fetchLastClosing(before, stationId) {
+      try {
+        const res = await meterApi.getLastReadings({
+          ...(before ? { before } : {}),
+          ...(stationId ? { station_id: stationId } : {}),
+        })
+        return res.data?.closing ?? {}
+      } catch (e) {
+        return {}
+      }
+    },
+
     buildPayload(form, nozzleIds) {
       return {
         date:  form.date,

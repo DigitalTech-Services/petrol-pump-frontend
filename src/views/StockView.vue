@@ -56,7 +56,7 @@
             </tr>
             <tr v-for="(r, i) in store.records" :key="r.id">
               <td class="font-mono-custom text-[11px] text-[var(--text-3)]">{{ i+1 }}</td>
-              <td><span class="font-mono-custom text-[12px] text-[#f59e0b]">{{ r.date }}</span></td>
+              <td><span class="font-mono-custom text-[12px] text-[#f59e0b]">{{ formatDate(r.date) }}</span></td>
               <td class="amt">{{ fmt(r.open) }}</td>
               <td class="amt" :class="r.recv > 0 ? 'text-positive' : 'text-[var(--text-3)]'">
                 {{ r.recv > 0 ? '+' + fmt(r.recv) : '—' }}
@@ -191,7 +191,7 @@
       <div v-if="deleteTarget" class="text-center py-4">
         <Trash2 :size="48" class="mx-auto mb-4 text-[#ef4444] opacity-70" />
         <p class="text-[14px] text-[var(--text)] mb-2">
-          Delete {{ tabLabel }} stock entry for <span class="text-[#f59e0b] font-bold">{{ deleteTarget.date }}</span>?
+          Delete {{ tabLabel }} stock entry for <span class="text-[#f59e0b] font-bold">{{ formatDate(deleteTarget.date) }}</span>?
         </p>
         <p class="text-[12px] text-negative mt-3">This cannot be undone.</p>
       </div>
@@ -213,7 +213,7 @@ import { ref, reactive, computed, watch, onMounted } from 'vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard    from '@/components/ui/KpiCard.vue'
 import AppModal   from '@/components/ui/AppModal.vue'
-import { fmt }    from '@/utils/format'
+import { fmt, formatDate } from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'
@@ -341,7 +341,7 @@ function doExport() {
 
 function doPrint() {
   const headers = ['Date','Opening','Received','Net Stock','Closing','Sale','Variation']
-  const rows = store.records.map(r => [r.date, r.open, r.recv, r.net, r.close, r.sale, r.var])
+  const rows = store.records.map(r => [formatDate(r.date), r.open, r.recv, r.net, r.close, r.sale, r.var])
   printTable(`${tabLabel.value} Stock — ${monthLabel.value}`, headers, rows)
 }
 </script>

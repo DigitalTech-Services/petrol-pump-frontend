@@ -59,7 +59,7 @@
             </tr>
             <tr v-for="(r, i) in tabReadings" :key="r.id ?? r.date">
               <td class="font-mono-custom text-[11px] text-[var(--text-3)]">{{ i + 1 }}</td>
-              <td><span class="font-mono-custom text-[12px] text-[#f59e0b]">{{ r.date }}</span></td>
+              <td><span class="font-mono-custom text-[12px] text-[#f59e0b]">{{ formatDate(r.date) }}</span></td>
               <template v-for="n in tabNozzles" :key="n.nozzleId">
                 <td class="font-mono-custom text-[11.5px]">{{ r.nozzles[n.nozzleId]?.opening ?? '—' }}</td>
                 <td class="font-mono-custom text-[11.5px]">{{ r.nozzles[n.nozzleId]?.closing ?? '—' }}</td>
@@ -96,6 +96,9 @@
       </div>
       <div v-if="!activeNozzles.length" class="text-center text-[13px] text-[var(--text-3)] py-6">
         No active nozzles configured yet. Add one in Settings → Nozzle Configuration first.
+      </div>
+      <div v-else class="text-[11.5px] text-[var(--text-3)] px-1 mb-1">
+        Opening meter is pre-filled from the last recorded closing reading — edit it if needed.
       </div>
       <template v-for="group in nozzleGroups" :key="group.fuel">
         <div class="text-[11px] font-semibold text-[var(--text-3)] uppercase tracking-wide mb-2 mt-3">{{ group.fuel }}</div>
@@ -166,7 +169,7 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard    from '@/components/ui/KpiCard.vue'
 import AppModal   from '@/components/ui/AppModal.vue'
-import { fmt }    from '@/utils/format'
+import { fmt, formatDate } from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore }    from '@/stores/ui'
 import { useAuthStore }  from '@/stores/auth'
@@ -275,11 +278,31 @@ onMounted(loadAll)
 watch(selectedMonth, loadAll)
 watch(() => selectedStation.selectedStationId, loadAll)
 
+// Pre-fills each nozzle's opening reading with its closing reading from the most
+// recent prior day's entry — still a plain editable input, just seeded instead
+// of blank, since opening should normally equal yesterday's closing.
+async function seedOpeningFromLastClosing(date) {
+  const lastClosing = await store.fetchLastClosing(date, selectedStation.selectedStationId)
+  for (const id of Object.keys(meterForm.nozzles)) {
+    const current = meterForm.nozzles[id]
+    if (lastClosing[id] !== undefined && (current.opening === null || current.opening === '')) {
+      current.opening = lastClosing[id]
+    }
+  }
+}
+
 function openAddReading() {
   meterForm.date = new Date().toISOString().split('T')[0]
   meterForm.nozzles = buildNozzleForm(activeNozzles.value.map((n) => n.nozzleId))
   showAdd.value = true
+  seedOpeningFromLastClosing(meterForm.date)
 }
+
+// Re-seed if the user backdates/changes the reading date while the modal is
+// open — only fills nozzles still blank, so it never clobbers a manual edit.
+watch(() => meterForm.date, (newDate) => {
+  if (showAdd.value && newDate) seedOpeningFromLastClosing(newDate)
+})
 
 function openEditReading(r) {
   const activeIds   = activeNozzles.value.map((n) => n.nozzleId)
@@ -329,7 +352,7 @@ async function saveEdit() {
 }
 
 async function confirmDelete(r) {
-  if (!confirm(`Delete reading for ${r.date}?`)) return
+  if (!confirm(`Delete reading for ${formatDate(r.date)}?`)) return
   try {
     await store.deleteReading(r.id)
     ui.success('Meter reading deleted.')
@@ -356,7 +379,7 @@ function doExport() {
 function doPrint() {
   const headers = ['Date', ...tabNozzles.value.map((n) => `${n.nozzleId} Used`), 'Day Total']
   const rows = tabReadings.value.map((r) => [
-    r.date,
+    formatDate(r.date),
     ...tabNozzles.value.map((n) => fmt(r.nozzles[n.nozzleId]?.used ?? 0)),
     fmt(tabTotal(r)),
   ])

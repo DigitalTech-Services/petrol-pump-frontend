@@ -53,7 +53,7 @@
             </tr>
             <tr v-for="(r, i) in filtered" :key="r.id ?? r.date + i">
               <td class="font-mono-custom text-[11px] text-[var(--text-3)]">{{ i + 1 }}</td>
-              <td><span class="font-mono-custom text-[12px] text-[#f59e0b]">{{ r.date }}</span></td>
+              <td><span class="font-mono-custom text-[12px] text-[#f59e0b]">{{ formatDate(r.date) }}</span></td>
               <td><span class="badge badge-ms">{{ fmt(r.ms) }}</span></td>
               <td><span class="badge badge-hsd">{{ fmt(r.hsd) }}</span></td>
               <td><span class="badge badge-speed">{{ fmt(r.speed) }}</span></td>
@@ -237,7 +237,7 @@
       <div v-if="deleteTarget" class="text-center py-4">
         <Trash2 :size="48" class="mx-auto mb-4 text-[#ef4444] opacity-70" />
         <p class="text-[14px] text-[var(--text)] mb-2">
-          Delete sale record for <span class="text-[#f59e0b] font-bold">{{ deleteTarget.date }}</span>?
+          Delete sale record for <span class="text-[#f59e0b] font-bold">{{ formatDate(deleteTarget.date) }}</span>?
         </p>
         <p class="text-[13px] text-[var(--text-2)]">Revenue: <span class="text-positive">₹{{ fmt(deleteTarget.revenue) }}</span></p>
         <p class="text-[12px] text-negative mt-3">This cannot be undone.</p>
@@ -260,7 +260,7 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import StatRow    from '@/components/ui/StatRow.vue'
 import AppModal   from '@/components/ui/AppModal.vue'
-import { fmt }    from '@/utils/format'
+import { fmt, formatDate } from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore }   from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'
@@ -424,7 +424,7 @@ function doExport() {
 
 function doPrint() {
   const headers = ['Date', 'MS(L)', 'HSD(L)', 'Speed(L)', 'Revenue', 'Cash', 'PhonePe', 'Expenses', 'Balance']
-  const rows = filtered.value.map(r => [r.date, fmt(r.ms), fmt(r.hsd), fmt(r.speed), '₹' + fmt(r.revenue), '₹' + fmt(r.cash), '₹' + fmt(r.phonepay), '₹' + fmt(r.exp), '₹' + fmt(r.balance)])
+  const rows = filtered.value.map(r => [formatDate(r.date), fmt(r.ms), fmt(r.hsd), fmt(r.speed), '₹' + fmt(r.revenue), '₹' + fmt(r.cash), '₹' + fmt(r.phonepay), '₹' + fmt(r.exp), '₹' + fmt(r.balance)])
   printTable(`Petrol Sales Register — ${monthLabel.value}`, headers, rows)
 }
 </script>

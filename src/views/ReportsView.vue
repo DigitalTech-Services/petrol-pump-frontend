@@ -101,7 +101,7 @@
             <div class="flex justify-between"><span class="text-[var(--text-2)]">Rate/Litre</span><span class="amt">₹{{ fmt(f.stats.rate) }}</span></div>
             <div class="flex justify-between"><span class="text-[var(--text-2)]">Revenue</span><span class="amt font-semibold" :style="{color:f.color}">{{ fmtINR(f.stats.revenue) }}</span></div>
             <div class="flex justify-between"><span class="text-[var(--text-2)]">Avg Daily</span><span class="amt">{{ fmt(f.stats.avg_daily, 0) }} L</span></div>
-            <div class="flex justify-between"><span class="text-[var(--text-2)]">Peak Day</span><span class="amt">{{ fmt(f.stats.peak_volume, 0) }} L ({{ f.stats.peak_date ?? '—' }})</span></div>
+            <div class="flex justify-between"><span class="text-[var(--text-2)]">Peak Day</span><span class="amt">{{ fmt(f.stats.peak_volume, 0) }} L ({{ f.stats.peak_date ? formatDate(f.stats.peak_date) : '—' }})</span></div>
             <div class="fuel-bar-track mt-2"><div class="fuel-bar-fill" :style="{ width: f.stats.pct_of_total + '%', background: f.color }"/></div>
             <div class="text-[11px] text-[var(--text-3)]">{{ f.stats.pct_of_total }}% of total fuel volume</div>
           </div>
@@ -223,7 +223,7 @@ import { useSelectedStationStore } from '@/stores/selectedStation'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard    from '@/components/ui/KpiCard.vue'
 import BaseChart  from '@/components/charts/BaseChart.vue'
-import { fmt, fmtINR } from '@/utils/format'
+import { fmt, fmtINR, formatDate } from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { reportsApi } from '@/services/api'
 import {
