@@ -44,7 +44,7 @@
         <NavItem to="/meter" :icon="Gauge" label="Meter Readings" />
       </div>
 
-      <div class="mb-1">
+      <div v-if="auth.isManager" class="mb-1">
         <div class="nav-label">Finance</div>
 
         <NavItem to="/transactions" :icon="CreditCard" label="Card Transactions" />
@@ -52,7 +52,7 @@
         <NavItem to="/expenses" :icon="Receipt" label="Expenses" />
       </div>
 
-      <div class="mb-1">
+      <div v-if="auth.isManager" class="mb-1">
         <div class="nav-label">HR</div>
 
         <NavItem to="/staff" :icon="Users" label="Staff & Salary" />

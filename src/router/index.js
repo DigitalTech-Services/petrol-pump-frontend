@@ -87,25 +87,25 @@ const routes = [
         path: 'transactions',
         name: 'Transactions',
         component: TransactionsView,
-        meta: { title: 'Card Transactions', breadcrumb: ['Transactions'] }
+        meta: { title: 'Card Transactions', breadcrumb: ['Transactions'], role: 'manager' }
       },
       {
         path: 'expenses',
         name: 'Expenses',
         component: ExpensesView,
-        meta: { title: 'Expenses', breadcrumb: ['Expenses'] }
+        meta: { title: 'Expenses', breadcrumb: ['Expenses'], role: 'manager' }
       },
       {
         path: 'staff',
         name: 'Staff',
         component: StaffView,
-        meta: { title: 'Staff & Salary', breadcrumb: ['Staff'] }
+        meta: { title: 'Staff & Salary', breadcrumb: ['Staff'], role: 'manager' }
       },
       {
         path: 'timesheet',
         name: 'Timesheet',
         component: TimesheetView,
-        meta: { title: 'Time Sheet', breadcrumb: ['Time Sheet'] }
+        meta: { title: 'Time Sheet', breadcrumb: ['Time Sheet'], role: 'manager' }
       },
       {
         path: 'reports',
