@@ -8,7 +8,6 @@
       <template #actions>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doExport"><Download :size="14" /> Export CSV</button>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doPrint"><Printer :size="14" /> Print</button>
-        <button v-if="auth.canWrite" class="btn btn-primary flex items-center gap-1.5" @click="openAdd"><Plus :size="14" /> New Sale Entry</button>
       </template>
     </PageHeader>
 
@@ -93,92 +92,6 @@
       </div>
     </div>
 
-    <!-- ═══ ADD SALE MODAL ═══ -->
-    <AppModal v-model="showAdd" title="New Sale Entry" subtitle="Enter daily fuel sale data" :icon="Fuel" max-width="640px">
-      <div class="space-y-5">
-
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="field-label">Sale Date *</label>
-            <input type="date" v-model="saleForm.date" class="form-input w-full" required />
-          </div>
-          <div>
-            <label class="field-label">Shift</label>
-            <select v-model="saleForm.shift" class="form-select w-full">
-              <option>Morning</option><option>Evening</option><option>Night</option><option>Full Day</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- MS -->
-        <div class="p-4 rounded-xl" style="background:var(--bg-3);border:1px solid rgba(245,158,11,0.2)">
-          <div class="flex items-center gap-2 mb-3"><span class="badge badge-ms">MS Petrol</span></div>
-          <div class="grid grid-cols-2 gap-3">
-            <div><label class="field-label">Volume (L)</label><input type="number" step="0.01" v-model.number="saleForm.ms" class="form-input w-full" placeholder="0.00" /></div>
-            <div><label class="field-label">Rate (₹/L)</label><input type="number" step="0.01" v-model.number="saleForm.rateMS" class="form-input w-full" placeholder="104.77" /></div>
-          </div>
-        </div>
-
-        <!-- HSD -->
-        <div class="p-4 rounded-xl" style="background:var(--bg-3);border:1px solid rgba(16,185,129,0.2)">
-          <div class="flex items-center gap-2 mb-3"><span class="badge badge-hsd">HSD Diesel</span></div>
-          <div class="grid grid-cols-2 gap-3">
-            <div><label class="field-label">Volume (L)</label><input type="number" step="0.01" v-model.number="saleForm.hsd" class="form-input w-full" placeholder="0.00" /></div>
-            <div><label class="field-label">Rate (₹/L)</label><input type="number" step="0.01" v-model.number="saleForm.rateHSD" class="form-input w-full" placeholder="91.28" /></div>
-          </div>
-        </div>
-
-        <!-- Speed -->
-        <div class="p-4 rounded-xl" style="background:var(--bg-3);border:1px solid rgba(59,130,246,0.2)">
-          <div class="flex items-center gap-2 mb-3"><span class="badge badge-speed">Speed Premium</span></div>
-          <div class="grid grid-cols-2 gap-3">
-            <div><label class="field-label">Volume (L)</label><input type="number" step="0.01" v-model.number="saleForm.speed" class="form-input w-full" placeholder="0.00" /></div>
-            <div><label class="field-label">Rate (₹/L)</label><input type="number" step="0.01" v-model.number="saleForm.rateSpeed" class="form-input w-full" placeholder="113.85" /></div>
-          </div>
-        </div>
-
-        <!-- Collections -->
-        <div class="p-4 rounded-xl" style="background:var(--bg-3);border:1px solid var(--bg-4)">
-          <div class="text-[12px] font-semibold text-[var(--text)] mb-3 flex items-center gap-1.5"><Banknote :size="14" /> Collections</div>
-          <div class="grid grid-cols-3 gap-3">
-            <div><label class="field-label">Cash (₹)</label><input type="number" step="0.01" v-model.number="saleForm.cash" class="form-input w-full" placeholder="0.00" /></div>
-            <div><label class="field-label">PhonePe (₹)</label><input type="number" step="0.01" v-model.number="saleForm.phonepay" class="form-input w-full" placeholder="0.00" /></div>
-            <div><label class="field-label">Card (₹)</label><input type="number" step="0.01" v-model.number="saleForm.card" class="form-input w-full" placeholder="0.00" /></div>
-          </div>
-          <div class="grid grid-cols-2 gap-3 mt-3">
-            <div><label class="field-label">Expenses (₹)</label><input type="number" step="0.01" v-model.number="saleForm.exp" class="form-input w-full" placeholder="0.00" /></div>
-            <div><label class="field-label">Credit Sale (₹)</label><input type="number" step="0.01" v-model.number="saleForm.credit" class="form-input w-full" placeholder="0.00" /></div>
-          </div>
-        </div>
-
-        <!-- Live Preview -->
-        <div class="grid grid-cols-2 gap-3 p-4 rounded-xl" style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2)">
-          <div>
-            <div class="text-[10.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Gross Revenue</div>
-            <div class="font-display font-bold text-[20px] text-[#f59e0b]">₹{{ fmt(addRevenue) }}</div>
-          </div>
-          <div>
-            <div class="text-[10.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Cash Balance</div>
-            <div class="font-display font-bold text-[20px]" :class="addBalance >= 0 ? 'text-positive' : 'text-negative'">₹{{ fmt(addBalance) }}</div>
-          </div>
-        </div>
-
-        <div>
-          <label class="field-label">Narration / Notes</label>
-          <textarea v-model="saleForm.narration" class="form-input w-full" rows="2" placeholder="Employee short, tanker, tea, expenses detail…" />
-        </div>
-      </div>
-
-      <template #footer>
-        <div class="flex justify-end gap-3">
-          <button class="btn btn-ghost px-6" @click="showAdd = false">Cancel</button>
-          <button class="btn btn-primary px-8 flex items-center gap-1.5" @click="saveSale" :disabled="store.loading">
-            <RotateCw v-if="store.loading" :size="14" class="animate-spin" /><Save v-else :size="14" /> Save Sale Entry
-          </button>
-        </div>
-      </template>
-    </AppModal>
-
     <!-- ═══ EDIT MODAL ═══ -->
     <AppModal v-model="showEdit" title="Edit Sale Entry" :icon="Pencil" max-width="640px">
       <div class="space-y-4" v-if="editData">
@@ -256,7 +169,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import StatRow    from '@/components/ui/StatRow.vue'
 import AppModal   from '@/components/ui/AppModal.vue'
@@ -266,7 +179,7 @@ import { useUiStore }   from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'
 import { useSalesStore } from '@/stores/sales'
 import { useSelectedStationStore } from '@/stores/selectedStation'
-import { Download, Printer, Plus, Fuel, Pencil, AlertTriangle, RotateCw, Save, Trash2, Banknote } from 'lucide-vue-next'
+import { Download, Printer, Pencil, AlertTriangle, RotateCw, Save, Trash2 } from 'lucide-vue-next'
 
 const ui              = useUiStore()
 const auth            = useAuthStore()
@@ -328,46 +241,6 @@ const summaryStats = computed(() => [
   { label: 'Total PhonePe',  value: '₹' + fmt(totals.value.phonepay, 0), sub: 'UPI',        class: 'text-[#6366f1]' },
   { label: 'Total Expenses', value: '₹' + fmt(totals.value.exp, 0),      sub: 'All days',   class: 'text-negative' },
 ])
-
-// ── Add modal ────────────────────────────────────────────────────
-const showAdd  = ref(false)
-const saleForm = reactive({
-  date: '', shift: 'Full Day',
-  ms: null, rateMS: 104.77,
-  hsd: null, rateHSD: 91.28,
-  speed: null, rateSpeed: 113.85,
-  cash: null, phonepay: null, card: null,
-  exp: null, credit: null, narration: '',
-})
-
-const addRevenue = computed(() =>
-  (saleForm.ms || 0) * saleForm.rateMS + (saleForm.hsd || 0) * saleForm.rateHSD + (saleForm.speed || 0) * saleForm.rateSpeed
-)
-const addBalance = computed(() =>
-  (saleForm.cash || 0) + (saleForm.phonepay || 0) + (saleForm.card || 0) - (saleForm.exp || 0)
-)
-
-function openAdd() {
-  saleForm.date = new Date().toISOString().split('T')[0]
-  saleForm.shift = 'Full Day'
-  saleForm.ms = saleForm.hsd = saleForm.speed = null
-  saleForm.cash = saleForm.phonepay = saleForm.card = saleForm.exp = saleForm.credit = null
-  saleForm.narration = ''
-  showAdd.value = true
-}
-
-async function saveSale() {
-  if (!saleForm.date || (!saleForm.ms && !saleForm.hsd && !saleForm.speed)) {
-    ui.error('Date and at least one fuel volume required'); return
-  }
-  try {
-    await store.create({ ...saleForm })
-    showAdd.value = false
-    ui.success('Sale entry saved!')
-  } catch (e) {
-    ui.error(e?.message || 'Failed to save.')
-  }
-}
 
 // ── Edit modal ───────────────────────────────────────────────────
 const showEdit = ref(false)
