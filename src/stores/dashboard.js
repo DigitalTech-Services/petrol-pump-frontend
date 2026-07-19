@@ -9,6 +9,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const paymentSplit = ref(null)
   const stockLevels  = ref(null)
   const profitLoss   = ref(null)
+  const actualProfit = ref(null)
   const loading      = ref(false)
   const error        = ref(null)
 
@@ -20,6 +21,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     paymentSplit.value = null
     stockLevels.value  = null
     profitLoss.value   = null
+    actualProfit.value = null
     loading.value      = true
     error.value        = null
 
@@ -32,6 +34,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
       paymentSplit.value = d.payment_split                            ?? null
       stockLevels.value  = d.stock_levels                             ?? null
       profitLoss.value   = d.profit_loss                              ?? null
+      actualProfit.value = d.actual_profit                            ?? null
     } catch (e) {
       error.value = e?.message ?? 'Failed to load dashboard.'
     } finally {
@@ -39,5 +42,5 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   }
 
-  return { kpis, dailyTrend, fuelMix, paymentSplit, stockLevels, profitLoss, loading, error, fetchAll }
+  return { kpis, dailyTrend, fuelMix, paymentSplit, stockLevels, profitLoss, actualProfit, loading, error, fetchAll }
 })

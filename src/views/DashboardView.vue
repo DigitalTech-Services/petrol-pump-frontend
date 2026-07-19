@@ -22,6 +22,7 @@
       <KpiCard label="PhonePe / UPI"  :value="kpi('totalPhonePe')"  :icon="Smartphone" color="#6366f1" sub="UPI payments"      :loading="store.loading" />
       <KpiCard label="Total Expenses" :value="kpi('totalExpenses')" :icon="Receipt"    color="#ef4444" sub="Operating costs"   :loading="store.loading" />
       <KpiCard label="Staff Payroll"  :value="kpi('staffPayroll')"  :icon="Users"      color="#8b5cf6" sub="Staff salary"      :loading="store.loading" />
+      <KpiCard label="Actual Profit"  :value="actualProfitDisplay"  :icon="Wallet"     :color="actualProfitColor" :sub="actualProfitSub" :loading="store.loading" />
     </div>
 
     <!-- Charts Row 1 -->
@@ -206,7 +207,7 @@ import BaseChart from '@/components/charts/BaseChart.vue'
 import { fmt, fmtINR, chartColors } from '@/utils/format'
 import {
   Banknote, Fuel, Smartphone, Receipt, Users,
-  Calendar, TrendingUp, Award, CreditCard, BarChart3, RotateCw
+  Calendar, TrendingUp, Award, CreditCard, BarChart3, RotateCw, Wallet
 } from 'lucide-vue-next'
 
 const auth            = useAuthStore()
@@ -278,6 +279,25 @@ const fuelProfitColor = computed(() => {
 const fuelProfitSub = computed(() => {
   if (fuelProfitTotal.value === null) return 'Set rates in Settings'
   return fuelProfitTotal.value >= 0 ? 'Profit this month' : 'Loss this month'
+})
+
+// ── Actual Profit — fuel margin − expenses − staff payroll ────────────
+const actualProfitTotal = computed(() => store.actualProfit?.total ?? null)
+
+const actualProfitDisplay = computed(() => {
+  if (actualProfitTotal.value === null) return '—'
+  const amt = Math.abs(actualProfitTotal.value)
+  return (actualProfitTotal.value < 0 ? '−' : '') + fmtINR(amt)
+})
+
+const actualProfitColor = computed(() => {
+  if (actualProfitTotal.value === null) return '#8b5cf6'
+  return actualProfitTotal.value >= 0 ? '#10b981' : '#ef4444'
+})
+
+const actualProfitSub = computed(() => {
+  if (actualProfitTotal.value === null) return 'Fuel margin − expenses − payroll'
+  return actualProfitTotal.value >= 0 ? 'Net profit this month' : 'Net loss this month'
 })
 
 // ── Charts — fully dynamic, no hardcoded data arrays ─────────────────
