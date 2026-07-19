@@ -182,7 +182,7 @@
           <div><label class="field-label">Join Date</label><input type="date" v-model="staffForm.joinDate" class="form-input w-full" /></div>
         </div>
         <div class="grid grid-cols-2 gap-4">
-          <div><label class="field-label">Rate per Hour (₹) *</label><input type="number" v-model.number="staffForm.ratePerHour" class="form-input w-full" placeholder="50" /></div>
+          <div><label class="field-label">Monthly Salary (₹) *</label><input type="number" v-model.number="staffForm.monthlySalary" class="form-input w-full" placeholder="15000" /></div>
           <div><label class="field-label">Shift Hours</label>
             <select v-model="staffForm.shiftHours" class="form-select w-full">
               <option value="8">8 Hours</option><option value="10">10 Hours</option>
@@ -190,7 +190,9 @@
             </select>
           </div>
         </div>
-        <div class="text-[11.5px] text-[var(--text-3)] px-1">Salary is calculated automatically from hours logged in Time Sheet — no need to enter it manually.</div>
+        <div class="text-[11.5px] text-[var(--text-3)] px-1">
+          Hourly rate is calculated automatically — Monthly Salary ÷ days in the month ÷ shift hours (e.g. ₹15,000 ÷ 31 ÷ 8 ≈ ₹{{ previewRatePerHour }}/hr) — then multiplied by hours present each day for salary.
+        </div>
         <div><label class="field-label">Address / Notes</label><textarea v-model="staffForm.notes" class="form-input w-full" rows="2" placeholder="Address, emergency contact, notes…" /></div>
       </div>
       <template #footer>
@@ -215,7 +217,13 @@
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
-          <div><label class="field-label">Rate per Hour (₹)</label><input type="number" v-model.number="editStaffData.ratePerHour" class="form-input w-full" /></div>
+          <div><label class="field-label">Monthly Salary (₹)</label><input type="number" v-model.number="editStaffData.monthlySalary" class="form-input w-full" /></div>
+          <div><label class="field-label">Shift Hours</label>
+            <select v-model="editStaffData.shiftHours" class="form-select w-full">
+              <option value="8">8 Hours</option><option value="10">10 Hours</option>
+              <option value="12">12 Hours</option><option value="14">14 Hours</option>
+            </select>
+          </div>
         </div>
         <div class="text-[11.5px] text-[var(--text-3)] px-1">
           This only affects hours logged from now on — {{ monthLabel }}'s already-logged hours keep the rate that was in effect when they were recorded.
@@ -298,7 +306,7 @@ const savingStaff   = ref(false)
 const editStaffData = ref(null)
 const advanceTarget = ref(null)
 
-const staffForm = reactive({ name:'', role:'Staff', phone:'', joinDate:'', ratePerHour:50, shiftHours:'8', notes:'' })
+const staffForm = reactive({ name:'', role:'Staff', phone:'', joinDate:'', monthlySalary:15000, shiftHours:'8', notes:'' })
 const advanceForm = reactive({ date:'', amount:null, reason:'' })
 
 const now = new Date()
@@ -309,6 +317,16 @@ const monthLabel = computed(() => {
 })
 
 const fmtK = n => Math.abs(n)>=1000 ? (n/1000).toFixed(1)+'K' : String(n)
+
+// Live preview of the hourly rate the backend will derive: salary ÷ days in the
+// reference month (join date if set, else current month) ÷ shift hours.
+const previewRatePerHour = computed(() => {
+  const salary = Number(staffForm.monthlySalary) || 0
+  const hours  = Number(staffForm.shiftHours) || 8
+  const ref    = staffForm.joinDate ? new Date(staffForm.joinDate) : new Date()
+  const daysInMonth = new Date(ref.getFullYear(), ref.getMonth() + 1, 0).getDate()
+  return daysInMonth > 0 && hours > 0 ? (salary / daysInMonth / hours).toFixed(2) : '0.00'
+})
 
 const COLORS = ['#f59e0b','#10b981','#3b82f6','#8b5cf6','#ef4444','#06b6d4','#ec4899','#f97316','#84cc16','#14b8a6','#6366f1','#78716c']
 
@@ -340,12 +358,29 @@ function mapStaff(s) {
     joinDate:     s.join_date,
     hoursWorked:  s.hours_worked ?? 0,
     ratePerHour:  s.rate_per_hour,
+    monthlySalary:s.monthly_salary ?? 0,
+    shiftHours:   String(s.shift_hours ?? 8),
     workingSalary:s.working_salary ?? 0,
     totalAdvance: s.total_advance ?? 0,
     finalPayout:  s.final_payout  ?? ((s.working_salary ?? 0) - (s.total_advance ?? 0)),
     notes:        s.notes,
     color:        COLORS[s.id % COLORS.length],
   }
+}
+
+// Returns the first validation error message, or null if the form is valid.
+function validateStaffForm(form) {
+  if (!form.name || !form.name.trim()) return 'Name is required'
+  if (form.name.trim().length < 2) return 'Name must be at least 2 characters'
+  if (!form.role) return 'Role is required'
+  if (form.phone && form.phone.trim()) {
+    const digits = form.phone.replace(/[^0-9]/g, '')
+    if (digits.length < 10 || digits.length > 13) return 'Enter a valid phone number'
+  }
+  if (form.joinDate && isNaN(new Date(form.joinDate).getTime())) return 'Enter a valid join date'
+  if (!form.monthlySalary || Number(form.monthlySalary) <= 0) return 'Monthly salary must be greater than 0'
+  if (!form.shiftHours || Number(form.shiftHours) < 1 || Number(form.shiftHours) > 24) return 'Shift hours must be between 1 and 24'
+  return null
 }
 
 function stationParam() {
@@ -380,7 +415,7 @@ watch(selectedMonth, loadAll)
 watch(() => selectedStation.selectedStationId, loadAll)
 
 function openAddStaff() {
-  Object.assign(staffForm, {name:'',role:'Staff',phone:'',joinDate:'',ratePerHour:50,shiftHours:'8',notes:''})
+  Object.assign(staffForm, {name:'',role:'Staff',phone:'',joinDate:'',monthlySalary:15000,shiftHours:'8',notes:''})
   showAddStaff.value = true
 }
 function openEditStaff(s) { editStaffData.value = {...s}; showEditStaff.value = true }
@@ -393,17 +428,18 @@ function openAddAdvance(s) {
 }
 
 async function saveStaff() {
-  if (!staffForm.name || !staffForm.ratePerHour) { ui.error('Name and rate are required'); return }
+  const validationError = validateStaffForm(staffForm)
+  if (validationError) { ui.error(validationError); return }
   savingStaff.value = true
   try {
     const res = await staffApi.create({
-      name:          staffForm.name,
-      role:          staffForm.role,
-      phone:         staffForm.phone || null,
-      join_date:     staffForm.joinDate || null,
-      rate_per_hour: staffForm.ratePerHour,
-      shift_hours:   Number(staffForm.shiftHours),
-      notes:         staffForm.notes || null,
+      name:           staffForm.name.trim(),
+      role:           staffForm.role,
+      phone:          staffForm.phone || null,
+      join_date:      staffForm.joinDate || null,
+      monthly_salary: staffForm.monthlySalary,
+      shift_hours:    Number(staffForm.shiftHours),
+      notes:          staffForm.notes || null,
     })
     staffList.push(mapStaff(res.data.staff))
     showAddStaff.value = false
@@ -417,12 +453,15 @@ async function saveStaff() {
 
 async function saveEditStaff() {
   if (!editStaffData.value) return
+  const s = editStaffData.value
+  if (!s.name || !s.name.trim()) { ui.error('Name is required'); return }
+  if (!s.monthlySalary || Number(s.monthlySalary) <= 0) { ui.error('Monthly salary must be greater than 0'); return }
   try {
-    const s = editStaffData.value
     await staffApi.update(s.id, {
-      name:          s.name,
-      role:          s.role,
-      rate_per_hour: s.ratePerHour,
+      name:           s.name.trim(),
+      role:           s.role,
+      monthly_salary: s.monthlySalary,
+      shift_hours:    Number(s.shiftHours),
     })
     // Reload rather than splice in the response — the backend computes gross
     // salary for its own default month, which may not match selectedMonth.
