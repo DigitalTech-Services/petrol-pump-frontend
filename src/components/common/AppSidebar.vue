@@ -7,7 +7,7 @@
       <div
         class="w-9 h-9 rounded-[10px] flex items-center justify-center font-display font-bold text-[18px] text-[var(--bg)] flex-shrink-0"
         style="background:linear-gradient(135deg,#f59e0b,#d97706); box-shadow:0 0 20px rgba(245,158,11,0.3)">
-        K
+        {{ businessInitial }}
       </div>
       <div class="min-w-0">
         <div class="font-display font-bold text-[15px] text-[var(--text)] leading-tight truncate">{{ auth.stationName }}</div>
@@ -66,18 +66,18 @@
         <NavItem to="/reports" :icon="BarChart3" label="Reports" />
       </div>
 
-      <div>
-        <div class="nav-label">System</div>
-
-        <NavItem to="/settings" :icon="Settings" label="Settings" />
-      </div>
-
       <div v-if="auth.isOwner">
         <div class="nav-label">Team</div>
 
         <NavItem to="/stations" :icon="Building2" label="Stations" />
         <NavItem to="/managers" :icon="UserCog" label="Managers" />
         <NavItem to="/business-profile" :icon="Building2" label="Business Profile" />
+      </div>
+
+      <div>
+        <div class="nav-label">System</div>
+
+        <NavItem to="/settings" :icon="Settings" label="Settings" />
       </div>
 
     </nav>
@@ -160,6 +160,8 @@ const initials = computed(() => {
     .toUpperCase()
     .slice(0, 2)
 })
+
+const businessInitial = computed(() => (auth.stationName || 'B').charAt(0).toUpperCase())
 
 async function handleLogout() {
   await auth.logout()
