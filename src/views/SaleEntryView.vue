@@ -34,36 +34,49 @@
         <div class="card">
           <div class="card-header"><div class="font-display font-bold text-[15px] text-[var(--text)] flex items-center gap-2"><Fuel :size="16" /> Fuel Volumes</div></div>
           <div class="card-body space-y-4">
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-3 gap-3">
               <div>
                 <label class="field-label">MS Volume (L) <span class="text-[#f59e0b]">●</span></label>
-                <input type="number" step="0.01" v-model.number="form.msVolume" class="form-input w-full" placeholder="0.00" @input="calc" />
+                <input type="number" step="0.01" v-model.number="form.msVolume" class="form-input w-full" placeholder="0.00" />
+              </div>
+              <div>
+                <label class="field-label">MS Testing Volume (L)</label>
+                <input type="number" step="0.01" v-model.number="form.msTestingVolume" class="form-input w-full" placeholder="0.00" />
               </div>
               <div>
                 <label class="field-label">MS Rate (₹/L)</label>
-                <input type="number" step="0.01" v-model.number="form.msRate" class="form-input w-full" placeholder="104.77" @input="calc" />
+                <input type="number" step="0.01" v-model.number="form.msRate" class="form-input w-full" placeholder="104.77" />
               </div>
             </div>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-3 gap-3">
               <div>
                 <label class="field-label">HSD Volume (L) <span class="text-[#10b981]">●</span></label>
-                <input type="number" step="0.01" v-model.number="form.hsdVolume" class="form-input w-full" placeholder="0.00" @input="calc" />
+                <input type="number" step="0.01" v-model.number="form.hsdVolume" class="form-input w-full" placeholder="0.00" />
+              </div>
+              <div>
+                <label class="field-label">HSD Testing Volume (L)</label>
+                <input type="number" step="0.01" v-model.number="form.hsdTestingVolume" class="form-input w-full" placeholder="0.00" />
               </div>
               <div>
                 <label class="field-label">HSD Rate (₹/L)</label>
-                <input type="number" step="0.01" v-model.number="form.hsdRate" class="form-input w-full" placeholder="91.28" @input="calc" />
+                <input type="number" step="0.01" v-model.number="form.hsdRate" class="form-input w-full" placeholder="91.28" />
               </div>
             </div>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-3 gap-3">
               <div>
                 <label class="field-label">Speed Volume (L) <span class="text-[#3b82f6]">●</span></label>
-                <input type="number" step="0.01" v-model.number="form.speedVolume" class="form-input w-full" placeholder="0.00" @input="calc" />
+                <input type="number" step="0.01" v-model.number="form.speedVolume" class="form-input w-full" placeholder="0.00" />
+              </div>
+              <div>
+                <label class="field-label">Speed Testing Volume (L)</label>
+                <input type="number" step="0.01" v-model.number="form.speedTestingVolume" class="form-input w-full" placeholder="0.00" />
               </div>
               <div>
                 <label class="field-label">Speed Rate (₹/L)</label>
-                <input type="number" step="0.01" v-model.number="form.speedRate" class="form-input w-full" placeholder="113.85" @input="calc" />
+                <input type="number" step="0.01" v-model.number="form.speedRate" class="form-input w-full" placeholder="113.85" />
               </div>
             </div>
+            <div class="text-[11.5px] text-[var(--text-3)] px-1">Testing volume (fuel dispensed for meter calibration) is deducted before revenue is calculated.</div>
           </div>
         </div>
 
@@ -74,26 +87,26 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="field-label">Cash (₹)</label>
-                <input type="number" step="0.01" v-model.number="form.cash" class="form-input w-full" placeholder="0.00" @input="calcBalance" />
+                <input type="number" step="0.01" v-model.number="form.cash" class="form-input w-full" placeholder="0.00" />
               </div>
               <div>
                 <label class="field-label">Card / Pine Labs (₹)</label>
-                <input type="number" step="0.01" v-model.number="form.card" class="form-input w-full" placeholder="0.00" @input="calcBalance" />
+                <input type="number" step="0.01" v-model.number="form.card" class="form-input w-full" placeholder="0.00" />
               </div>
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="field-label">PhonePe / UPI (₹)</label>
-                <input type="number" step="0.01" v-model.number="form.phonePe" class="form-input w-full" placeholder="0.00" @input="calcBalance" />
+                <input type="number" step="0.01" v-model.number="form.phonePe" class="form-input w-full" placeholder="0.00" />
               </div>
               <div>
                 <label class="field-label">Credit Sale (₹)</label>
-                <input type="number" step="0.01" v-model.number="form.creditSale" class="form-input w-full" placeholder="0.00" @input="calcBalance" />
+                <input type="number" step="0.01" v-model.number="form.creditSale" class="form-input w-full" placeholder="0.00" />
               </div>
             </div>
             <div>
               <label class="field-label">Expenses (₹)</label>
-              <input type="number" step="0.01" v-model.number="form.expenses" class="form-input w-full" placeholder="0.00" @input="calcBalance" />
+              <input type="number" step="0.01" v-model.number="form.expenses" class="form-input w-full" placeholder="0.00" />
             </div>
           </div>
         </div>
@@ -163,23 +176,22 @@ const saving  = ref(false)
 const form = reactive({
   saleDate: new Date().toISOString().split('T')[0],
   shift: 'Full Day',
-  msVolume: null, msRate: 104.77,
-  hsdVolume: null, hsdRate: 91.28,
-  speedVolume: null, speedRate: 113.85,
+  msVolume: null, msTestingVolume: null, msRate: 104.77,
+  hsdVolume: null, hsdTestingVolume: null, hsdRate: 91.28,
+  speedVolume: null, speedTestingVolume: null, speedRate: 113.85,
   cash: null, card: null, phonePe: null,
   creditSale: null, expenses: null,
   narration: '',
 })
 
-const calc_msRev    = computed(() => (form.msVolume    || 0) * (form.msRate    || 0))
-const calc_hsdRev   = computed(() => (form.hsdVolume   || 0) * (form.hsdRate   || 0))
-const calc_speedRev = computed(() => (form.speedVolume || 0) * (form.speedRate || 0))
+// Testing volume (fuel dispensed for meter calibration) isn't sold, so it's
+// deducted from the entered volume before revenue is calculated.
+const calc_msRev    = computed(() => Math.max(0, (form.msVolume    || 0) - (form.msTestingVolume    || 0)) * (form.msRate    || 0))
+const calc_hsdRev   = computed(() => Math.max(0, (form.hsdVolume   || 0) - (form.hsdTestingVolume   || 0)) * (form.hsdRate   || 0))
+const calc_speedRev = computed(() => Math.max(0, (form.speedVolume || 0) - (form.speedTestingVolume || 0)) * (form.speedRate || 0))
 const calc_revenue  = computed(() => calc_msRev.value + calc_hsdRev.value + calc_speedRev.value)
 const calc_collection = computed(() => (form.cash||0) + (form.card||0) + (form.phonePe||0) + (form.creditSale||0))
 const calc_balance  = computed(() => calc_collection.value - (form.expenses || 0))
-
-const calc = () => {}
-const calcBalance = () => {}
 
 async function handleSubmit() {
   saving.value = true
