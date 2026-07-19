@@ -18,7 +18,7 @@
         <KpiCard label="Total Staff"     :value="timesheetData.length"                                                                               :icon="Users"      color="#f59e0b" sub="Active this month"/>
         <KpiCard label="Total Man-Days"  :value="timesheetData.reduce((a,s)=>a+s.daysWorked,0)"                                                      :icon="Calendar"   color="#10b981" sub="Combined attendance"/>
         <KpiCard label="Avg Attendance"  :value="timesheetData.length ? Math.round(timesheetData.reduce((a,s)=>a+s.daysWorked,0)/timesheetData.length)+' days' : '—'" :icon="BarChart3" color="#3b82f6" sub="Per person"/>
-        <KpiCard label="Full Attendance" :value="timesheetData.filter(s=>s.daysWorked>=30).length+' Staff'"                                          :icon="Award"      color="#6366f1" sub="30/30 days"/>
+        <KpiCard label="Full Attendance" :value="timesheetData.filter(s=>s.daysWorked>=daysInMonth).length+' Staff'"                                 :icon="Award"      color="#6366f1" :sub="`${daysInMonth}/${daysInMonth} days`"/>
       </div>
 
       <!-- Summary Cards -->
@@ -38,16 +38,16 @@
             </div>
             <div class="text-right">
               <div class="font-display font-bold text-[22px]" :style="{color:s.color}">{{ s.daysWorked }}</div>
-              <div class="text-[10px] text-[var(--text-3)]">/ 30 days</div>
+              <div class="text-[10px] text-[var(--text-3)]">/ {{ daysInMonth }} days</div>
             </div>
           </div>
           <div class="mb-3">
             <div class="fuel-bar-track">
-              <div class="fuel-bar-fill" :style="{width:(s.daysWorked/30*100)+'%',background:s.color}" />
+              <div class="fuel-bar-fill" :style="{width:(s.daysWorked/daysInMonth*100)+'%',background:s.color}" />
             </div>
             <div class="flex justify-between text-[10.5px] text-[var(--text-3)] mt-1">
-              <span>{{ Math.round(s.daysWorked/30*100) }}% attendance</span>
-              <span>{{ 30-s.daysWorked }} absent</span>
+              <span>{{ Math.round(s.daysWorked/daysInMonth*100) }}% attendance</span>
+              <span>{{ daysInMonth-s.daysWorked }} absent</span>
             </div>
           </div>
           <div class="grid grid-cols-3 gap-2 pt-3" style="border-top:1px solid var(--bg-4)">
@@ -93,7 +93,7 @@
                 </td>
                 <td><span class="badge badge-gray">{{ s.role }}</span></td>
                 <td><span class="font-display font-bold text-[15px] text-positive">{{ s.daysWorked }}</span> <span class="text-[var(--text-3)] text-[11px]">days</span></td>
-                <td><span class="font-display font-bold text-[15px]" :class="(30-s.daysWorked)>5?'text-negative':'text-[var(--text-3)]'">{{ 30-s.daysWorked }}</span></td>
+                <td><span class="font-display font-bold text-[15px]" :class="(daysInMonth-s.daysWorked)>5?'text-negative':'text-[var(--text-3)]'">{{ daysInMonth-s.daysWorked }}</span></td>
                 <td class="font-mono-custom text-[12px] text-[var(--text-2)]">{{ s.inTime }}</td>
                 <td class="font-mono-custom text-[12px] text-[var(--text-2)]">{{ s.outTime }}</td>
                 <td><span class="badge badge-gray text-[#3b82f6]">{{ s.totalHours }}h</span></td>
@@ -104,9 +104,9 @@
                 <td>
                   <div class="flex items-center gap-2">
                     <div class="flex-1 fuel-bar-track" style="min-width:50px">
-                      <div class="fuel-bar-fill" :style="{width:(s.daysWorked/30*100)+'%',background:s.color}" />
+                      <div class="fuel-bar-fill" :style="{width:(s.daysWorked/daysInMonth*100)+'%',background:s.color}" />
                     </div>
-                    <span class="text-[11px] text-[var(--text-2)]">{{ Math.round(s.daysWorked/30*100) }}%</span>
+                    <span class="text-[11px] text-[var(--text-2)]">{{ Math.round(s.daysWorked/daysInMonth*100) }}%</span>
                   </div>
                 </td>
                 <td>
@@ -119,7 +119,7 @@
               <tr>
                 <td colspan="3">TOTAL ({{ timesheetData.length }} employees)</td>
                 <td>{{ timesheetData.reduce((a,s)=>a+s.daysWorked,0) }} days</td>
-                <td>{{ timesheetData.reduce((a,s)=>a+(30-s.daysWorked),0) }}</td>
+                <td>{{ timesheetData.reduce((a,s)=>a+(daysInMonth-s.daysWorked),0) }}</td>
                 <td colspan="2">—</td>
                 <td>{{ timesheetData.length ? (timesheetData.reduce((a,s)=>a+s.totalHours,0)/timesheetData.length).toFixed(1) : 0 }}h avg</td>
                 <td>—</td>
@@ -154,7 +154,7 @@
               </div>
             </div>
             <div class="flex items-center gap-3">
-              <span class="text-[12px] text-[var(--text-3)]">{{ s.daysWorked }}/30 days</span>
+              <span class="text-[12px] text-[var(--text-3)]">{{ s.daysWorked }}/{{ daysInMonth }} days</span>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" v-model="attendanceMap[s.id]" class="sr-only peer">
                 <div class="w-10 h-5 rounded-full peer-checked:bg-[#10b981] bg-[var(--border)] transition-colors relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:w-4 after:h-4 after:transition-all peer-checked:after:translate-x-5"></div>
@@ -212,7 +212,7 @@
             <label class="field-label">Days Present</label>
             <div class="p-2.5 rounded-lg flex items-center" style="background:var(--bg-3);border:1px solid var(--bg-4);height:42px">
               <span class="font-display font-bold text-[18px] text-positive">{{ editAttData.daysWorked }}</span>
-              <span class="text-[11px] text-[var(--text-3)] ml-1">/ 30 days</span>
+              <span class="text-[11px] text-[var(--text-3)] ml-1">/ {{ daysInMonth }} days</span>
             </div>
           </div>
           <div>
@@ -321,6 +321,12 @@ const selectedMonth = ref(new Date().toISOString().slice(0, 7))
 const monthLabel = computed(() => {
   const [y, m] = selectedMonth.value.split('-')
   return new Date(+y, +m - 1, 1).toLocaleString('default', { month: 'long', year: 'numeric' })
+})
+
+// Actual number of days in the selected month (28-31) — not a fixed 30.
+const daysInMonth = computed(() => {
+  const [y, m] = selectedMonth.value.split('-')
+  return new Date(+y, +m, 0).getDate()
 })
 
 const COLORS = ['#f59e0b','#ef4444','#10b981','#3b82f6','#8b5cf6','#06b6d4','#f97316','#84cc16','#ec4899','#14b8a6','#6366f1','#78716c']
@@ -436,10 +442,10 @@ async function saveEditAtt() {
 function doExport() {
   const headers = ['Name','Role','Days Present','Days Absent','In Time','Out Time','Hours/Day','Rate/Hour','Gross Salary','Advance','Net Payable','Attendance %']
   const rows = timesheetData.map(s => [
-    s.name, s.role, s.daysWorked, 30 - s.daysWorked,
+    s.name, s.role, s.daysWorked, daysInMonth.value - s.daysWorked,
     s.inTime, s.outTime, s.totalHours + 'h',
     '₹' + s.ratePerHour, '₹' + fmt(s.salary), '₹' + fmt(s.advance),
-    '₹' + fmt(s.netPayable), Math.round(s.daysWorked / 30 * 100) + '%'
+    '₹' + fmt(s.netPayable), Math.round(s.daysWorked / daysInMonth.value * 100) + '%'
   ])
   exportCSV('TimeSheet_' + selectedMonth.value, headers, rows)
   ui.success('CSV exported!')
@@ -448,10 +454,10 @@ function doExport() {
 function doPrint() {
   const headers = ['Name','Role','Days','Absent','In','Out','Hours','Rate','Gross','Adv','Net','Att%']
   const rows = timesheetData.map(s => [
-    s.name, s.role, s.daysWorked, 30 - s.daysWorked,
+    s.name, s.role, s.daysWorked, daysInMonth.value - s.daysWorked,
     s.inTime, s.outTime, s.totalHours + 'h',
     '₹' + s.ratePerHour, '₹' + fmt(s.salary), '₹' + fmt(s.advance), '₹' + fmt(s.netPayable),
-    Math.round(s.daysWorked / 30 * 100) + '%'
+    Math.round(s.daysWorked / daysInMonth.value * 100) + '%'
   ])
   printTable('Attendance Register — ' + monthLabel.value, headers, rows)
 }
