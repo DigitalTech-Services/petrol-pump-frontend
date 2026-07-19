@@ -169,25 +169,45 @@
     <AppModal v-model="showAddStaff" title="Add New Staff Member" subtitle="Fill in employee details" :icon="User" max-width="560px">
       <div class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
-          <div><label class="field-label">Full Name *</label><input v-model="staffForm.name" class="form-input w-full" placeholder="Employee name" /></div>
-          <div><label class="field-label">Role *</label>
-            <select v-model="staffForm.role" class="form-select w-full">
+          <div>
+            <label class="field-label">Full Name *</label>
+            <input v-model="staffForm.name" class="form-input w-full" :class="{ 'input-error': staffFormErrors.name }" placeholder="Employee name" />
+            <p v-if="staffFormErrors.name" class="field-error">{{ staffFormErrors.name }}</p>
+          </div>
+          <div>
+            <label class="field-label">Role *</label>
+            <select v-model="staffForm.role" class="form-select w-full" :class="{ 'input-error': staffFormErrors.role }">
               <option>Staff</option><option>Senior Staff</option><option>Manager</option>
               <option>Security</option><option>Part-time</option><option>Air Machine</option><option>Petrol</option>
             </select>
+            <p v-if="staffFormErrors.role" class="field-error">{{ staffFormErrors.role }}</p>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
-          <div><label class="field-label">Phone</label><input v-model="staffForm.phone" class="form-input w-full" placeholder="+91 98765 43210" /></div>
-          <div><label class="field-label">Join Date</label><input type="date" v-model="staffForm.joinDate" class="form-input w-full" /></div>
+          <div>
+            <label class="field-label">Phone</label>
+            <input v-model="staffForm.phone" class="form-input w-full" :class="{ 'input-error': staffFormErrors.phone }" placeholder="+91 98765 43210" />
+            <p v-if="staffFormErrors.phone" class="field-error">{{ staffFormErrors.phone }}</p>
+          </div>
+          <div>
+            <label class="field-label">Join Date</label>
+            <input type="date" v-model="staffForm.joinDate" class="form-input w-full" :class="{ 'input-error': staffFormErrors.joinDate }" />
+            <p v-if="staffFormErrors.joinDate" class="field-error">{{ staffFormErrors.joinDate }}</p>
+          </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
-          <div><label class="field-label">Monthly Salary (₹) *</label><input type="number" v-model.number="staffForm.monthlySalary" class="form-input w-full" placeholder="15000" /></div>
-          <div><label class="field-label">Shift Hours</label>
-            <select v-model="staffForm.shiftHours" class="form-select w-full">
+          <div>
+            <label class="field-label">Monthly Salary (₹) *</label>
+            <input type="number" v-model.number="staffForm.monthlySalary" class="form-input w-full" :class="{ 'input-error': staffFormErrors.monthlySalary }" placeholder="15000" />
+            <p v-if="staffFormErrors.monthlySalary" class="field-error">{{ staffFormErrors.monthlySalary }}</p>
+          </div>
+          <div>
+            <label class="field-label">Shift Hours</label>
+            <select v-model="staffForm.shiftHours" class="form-select w-full" :class="{ 'input-error': staffFormErrors.shiftHours }">
               <option value="8">8 Hours</option><option value="10">10 Hours</option>
               <option value="12">12 Hours</option><option value="14">14 Hours</option>
             </select>
+            <p v-if="staffFormErrors.shiftHours" class="field-error">{{ staffFormErrors.shiftHours }}</p>
           </div>
         </div>
         <div class="text-[11.5px] text-[var(--text-3)] px-1">
@@ -209,20 +229,32 @@
     <AppModal v-model="showEditStaff" title="Edit Staff Member" :icon="Pencil" max-width="560px">
       <div class="space-y-4" v-if="editStaffData">
         <div class="grid grid-cols-2 gap-4">
-          <div><label class="field-label">Full Name</label><input v-model="editStaffData.name" class="form-input w-full" /></div>
-          <div><label class="field-label">Role</label>
-            <select v-model="editStaffData.role" class="form-select w-full">
+          <div>
+            <label class="field-label">Full Name</label>
+            <input v-model="editStaffData.name" class="form-input w-full" :class="{ 'input-error': editStaffErrors.name }" />
+            <p v-if="editStaffErrors.name" class="field-error">{{ editStaffErrors.name }}</p>
+          </div>
+          <div>
+            <label class="field-label">Role</label>
+            <select v-model="editStaffData.role" class="form-select w-full" :class="{ 'input-error': editStaffErrors.role }">
               <option>Staff</option><option>Senior Staff</option><option>Manager</option><option>Security</option><option>Part-time</option>
             </select>
+            <p v-if="editStaffErrors.role" class="field-error">{{ editStaffErrors.role }}</p>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
-          <div><label class="field-label">Monthly Salary (₹)</label><input type="number" v-model.number="editStaffData.monthlySalary" class="form-input w-full" /></div>
-          <div><label class="field-label">Shift Hours</label>
-            <select v-model="editStaffData.shiftHours" class="form-select w-full">
+          <div>
+            <label class="field-label">Monthly Salary (₹)</label>
+            <input type="number" v-model.number="editStaffData.monthlySalary" class="form-input w-full" :class="{ 'input-error': editStaffErrors.monthlySalary }" />
+            <p v-if="editStaffErrors.monthlySalary" class="field-error">{{ editStaffErrors.monthlySalary }}</p>
+          </div>
+          <div>
+            <label class="field-label">Shift Hours</label>
+            <select v-model="editStaffData.shiftHours" class="form-select w-full" :class="{ 'input-error': editStaffErrors.shiftHours }">
               <option value="8">8 Hours</option><option value="10">10 Hours</option>
               <option value="12">12 Hours</option><option value="14">14 Hours</option>
             </select>
+            <p v-if="editStaffErrors.shiftHours" class="field-error">{{ editStaffErrors.shiftHours }}</p>
           </div>
         </div>
         <div class="text-[11.5px] text-[var(--text-3)] px-1">
@@ -309,6 +341,12 @@ const advanceTarget = ref(null)
 const staffForm = reactive({ name:'', role:'Staff', phone:'', joinDate:'', monthlySalary:15000, shiftHours:'8', notes:'' })
 const advanceForm = reactive({ date:'', amount:null, reason:'' })
 
+function emptyStaffErrors() {
+  return { name:'', role:'', phone:'', joinDate:'', monthlySalary:'', shiftHours:'' }
+}
+const staffFormErrors = reactive(emptyStaffErrors())
+const editStaffErrors = reactive(emptyStaffErrors())
+
 const now = new Date()
 const selectedMonth = ref(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`)
 const monthLabel = computed(() => {
@@ -368,19 +406,36 @@ function mapStaff(s) {
   }
 }
 
-// Returns the first validation error message, or null if the form is valid.
-function validateStaffForm(form) {
-  if (!form.name || !form.name.trim()) return 'Name is required'
-  if (form.name.trim().length < 2) return 'Name must be at least 2 characters'
-  if (!form.role) return 'Role is required'
+// Validates a staff form object (shared by Add and Edit) and returns a
+// field -> message error map; all values are '' when the form is valid.
+function validateStaffFields(form) {
+  const errors = emptyStaffErrors()
+
+  if (!form.name || !form.name.trim()) errors.name = 'Name is required'
+  else if (form.name.trim().length < 2) errors.name = 'Name must be at least 2 characters'
+
+  if (!form.role) errors.role = 'Role is required'
+
   if (form.phone && form.phone.trim()) {
     const digits = form.phone.replace(/[^0-9]/g, '')
-    if (digits.length < 10 || digits.length > 13) return 'Enter a valid phone number'
+    if (digits.length < 10 || digits.length > 13) errors.phone = 'Enter a valid phone number'
   }
-  if (form.joinDate && isNaN(new Date(form.joinDate).getTime())) return 'Enter a valid join date'
-  if (!form.monthlySalary || Number(form.monthlySalary) <= 0) return 'Monthly salary must be greater than 0'
-  if (!form.shiftHours || Number(form.shiftHours) < 1 || Number(form.shiftHours) > 24) return 'Shift hours must be between 1 and 24'
-  return null
+
+  if (form.joinDate && isNaN(new Date(form.joinDate).getTime())) errors.joinDate = 'Enter a valid join date'
+
+  if (!form.monthlySalary || Number(form.monthlySalary) <= 0) errors.monthlySalary = 'Monthly salary must be greater than 0'
+
+  if (!form.shiftHours || Number(form.shiftHours) < 1 || Number(form.shiftHours) > 24) errors.shiftHours = 'Shift hours must be between 1 and 24'
+
+  return errors
+}
+
+function hasErrors(errors) {
+  return Object.values(errors).some(Boolean)
+}
+
+function firstError(errors) {
+  return Object.values(errors).find(Boolean) || ''
 }
 
 function stationParam() {
@@ -416,9 +471,14 @@ watch(() => selectedStation.selectedStationId, loadAll)
 
 function openAddStaff() {
   Object.assign(staffForm, {name:'',role:'Staff',phone:'',joinDate:'',monthlySalary:15000,shiftHours:'8',notes:''})
+  Object.assign(staffFormErrors, emptyStaffErrors())
   showAddStaff.value = true
 }
-function openEditStaff(s) { editStaffData.value = {...s}; showEditStaff.value = true }
+function openEditStaff(s) {
+  editStaffData.value = {...s}
+  Object.assign(editStaffErrors, emptyStaffErrors())
+  showEditStaff.value = true
+}
 function openAddAdvance(s) {
   advanceTarget.value = s
   advanceForm.date = new Date().toISOString().split('T')[0]
@@ -428,8 +488,9 @@ function openAddAdvance(s) {
 }
 
 async function saveStaff() {
-  const validationError = validateStaffForm(staffForm)
-  if (validationError) { ui.error(validationError); return }
+  const errors = validateStaffFields(staffForm)
+  Object.assign(staffFormErrors, errors)
+  if (hasErrors(errors)) { ui.error(firstError(errors)); return }
   savingStaff.value = true
   try {
     const res = await staffApi.create({
@@ -454,8 +515,9 @@ async function saveStaff() {
 async function saveEditStaff() {
   if (!editStaffData.value) return
   const s = editStaffData.value
-  if (!s.name || !s.name.trim()) { ui.error('Name is required'); return }
-  if (!s.monthlySalary || Number(s.monthlySalary) <= 0) { ui.error('Monthly salary must be greater than 0'); return }
+  const errors = validateStaffFields(s)
+  Object.assign(editStaffErrors, errors)
+  if (hasErrors(errors)) { ui.error(firstError(errors)); return }
   try {
     await staffApi.update(s.id, {
       name:           s.name.trim(),
@@ -534,4 +596,6 @@ function exportAdvanceCSV() {
 
 <style scoped>
 .field-label{display:block;font-size:11.5px;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.field-error{font-size:11px;color:#ef4444;margin-top:4px}
+.input-error{border-color:#ef4444 !important}
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-4xl">
+  <div>
     <PageHeader title="New Sale Entry" subtitle="Add daily fuel sale record" :crumbs="['Home','Sales','New Entry']">
       <template #actions>
         <RouterLink to="/sales" class="btn btn-ghost">← Back to Sales</RouterLink>
