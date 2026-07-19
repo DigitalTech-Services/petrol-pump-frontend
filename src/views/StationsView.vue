@@ -64,10 +64,10 @@
           <div><label class="field-label">State</label><input v-model="form.state" class="form-input w-full" /></div>
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <div><label class="field-label">GST</label><input v-model="form.gst" class="form-input w-full" /></div>
-          <div><label class="field-label">PAN</label><input v-model="form.pan" class="form-input w-full" /></div>
+          <div><label class="field-label">GST</label><input v-model="form.gst" maxlength="15" placeholder="27ABCDE1234F1Z5" class="form-input w-full" style="text-transform:uppercase" /></div>
+          <div><label class="field-label">PAN</label><input v-model="form.pan" maxlength="10" placeholder="ABCDE1234F" class="form-input w-full" style="text-transform:uppercase" /></div>
         </div>
-        <div><label class="field-label">Phone</label><input v-model="form.phone" class="form-input w-full" /></div>
+        <div><label class="field-label">Phone</label><input v-model="form.phone" maxlength="10" placeholder="9876543210" class="form-input w-full" /></div>
       </div>
       <template #footer>
         <div class="flex justify-end gap-3">
@@ -90,10 +90,10 @@
           <div><label class="field-label">State</label><input v-model="editRow.state" class="form-input w-full" /></div>
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <div><label class="field-label">GST</label><input v-model="editRow.gst" class="form-input w-full" /></div>
-          <div><label class="field-label">PAN</label><input v-model="editRow.pan" class="form-input w-full" /></div>
+          <div><label class="field-label">GST</label><input v-model="editRow.gst" maxlength="15" placeholder="27ABCDE1234F1Z5" class="form-input w-full" style="text-transform:uppercase" /></div>
+          <div><label class="field-label">PAN</label><input v-model="editRow.pan" maxlength="10" placeholder="ABCDE1234F" class="form-input w-full" style="text-transform:uppercase" /></div>
         </div>
-        <div><label class="field-label">Phone</label><input v-model="editRow.phone" class="form-input w-full" /></div>
+        <div><label class="field-label">Phone</label><input v-model="editRow.phone" maxlength="10" placeholder="9876543210" class="form-input w-full" /></div>
       </div>
       <template #footer>
         <div class="flex justify-end gap-3">
@@ -133,6 +133,7 @@ import KpiCard    from '@/components/ui/KpiCard.vue'
 import AppModal   from '@/components/ui/AppModal.vue'
 import { useUiStore } from '@/stores/ui'
 import { useStationsStore } from '@/stores/stations'
+import { validateStationForm } from '@/utils/validation'
 import { Plus, Building2, Pencil, Trash2, RotateCw, Save, AlertTriangle } from 'lucide-vue-next'
 
 const ui    = useUiStore()
@@ -150,9 +151,12 @@ function openAdd() {
 }
 
 async function saveAdd() {
-  if (!form.name) {
-    ui.error('Station name is required'); return
-  }
+  const error = validateStationForm(form)
+  if (error) { ui.error(error); return }
+
+  form.gst = form.gst?.trim().toUpperCase() || ''
+  form.pan = form.pan?.trim().toUpperCase() || ''
+
   try {
     await store.create({ ...form })
     showAdd.value = false
@@ -170,6 +174,13 @@ function openEdit(s) { editRow.value = { ...s }; showEdit.value = true }
 
 async function saveEdit() {
   if (!editRow.value?.id) return
+
+  const error = validateStationForm(editRow.value)
+  if (error) { ui.error(error); return }
+
+  editRow.value.gst = editRow.value.gst?.trim().toUpperCase() || ''
+  editRow.value.pan = editRow.value.pan?.trim().toUpperCase() || ''
+
   try {
     await store.update(editRow.value.id, {
       name: editRow.value.name,

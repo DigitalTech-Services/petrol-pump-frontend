@@ -58,7 +58,7 @@
       <div class="space-y-4">
         <div><label class="field-label">Name *</label><input v-model="form.name" class="form-input w-full" placeholder="Full name" /></div>
         <div><label class="field-label">Email *</label><input type="email" v-model="form.email" class="form-input w-full" placeholder="manager@example.com" /></div>
-        <div><label class="field-label">Contact *</label><input v-model="form.contact" class="form-input w-full" placeholder="10-digit phone" /></div>
+        <div><label class="field-label">Contact *</label><input v-model="form.contact" maxlength="10" class="form-input w-full" placeholder="9876543210" /></div>
         <div><label class="field-label">Password *</label><input type="password" v-model="form.password" class="form-input w-full" placeholder="Min 8 characters" /></div>
         <div>
           <label class="field-label">Station</label>
@@ -130,6 +130,7 @@ import AppModal   from '@/components/ui/AppModal.vue'
 import { useUiStore } from '@/stores/ui'
 import { useManagersStore } from '@/stores/managers'
 import { useStationsStore } from '@/stores/stations'
+import { isValidPhone } from '@/utils/validation'
 import { Plus, Users, Pencil, Trash2, UserPlus, RotateCw, Save, AlertTriangle } from 'lucide-vue-next'
 
 const ui       = useUiStore()
@@ -154,8 +155,19 @@ async function saveAdd() {
   if (!form.name || !form.email || !form.contact || !form.password) {
     ui.error('All fields are required'); return
   }
+  if (!isValidPhone(form.contact)) {
+    ui.error('Enter a valid 10-digit phone number.'); return
+  }
+  if (form.password.length < 8) {
+    ui.error('Password must be at least 8 characters.'); return
+  }
   try {
     await store.create({ ...form, station_id: form.station_id || null })
+    // Re-fetch rather than trust the local optimistic push — assigning a
+    // manager to an already-staffed station silently unassigns whoever was
+    // running it server-side, and only a refetch reflects that here too.
+    await store.fetchAll()
+    if (form.station_id) await stations.fetchAll()
     showAdd.value = false
     ui.success('Manager created!')
   } catch (e) {
@@ -177,6 +189,10 @@ async function saveEdit() {
       email: editRow.value.email,
       station_id: editRow.value.stationId || null,
     })
+    // Re-fetch — reassigning a station here can silently unassign whichever
+    // other manager was previously running it server-side.
+    await store.fetchAll()
+    await stations.fetchAll()
     showEdit.value = false
     ui.success('Manager updated!')
   } catch (e) {

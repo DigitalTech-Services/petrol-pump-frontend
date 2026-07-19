@@ -65,12 +65,12 @@
             </div>
             <div v-else class="card-body grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div><label class="field-label">HP Dealer Code</label><input v-model="settings.dealerCode" :disabled="!auth.canWrite" class="form-input w-full" /></div>
-              <div><label class="field-label">Contact Number</label><input v-model="settings.phone" :disabled="!auth.canWrite" class="form-input w-full" /></div>
+              <div><label class="field-label">Contact Number</label><input v-model="settings.phone" :disabled="!auth.canWrite" maxlength="10" placeholder="9876543210" class="form-input w-full" /></div>
               <div class="sm:col-span-2"><label class="field-label">Address</label><textarea v-model="settings.address" :disabled="!auth.canWrite" class="form-input w-full" rows="2" /></div>
               <div><label class="field-label">City</label><input v-model="settings.city" :disabled="!auth.canWrite" class="form-input w-full" /></div>
               <div><label class="field-label">State</label><input v-model="settings.state" :disabled="!auth.canWrite" class="form-input w-full" /></div>
-              <div><label class="field-label">GST Number</label><input v-model="settings.gst" :disabled="!auth.canWrite" class="form-input w-full" /></div>
-              <div><label class="field-label">PAN Number</label><input v-model="settings.pan" :disabled="!auth.canWrite" class="form-input w-full" /></div>
+              <div><label class="field-label">GST Number</label><input v-model="settings.gst" :disabled="!auth.canWrite" maxlength="15" placeholder="27ABCDE1234F1Z5" class="form-input w-full" style="text-transform:uppercase" /></div>
+              <div><label class="field-label">PAN Number</label><input v-model="settings.pan" :disabled="!auth.canWrite" maxlength="10" placeholder="ABCDE1234F" class="form-input w-full" style="text-transform:uppercase" /></div>
             </div>
           </div>
         </template>
@@ -286,173 +286,6 @@
           </Transition>
         </template>
 
-        <!-- Users (owner only) -->
-        <template v-else-if="activeSection === 'users'">
-          <div class="card">
-            <div class="card-header">
-              <User :size="18" class="text-[#f59e0b]" />
-              <div>
-                <div class="font-display font-bold text-[15px] text-[var(--text)]">User Management</div>
-                <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">Manage manager accounts for this station</div>
-              </div>
-              <button class="btn btn-primary ml-auto text-[12px] py-1 flex items-center gap-1" @click="openAddManager"><Plus :size="12" /> Add Manager</button>
-            </div>
-
-            <div v-if="managersLoading" class="card-body text-center text-[13px] text-[var(--text-3)] py-8">
-              <RotateCw :size="14" class="animate-spin inline-block mr-2" />Loading…
-            </div>
-            <div v-else-if="managersError" class="card-body text-center py-8">
-              <p class="text-[#ef4444] text-[13px] mb-2">{{ managersError }}</p>
-              <button class="text-[#f59e0b] text-[12px] hover:underline" @click="loadManagers">Retry</button>
-            </div>
-            <div v-else class="overflow-x-auto">
-              <table class="data-table">
-                <thead>
-                  <tr><th>Name</th><th>Email</th><th>Contact</th><th>Role</th><th>Created</th><th>Action</th></tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>
-                      <div class="flex items-center gap-2.5">
-                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold font-display text-[var(--text)]"
-                          style="background:linear-gradient(135deg,#f59e0b,#d97706)">
-                          {{ initials(auth.fullName) }}
-                        </div>
-                        <span class="font-medium text-[var(--text)]">{{ auth.fullName }}</span>
-                      </div>
-                    </td>
-                    <td class="font-mono-custom text-[12px] text-[var(--text-2)]">{{ auth.user?.email }}</td>
-                    <td class="text-[12px] text-[var(--text-2)]">{{ auth.user?.contact || '—' }}</td>
-                    <td><span class="badge badge-ms">Owner</span></td>
-                    <td class="text-[12px] text-[var(--text-3)]">—</td>
-                    <td><span class="text-[11px] text-[var(--text-3)]">Current account</span></td>
-                  </tr>
-                  <tr v-for="m in managers" :key="m.id">
-                    <td>
-                      <div class="flex items-center gap-2.5">
-                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold font-display text-[var(--text)]"
-                          :style="{ background: avatarColor(m.name) }">
-                          {{ initials(m.name) }}
-                        </div>
-                        <span class="font-medium text-[var(--text)]">{{ m.name }}</span>
-                      </div>
-                    </td>
-                    <td class="font-mono-custom text-[12px] text-[var(--text-2)]">{{ m.email }}</td>
-                    <td class="text-[12px] text-[var(--text-2)]">{{ m.contact || '—' }}</td>
-                    <td><span class="badge badge-blue">Manager</span></td>
-                    <td class="text-[12px] text-[var(--text-3)]">{{ formatDate(m.created_at) }}</td>
-                    <td>
-                      <div class="flex gap-1.5">
-                        <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditManager(m)"><Pencil :size="11" /> Edit</button>
-                        <button class="btn btn-danger py-0.5 px-2 text-[11px]" @click="openDeleteManager(m)"><Trash2 :size="11" /></button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr v-if="!managers.length">
-                    <td colspan="6" class="text-center text-[12.5px] text-[var(--text-3)] py-6">
-                      No managers added yet. Click <strong class="text-[var(--text)]">+ Add Manager</strong> to create one.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Add / Edit Manager Modal -->
-          <Transition name="modal-fade">
-            <div v-if="managerModal.open"
-              class="fixed inset-0 z-50 flex items-center justify-center px-4"
-              style="background:rgba(0,0,0,0.7); backdrop-filter:blur(4px)"
-              @mousedown.self="managerModal.open = false">
-              <div class="w-full max-w-[420px] rounded-2xl p-6" style="background:var(--bg-2); border:1px solid var(--border)">
-                <h3 class="font-display font-bold text-[17px] text-[var(--text)] mb-1">
-                  {{ managerModal.mode === 'add' ? 'Add Manager' : 'Edit Manager' }}
-                </h3>
-                <p class="text-[12px] text-[var(--text-3)] mb-5">
-                  {{ managerModal.mode === 'add' ? 'Create a new manager account.' : 'Update manager details.' }}
-                </p>
-                <form @submit.prevent="submitManager">
-                  <div class="mb-4">
-                    <label class="field-label">Full Name</label>
-                    <input v-model="managerForm.name" type="text" class="form-input w-full" placeholder="Shaikh Ahmed" required />
-                  </div>
-                  <div class="mb-4">
-                    <label class="field-label">Email</label>
-                    <input v-model="managerForm.email" type="email" class="form-input w-full" placeholder="manager@example.com" required />
-                  </div>
-                  <template v-if="managerModal.mode === 'add'">
-                    <div class="mb-4">
-                      <label class="field-label">Contact</label>
-                      <input v-model="managerForm.contact" type="text" class="form-input w-full" placeholder="9876543210" maxlength="10" required />
-                    </div>
-                    <div class="mb-5">
-                      <label class="field-label">Password</label>
-                      <div class="relative">
-                        <input v-model="managerForm.password" :type="showManagerPass ? 'text' : 'password'"
-                          class="form-input w-full pr-10" placeholder="••••••••" required />
-                        <button type="button" @click="showManagerPass = !showManagerPass"
-                          class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-3)] hover:text-[var(--text)] text-sm">
-                          <component :is="showManagerPass ? EyeOff : Eye" :size="16" />
-                        </button>
-                      </div>
-                    </div>
-                  </template>
-                  <Transition name="fade">
-                    <div v-if="managerSubmitError" class="mb-4 px-3 py-2.5 rounded-lg text-[12px]"
-                      style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444">
-                      <AlertTriangle :size="13" class="inline mr-1" />{{ managerSubmitError }}
-                    </div>
-                  </Transition>
-                  <div class="flex gap-3 justify-end">
-                    <button type="button" @click="managerModal.open = false"
-                      class="px-4 py-2 rounded-xl text-[12.5px] font-medium text-[var(--text-2)] hover:text-[var(--text)]"
-                      style="background:var(--bg-3); border:1px solid var(--border)">Cancel</button>
-                    <button type="submit"
-                      class="btn btn-primary px-5 py-2 flex items-center gap-2"
-                      :disabled="managerSubmitting">
-                      <RotateCw v-if="managerSubmitting" :size="14" class="animate-spin" />
-                      {{ managerSubmitting ? 'Saving…' : (managerModal.mode === 'add' ? 'Add Manager' : 'Save Changes') }}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </Transition>
-
-          <!-- Delete Confirmation Modal -->
-          <Transition name="modal-fade">
-            <div v-if="deleteModal.open"
-              class="fixed inset-0 z-50 flex items-center justify-center px-4"
-              style="background:rgba(0,0,0,0.7); backdrop-filter:blur(4px)"
-              @mousedown.self="deleteModal.open = false">
-              <div class="w-full max-w-[360px] rounded-2xl p-6" style="background:var(--bg-2); border:1px solid var(--border)">
-                <h3 class="font-display font-bold text-[17px] text-[var(--text)] mb-1">Remove Manager</h3>
-                <p class="text-[13px] text-[var(--text-3)] mb-5">
-                  Remove <strong class="text-[var(--text)]">{{ deleteModal.manager?.name }}</strong> as manager?
-                  They will lose access immediately.
-                </p>
-                <Transition name="fade">
-                  <div v-if="deleteError" class="mb-4 px-3 py-2.5 rounded-lg text-[12px]"
-                    style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444">
-                    <AlertTriangle :size="13" class="inline mr-1" />{{ deleteError }}
-                  </div>
-                </Transition>
-                <div class="flex gap-3 justify-end">
-                  <button @click="deleteModal.open = false"
-                    class="px-4 py-2 rounded-xl text-[12.5px] font-medium text-[var(--text-2)] hover:text-[var(--text)]"
-                    style="background:var(--bg-3); border:1px solid var(--border)">Cancel</button>
-                  <button @click="confirmDeleteManager"
-                    class="btn btn-danger px-5 py-2 flex items-center gap-2"
-                    :disabled="deleting">
-                    <RotateCw v-if="deleting" :size="14" class="animate-spin" />
-                    {{ deleting ? 'Removing…' : 'Remove' }}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Transition>
-        </template>
-
         <!-- Notifications (manager-personal, not offered to owner — see `sections` computed) -->
         <template v-else-if="activeSection === 'notifications'">
           <div class="card">
@@ -532,12 +365,13 @@ import { useUiStore } from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'
 import { useSelectedStationStore } from '@/stores/selectedStation'
 import { useThemeStore, THEMES } from '@/stores/theme'
-import { userApi, settingsApi } from '@/services/api'
+import { settingsApi } from '@/services/api'
 import { fmt } from '@/utils/format'
+import { isValidGST, isValidPAN, isValidPhone } from '@/utils/validation'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import {
-  Building2, Fuel, Wrench, User, Bell, Palette, CheckCircle2,
-  RotateCw, Save, AlertTriangle, Plus, Pencil, Trash2, Eye, EyeOff
+  Building2, Fuel, Wrench, Bell, Palette, CheckCircle2,
+  RotateCw, Save, AlertTriangle, Plus, Pencil, Trash2
 } from 'lucide-vue-next'
 
 const ui              = useUiStore()
@@ -554,7 +388,6 @@ const sections = computed(() => [
   { key:'station',       icon: Building2, label:'Station Details' },
   { key:'fuel',          icon: Fuel,      label:'Fuel Rates' },
   { key:'nozzles',       icon: Wrench,    label:'Nozzle Config' },
-  ...(auth.isOwner ? [{ key:'users', icon: User, label:'User Access' }] : []),
   // Notifications are manager-personal, not station data — no owner view.
   ...(auth.isOwner ? [] : [{ key:'notifications', icon: Bell, label:'Notifications' }]),
   { key:'appearance', icon: Palette, label:'Appearance' },
@@ -595,6 +428,19 @@ async function loadStation() {
 }
 
 async function saveStation() {
+  if (settings.gst && !isValidGST(settings.gst)) {
+    ui.error('Enter a valid 15-character GST number (e.g. 27ABCDE1234F1Z5).'); return
+  }
+  if (settings.pan && !isValidPAN(settings.pan)) {
+    ui.error('Enter a valid 10-character PAN number (e.g. ABCDE1234F).'); return
+  }
+  if (settings.phone && !isValidPhone(settings.phone)) {
+    ui.error('Enter a valid 10-digit phone number.'); return
+  }
+
+  settings.gst = settings.gst?.trim().toUpperCase() || ''
+  settings.pan = settings.pan?.trim().toUpperCase() || ''
+
   saving.value = true
   try {
     await settingsApi.updateStation({
@@ -827,114 +673,6 @@ async function saveNotifications() {
   }
 }
 
-// ── Manager (sub-user) management ────────────────────────────────
-const managers        = ref([])
-const managersLoading = ref(false)
-const managersError   = ref('')
-
-const managerModal      = reactive({ open: false, mode: 'add', userId: null })
-const managerForm       = reactive({ name: '', email: '', contact: '', password: '' })
-const showManagerPass   = ref(false)
-const managerSubmitting = ref(false)
-const managerSubmitError= ref('')
-
-const deleteModal = reactive({ open: false, manager: null })
-const deleting    = ref(false)
-const deleteError = ref('')
-
-const AVATAR_COLORS = ['#6366f1','#f59e0b','#10b981','#3b82f6','#ec4899','#8b5cf6']
-function avatarColor(name) {
-  return AVATAR_COLORS[(name?.charCodeAt(0) || 0) % AVATAR_COLORS.length]
-}
-function initials(name) {
-  if (!name) return '?'
-  return name.trim().split(/\s+/).map(w => w[0].toUpperCase()).slice(0, 2).join('')
-}
-function formatDate(d) {
-  if (!d) return '—'
-  return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-}
-
-async function loadManagers() {
-  managersLoading.value = true
-  managersError.value   = ''
-  try {
-    const res = await userApi.getSubUsers()
-    managers.value = res.data?.sub_users || []
-  } catch (e) {
-    managersError.value = e?.message || 'Failed to load managers.'
-  } finally {
-    managersLoading.value = false
-  }
-}
-
-function openAddManager() {
-  managerModal.mode    = 'add'
-  managerModal.userId  = null
-  managerForm.name     = ''
-  managerForm.email    = ''
-  managerForm.contact  = ''
-  managerForm.password = ''
-  managerSubmitError.value = ''
-  showManagerPass.value    = false
-  managerModal.open = true
-}
-
-function openEditManager(m) {
-  managerModal.mode    = 'edit'
-  managerModal.userId  = m.id
-  managerForm.name     = m.name
-  managerForm.email    = m.email
-  managerForm.contact  = m.contact || ''
-  managerForm.password = ''
-  managerSubmitError.value = ''
-  managerModal.open = true
-}
-
-function openDeleteManager(m) {
-  deleteModal.manager = m
-  deleteError.value   = ''
-  deleteModal.open    = true
-}
-
-async function submitManager() {
-  managerSubmitting.value  = true
-  managerSubmitError.value = ''
-  try {
-    if (managerModal.mode === 'add') {
-      await userApi.addSubUser({
-        name: managerForm.name, email: managerForm.email,
-        contact: managerForm.contact, password: managerForm.password,
-      })
-      ui.success('Manager added successfully.')
-    } else {
-      await userApi.updateSubUser({ user_id: managerModal.userId, name: managerForm.name, email: managerForm.email })
-      ui.success('Manager updated.')
-    }
-    managerModal.open = false
-    await loadManagers()
-  } catch (e) {
-    managerSubmitError.value = e?.message || 'Operation failed.'
-  } finally {
-    managerSubmitting.value = false
-  }
-}
-
-async function confirmDeleteManager() {
-  deleting.value    = true
-  deleteError.value = ''
-  try {
-    await userApi.deleteSubUser({ user_id: deleteModal.manager.id })
-    deleteModal.open = false
-    ui.success('Manager removed.')
-    await loadManagers()
-  } catch (e) {
-    deleteError.value = e?.message || 'Delete failed.'
-  } finally {
-    deleting.value = false
-  }
-}
-
 // ── Section-aware save ───────────────────────────────────────────
 async function saveAll() {
   switch (activeSection.value) {
@@ -960,8 +698,6 @@ async function loadSection(section) {
   } else if (section === 'notifications' && !loaded.notifications) {
     loaded.notifications = true
     await loadNotifications()
-  } else if (section === 'users') {
-    loadManagers()
   }
 }
 
