@@ -45,7 +45,7 @@
               </div>
               <div>
                 <label class="field-label">MS Rate (₹/L)</label>
-                <input type="number" step="0.01" v-model.number="form.msRate" class="form-input w-full" placeholder="104.77" />
+                <input type="number" step="0.01" v-model.number="form.msRate" class="form-input w-full" placeholder="0.00" @input="ratesAutoFilled.ms = false" />
               </div>
             </div>
             <div class="grid grid-cols-3 gap-3">
@@ -59,7 +59,7 @@
               </div>
               <div>
                 <label class="field-label">HSD Rate (₹/L)</label>
-                <input type="number" step="0.01" v-model.number="form.hsdRate" class="form-input w-full" placeholder="91.28" />
+                <input type="number" step="0.01" v-model.number="form.hsdRate" class="form-input w-full" placeholder="0.00" @input="ratesAutoFilled.hsd = false" />
               </div>
             </div>
             <div class="grid grid-cols-3 gap-3">
@@ -73,10 +73,10 @@
               </div>
               <div>
                 <label class="field-label">Speed Rate (₹/L)</label>
-                <input type="number" step="0.01" v-model.number="form.speedRate" class="form-input w-full" placeholder="113.85" />
+                <input type="number" step="0.01" v-model.number="form.speedRate" class="form-input w-full" placeholder="0.00" @input="ratesAutoFilled.speed = false" />
               </div>
             </div>
-            <div class="text-[11.5px] text-[var(--text-3)] px-1">Testing volume (fuel dispensed for meter calibration) is deducted before revenue is calculated.</div>
+            <div class="text-[11.5px] text-[var(--text-3)] px-1">Rates are pre-filled from Settings → Fuel Rates for this date — edit if needed. Testing volume (fuel dispensed for meter calibration) is deducted before revenue is calculated.</div>
           </div>
         </div>
 
@@ -167,7 +167,7 @@ import { useSalesStore } from '@/stores/sales'
 import { useUiStore }    from '@/stores/ui'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import { fmt } from '@/utils/format'
-import { expenseApi } from '@/services/api'
+import { expenseApi, settingsApi } from '@/services/api'
 import { Calendar, Fuel, Banknote, Calculator, RotateCw, Save } from 'lucide-vue-next'
 
 const store  = useSalesStore()
@@ -178,13 +178,37 @@ const saving  = ref(false)
 const form = reactive({
   saleDate: new Date().toISOString().split('T')[0],
   shift: 'Full Day',
-  msVolume: null, msTestingVolume: null, msRate: 104.77,
-  hsdVolume: null, hsdTestingVolume: null, hsdRate: 91.28,
-  speedVolume: null, speedTestingVolume: null, speedRate: 113.85,
+  msVolume: null, msTestingVolume: null, msRate: null,
+  hsdVolume: null, hsdTestingVolume: null, hsdRate: null,
+  speedVolume: null, speedTestingVolume: null, speedRate: null,
   cash: null, card: null, phonePe: null,
   creditSale: null, expenses: null,
   narration: '',
 })
+
+// Pre-fills the rate fields from Settings → Fuel Rates using the rate actually
+// in effect on this sale's date (fuel rates change daily, so this is looked up
+// fresh — never a hardcoded number). Still plain editable fields; re-seeds when
+// the date changes, but stops touching a field the moment it's edited by hand.
+// A fuel with no saved rate yet stays blank, prompting real entry instead of a
+// fabricated placeholder.
+const ratesAutoFilled = reactive({ ms: true, hsd: true, speed: true })
+
+async function seedRatesForDate(date) {
+  if (!date) return
+  try {
+    const res   = await settingsApi.getFuelRates({ date })
+    const rates = res.data?.fuel_rates ?? []
+    const byKey = Object.fromEntries(rates.map(r => [r.fuel_key, r.rate]))
+
+    if (ratesAutoFilled.ms    && byKey.ms)    form.msRate    = byKey.ms
+    if (ratesAutoFilled.hsd   && byKey.hsd)   form.hsdRate   = byKey.hsd
+    if (ratesAutoFilled.speed && byKey.speed) form.speedRate = byKey.speed
+  } catch { /* non-critical */ }
+}
+
+onMounted(() => seedRatesForDate(form.saleDate))
+watch(() => form.saleDate, (newDate) => seedRatesForDate(newDate))
 
 // Pre-fills Expenses from whatever's already logged for this date in the
 // Expenses ledger — still a plain editable field, just seeded instead of blank.

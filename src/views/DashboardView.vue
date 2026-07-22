@@ -11,18 +11,24 @@
       </template>
     </PageHeader>
 
-    <!-- KPI Grid -->
+    <!-- Priority KPIs — Revenue & Profit/Loss come first, larger -->
+    <div class="text-[11px] font-semibold text-[var(--text-3)] uppercase tracking-[0.1em] mb-2">Revenue &amp; Profit</div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <KpiCard label="Total Revenue"    :value="kpi('totalRevenue')" :icon="Banknote"   color="#f59e0b" :sub="monthLabel"           :loading="store.loading" valueSize="32px" />
+      <KpiCard label="Fuel Profit/Loss" :value="fuelProfitDisplay"   :icon="TrendingUp" :color="fuelProfitColor"   :sub="fuelProfitSub"   :loading="store.loading" valueSize="32px" />
+      <KpiCard label="Actual Profit"    :value="actualProfitDisplay" :icon="Wallet"     :color="actualProfitColor" :sub="actualProfitSub" :loading="store.loading" valueSize="32px" />
+    </div>
+
+    <!-- Secondary KPIs -->
+    <div class="text-[11px] font-semibold text-[var(--text-3)] uppercase tracking-[0.1em] mb-2">Other Metrics</div>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <KpiCard label="Total Revenue"  :value="kpi('totalRevenue')"  :icon="Banknote"   color="#f59e0b" :sub="monthLabel"       :loading="store.loading" />
-      <KpiCard label="MS Sold (L)"    :value="kpi('msSold')"        :icon="Fuel"       color="#f59e0b" sub="Petrol volume"     :loading="store.loading" />
-      <KpiCard label="HSD Sold (L)"   :value="kpi('hsdSold')"       :icon="Fuel"       color="#10b981" sub="Diesel volume"     :loading="store.loading" />
-      <KpiCard label="Speed (L)"      :value="kpi('speedSold')"     :icon="Fuel"       color="#3b82f6" sub="Premium fuel"      :loading="store.loading" />
-      <KpiCard label="Fuel Profit/Loss" :value="fuelProfitDisplay"  :icon="TrendingUp" :color="fuelProfitColor" :sub="fuelProfitSub" :loading="store.loading" />
-      <KpiCard label="Total Cash"     :value="kpi('totalCash')"     :icon="Banknote"   color="#10b981" sub="Cash receipts"     :loading="store.loading" />
-      <KpiCard label="PhonePe / UPI"  :value="kpi('totalPhonePe')"  :icon="Smartphone" color="#6366f1" sub="UPI payments"      :loading="store.loading" />
-      <KpiCard label="Total Expenses" :value="kpi('totalExpenses')" :icon="Receipt"    color="#ef4444" sub="Operating costs"   :loading="store.loading" />
-      <KpiCard label="Staff Payroll"  :value="kpi('staffPayroll')"  :icon="Users"      color="#8b5cf6" sub="Staff salary"      :loading="store.loading" />
-      <KpiCard label="Actual Profit"  :value="actualProfitDisplay"  :icon="Wallet"     :color="actualProfitColor" :sub="actualProfitSub" :loading="store.loading" />
+      <KpiCard label="MS Sold (L)"    :value="kpi('msSold')"        :icon="Fuel"       color="#f59e0b" sub="Petrol volume"     :loading="store.loading" valueSize="20px" />
+      <KpiCard label="HSD Sold (L)"   :value="kpi('hsdSold')"       :icon="Fuel"       color="#10b981" sub="Diesel volume"     :loading="store.loading" valueSize="20px" />
+      <KpiCard label="Speed (L)"      :value="kpi('speedSold')"     :icon="Fuel"       color="#3b82f6" sub="Premium fuel"      :loading="store.loading" valueSize="20px" />
+      <KpiCard label="Total Cash"     :value="kpi('totalCash')"     :icon="Banknote"   color="#10b981" sub="Cash receipts"     :loading="store.loading" valueSize="20px" />
+      <KpiCard label="PhonePe / UPI"  :value="kpi('totalPhonePe')"  :icon="Smartphone" color="#6366f1" sub="UPI payments"      :loading="store.loading" valueSize="20px" />
+      <KpiCard label="Total Expenses" :value="kpi('totalExpenses')" :icon="Receipt"    color="#ef4444" sub="Operating costs"   :loading="store.loading" valueSize="20px" />
+      <KpiCard label="Staff Payroll"  :value="kpi('staffPayroll')"  :icon="Users"      color="#8b5cf6" sub="Staff salary"      :loading="store.loading" valueSize="20px" />
     </div>
 
     <!-- Charts Row 1 -->

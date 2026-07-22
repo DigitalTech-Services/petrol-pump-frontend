@@ -100,28 +100,34 @@
                   <div class="w-9 h-9 rounded-lg flex items-center justify-center font-display font-bold text-[13px] text-[var(--text)]"
                     :style="{ background: fuel.color }">{{ fuel.abbr }}</div>
                   <div>
-                    <div class="font-display font-bold text-[15px] text-[var(--text)]">{{ fuel.name }}</div>
+                    <div class="font-display font-bold text-[15px] text-[var(--text)] flex items-center gap-2">
+                      {{ fuel.name }}
+                      <span v-if="!fuel.configured" class="badge badge-red text-[9.5px]">Not set today</span>
+                    </div>
                     <div class="text-[11px] text-[var(--text-3)]">{{ fuel.type }}</div>
                   </div>
                   <div class="ml-auto text-right">
-                    <div>
-                      <span class="font-display font-bold text-[22px]" :style="{ color: fuel.color }">₹{{ fuel.rate }}</span>
-                      <span class="text-[11px] text-[var(--text-3)]">/L</span>
-                    </div>
-                    <div class="text-[11px] font-semibold" :class="margin(fuel) >= 0 ? 'text-positive' : 'text-negative'">
-                      {{ margin(fuel) >= 0 ? '+' : '−' }}₹{{ fmt(Math.abs(margin(fuel))) }}/L {{ margin(fuel) >= 0 ? 'profit' : 'loss' }}
-                    </div>
+                    <template v-if="fuel.configured">
+                      <div>
+                        <span class="font-display font-bold text-[22px]" :style="{ color: fuel.color }">₹{{ fuel.rate }}</span>
+                        <span class="text-[11px] text-[var(--text-3)]">/L</span>
+                      </div>
+                      <div class="text-[11px] font-semibold" :class="margin(fuel) >= 0 ? 'text-positive' : 'text-negative'">
+                        {{ margin(fuel) >= 0 ? '+' : '−' }}₹{{ fmt(Math.abs(margin(fuel))) }}/L {{ margin(fuel) >= 0 ? 'profit' : 'loss' }}
+                      </div>
+                    </template>
+                    <div v-else class="text-[11px] text-[var(--text-3)] max-w-[140px]">Enter today's rate below and save</div>
                   </div>
                 </div>
                 <div class="grid grid-cols-3 gap-3">
                   <div><label class="field-label">Actual Rate (₹/L)</label>
-                    <input type="number" step="0.01" v-model.number="fuel.actualRate" :disabled="!auth.canWrite" class="form-input w-full" /></div>
+                    <input type="number" step="0.01" v-model.number="fuel.actualRate" :disabled="!auth.canWrite" class="form-input w-full" @input="fuel.configured = true" /></div>
                   <div><label class="field-label">Selling Rate (₹/L)</label>
-                    <input type="number" step="0.01" v-model.number="fuel.rate" :disabled="!auth.canWrite" class="form-input w-full" /></div>
+                    <input type="number" step="0.01" v-model.number="fuel.rate" :disabled="!auth.canWrite" class="form-input w-full" @input="fuel.configured = true" /></div>
                   <div><label class="field-label">Effective Date</label>
                     <input type="date" v-model="fuel.effectiveDate" :disabled="!auth.canWrite" class="form-input w-full" /></div>
                 </div>
-                <div class="mt-3 p-2.5 rounded-lg flex items-center justify-between" style="background:var(--bg-2);border:1px solid var(--bg-4)">
+                <div v-if="fuel.configured" class="mt-3 p-2.5 rounded-lg flex items-center justify-between" style="background:var(--bg-2);border:1px solid var(--bg-4)">
                   <span class="text-[12px] text-[var(--text-2)]">Profit / Loss per Litre</span>
                   <span class="font-display font-bold text-[15px]" :class="margin(fuel) >= 0 ? 'text-positive' : 'text-negative'">
                     {{ margin(fuel) >= 0 ? '+' : '−' }}₹{{ fmt(Math.abs(margin(fuel))) }}
@@ -470,22 +476,30 @@ function margin(fuel) {
   return (Number(fuel.rate) || 0) - (Number(fuel.actualRate) || 0)
 }
 
+function mapFuelRates(rates) {
+  const today = new Date().toISOString().split('T')[0]
+  return rates.map(r => ({
+    key:           r.fuel_key,
+    name:          r.name,
+    abbr:          r.abbr,
+    type:          r.type,
+    rate:          r.rate,
+    actualRate:    r.actual_rate ?? 0,
+    // A fuel never saved before comes back with no effective_date — default
+    // the picker to today (the day almost every save will be for anyway)
+    // without pretending a real rate already exists (see `configured`).
+    effectiveDate: r.effective_date || today,
+    color:         r.color,
+    configured:    !!r.effective_date,
+  }))
+}
+
 async function loadFuelRates() {
   fuelLoading.value = true
   fuelError.value   = ''
   try {
-    const res   = await settingsApi.getFuelRates(stationParam())
-    const rates = res.data?.fuel_rates || []
-    fuelRates.value = rates.map(r => ({
-      key:           r.fuel_key,
-      name:          r.name,
-      abbr:          r.abbr,
-      type:          r.type,
-      rate:          r.rate,
-      actualRate:    r.actual_rate ?? 0,
-      effectiveDate: r.effective_date,
-      color:         r.color,
-    }))
+    const res = await settingsApi.getFuelRates(stationParam())
+    fuelRates.value = mapFuelRates(res.data?.fuel_rates || [])
   } catch (e) {
     fuelError.value = e?.message || 'Failed to load fuel rates.'
   } finally {
@@ -496,7 +510,7 @@ async function loadFuelRates() {
 async function saveFuelRates() {
   saving.value = true
   try {
-    await settingsApi.updateFuelRates({
+    const res = await settingsApi.updateFuelRates({
       rates: fuelRates.value.map(f => ({
         fuel_key:       f.key,
         name:           f.name,
@@ -508,6 +522,7 @@ async function saveFuelRates() {
         color:          f.color,
       })),
     })
+    fuelRates.value = mapFuelRates(res.data?.fuel_rates || [])
     ui.success('Fuel rates saved.')
   } catch (e) {
     ui.error(e?.message || 'Failed to save fuel rates.')
