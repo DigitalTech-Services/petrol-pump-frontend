@@ -14,9 +14,9 @@
         <div
           class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 font-display font-bold text-3xl text-[var(--bg)]"
           style="background:linear-gradient(135deg,#f59e0b,#d97706); box-shadow:0 0 50px rgba(245,158,11,0.35)"
-        >K</div>
+         > {{ businessName?.charAt(0)?.toUpperCase() }}</div>
         <h1 class="font-display font-bold text-[30px] text-[var(--text)] tracking-wide">{{ businessName }}</h1>
-        <p class="text-[13px] text-[var(--text-3)] mt-1.5">HP Fuel Station · Khopoli, Maharashtra</p>
+        <!-- <p class="text-[13px] text-[var(--text-3)] mt-1.5">HP Fuel Station · Khopoli, Maharashtra</p> -->
       </div>
 
       <!-- Demo Accounts Banner -->
