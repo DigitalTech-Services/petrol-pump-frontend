@@ -2,30 +2,6 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authApi } from '@/services/api'
 
-// ── Demo accounts — work WITHOUT any backend ──────────────────────
-// const DEMO_USERS = {
-//   'admin@petromines.com': {
-//     password: 'admin123',
-//     user: { id: '1', name: 'Kailas Patil', email: 'admin@petromines.com',
-//             role: 'admin', stationName: 'Kailas Petromines', avatar: 'KP' }
-//   },
-//   'manager@petromines.com': {
-//     password: 'manager123',
-//     user: { id: '2', name: 'Shaikh Ahmed', email: 'manager@petromines.com',
-//             role: 'manager', stationName: 'Kailas Petromines', avatar: 'SA' }
-//   },
-//   'staff@petromines.com': {
-//     password: 'staff123',
-//     user: { id: '3', name: 'Ajay Kumar', email: 'staff@petromines.com',
-//             role: 'staff', stationName: 'Kailas Petromines', avatar: 'AK' }
-//   },
-//   // shorthand aliases
-//   'admin': {
-//     password: 'admin123',
-//     user: { id: '1', name: 'Kailas Patil', email: 'admin@petromines.com',
-//             role: 'admin', stationName: 'Kailas Petromines', avatar: 'KP' }
-//   },
-// }
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('pm_token') || null)

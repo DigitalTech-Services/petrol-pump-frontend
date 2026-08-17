@@ -28,7 +28,7 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: LoginView,
-    meta: { public: true, title: 'Login — Kailas Petromines' }
+    meta: { public: true, title: 'User Login' }
   },
   {
     path: '/admin/login',
@@ -158,7 +158,7 @@ router.beforeEach((to, _from, next) => {
   const auth      = useAuthStore()
   const adminAuth = useAdminAuthStore()
 
-  if (to.meta.title) document.title = `${to.meta.title} — Kailas Petromines`
+  if (to.meta.title) document.title = `${to.meta.title}`
 
   if (to.meta.requiresAdminAuth && !adminAuth.isLoggedIn) {
     next({ name: 'AdminLogin', query: { redirect: to.fullPath } })

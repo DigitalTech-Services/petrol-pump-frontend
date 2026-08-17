@@ -148,7 +148,7 @@ const form = reactive({ email: '', password: '', remember: false })
 
 // ── Business name preview — swaps the default brand for the typed
 // email's own business name, debounced so we don't fire on every keystroke.
-const DEFAULT_BUSINESS_NAME = 'Kailas Petromines'
+const DEFAULT_BUSINESS_NAME = ''
 const businessName = ref(DEFAULT_BUSINESS_NAME)
 let lookupTimer = null
 

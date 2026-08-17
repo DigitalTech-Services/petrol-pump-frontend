@@ -1,4 +1,4 @@
-# Kailas Petromines — Management System
+# Digital Tech Petromines — Management System
 
 Professional Vue.js 3 Fuel Station Management System for HP Petrol Pumps.
 
@@ -246,5 +246,3 @@ Each client gets their own deployment with custom:
 - Custom dealer code and GST
 
 ---
-
-*Built for Kailas Petromines, Khopoli — April 2026*

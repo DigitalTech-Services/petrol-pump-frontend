@@ -16,7 +16,7 @@
           style="background:linear-gradient(135deg,#6366f1,#4f46e5); box-shadow:0 0 50px rgba(99,102,241,0.35)"
         >A</div>
         <h1 class="font-display font-bold text-[30px] text-[var(--text)] tracking-wide">Admin Portal</h1>
-        <p class="text-[13px] text-[var(--text-3)] mt-1.5">Kailas Petromines · User Management</p>
+        <p class="text-[13px] text-[var(--text-3)] mt-1.5">User Management</p>
       </div>
 
       <!-- Login Card -->

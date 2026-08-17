@@ -191,7 +191,7 @@
 
             <div class="mb-4" v-if="modal.mode === 'add' || modal.userType !== 'sub_user'">
               <label class="field-label">Business Name</label>
-              <input v-model="form.business_name" type="text" class="form-input w-full" placeholder="Kailas Petromines" required />
+              <input v-model="form.business_name" type="text" class="form-input w-full" placeholder="Digital Tech Petromines" required />
             </div>
 
             <div class="mb-4">

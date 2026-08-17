@@ -10,7 +10,7 @@
         <div class="card-body space-y-4">
           <div>
             <label class="field-label">Business Name</label>
-            <input v-model="form.business_name" class="form-input w-full" placeholder="Kailas Petromines" />
+            <input v-model="form.business_name" class="form-input w-full" placeholder="Digital Tech Petromines" />
           </div>
           <div>
             <label class="field-label">Owner Full Name</label>
