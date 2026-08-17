@@ -219,7 +219,7 @@
                       <select v-model="nozzleForm.fuel" class="form-input w-full" required>
                         <option value="MS">MS Petrol</option>
                         <option value="HSD">HSD Diesel</option>
-                        <option value="Speed">Speed</option>
+                        <option value="Speed">Power</option>
                       </select>
                     </div>
                     <div>

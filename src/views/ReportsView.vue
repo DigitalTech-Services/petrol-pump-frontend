@@ -307,7 +307,7 @@ const fuelCards = computed(() => {
   return [
     { key:'MS',    title:'MS Petrol',      color:'#f59e0b', iconClass:'',                stats: f.MS    ?? empty },
     { key:'HSD',   title:'HSD Diesel',     color:'#10b981', iconClass:'text-[#10b981]',   stats: f.HSD   ?? empty },
-    { key:'Speed', title:'Speed Premium',  color:'#3b82f6', iconClass:'text-[#3b82f6]',   stats: f.Speed ?? empty },
+    { key:'Speed', title:'Power Premium',  color:'#3b82f6', iconClass:'text-[#3b82f6]',   stats: f.Speed ?? empty },
   ]
 })
 
@@ -388,11 +388,11 @@ const plRows = computed(() => {
     { label:'Period',               value:`${monthLabel.value} (${monthly.value?.days ?? 0} days)` },
     { label:'MS Volume Sold',       value:`${fmt(f.ms_volume)} L`,    class:'text-[#f59e0b]' },
     { label:'HSD Volume Sold',      value:`${fmt(f.hsd_volume)} L`,   class:'text-[#10b981]' },
-    { label:'Speed Volume Sold',    value:`${fmt(f.speed_volume)} L`, class:'text-[#3b82f6]' },
+    { label:'Power Volume Sold',    value:`${fmt(f.speed_volume)} L`, class:'text-[#3b82f6]' },
     { label:'Total Fuel Sold',      value:`${fmt(totalFuel)} L`,      class:'text-positive', divider:true },
     { label:'MS Rate',              value:`₹${fmt(f.rate_ms)} / Litre`,    indent:true },
     { label:'HSD Rate',             value:`₹${fmt(f.rate_hsd)} / Litre`,   indent:true },
-    { label:'Speed Rate',           value:`₹${fmt(f.rate_speed)} / Litre`,indent:true, divider:true },
+    { label:'Power Rate',           value:`₹${fmt(f.rate_speed)} / Litre`,indent:true, divider:true },
     { label:'Cash Received',        value:fmtINR(c.cash),      class:'text-positive', indent:true },
     { label:'PhonePe / UPI',        value:fmtINR(c.phone_pe),  class:'text-[#6366f1]', indent:true },
     { label:'Card (Pine Labs)',     value:fmtINR(c.card),      class:'text-[#3b82f6]', indent:true },

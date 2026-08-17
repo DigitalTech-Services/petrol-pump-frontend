@@ -40,7 +40,7 @@
           <thead>
             <tr>
               <th>#</th><th>Date</th>
-              <th>MS (L)</th><th>HSD (L)</th><th>Speed (L)</th>
+              <th>MS (L)</th><th>HSD (L)</th><th>Power (L)</th>
               <th>Rate MS</th><th>Revenue (₹)</th><th>Cash (₹)</th>
               <th>PhonePe (₹)</th><th>Card (₹)</th>
               <th>Expenses</th><th>Balance</th><th>Narration</th><th>Actions</th>
@@ -107,12 +107,12 @@
         <div class="grid grid-cols-3 gap-3">
           <div><label class="field-label">MS Volume (L)</label><input type="number" step="0.01" v-model.number="editData.ms" class="form-input w-full" /></div>
           <div><label class="field-label">HSD Volume (L)</label><input type="number" step="0.01" v-model.number="editData.hsd" class="form-input w-full" /></div>
-          <div><label class="field-label">Speed Volume (L)</label><input type="number" step="0.01" v-model.number="editData.speed" class="form-input w-full" /></div>
+          <div><label class="field-label">Power Volume (L)</label><input type="number" step="0.01" v-model.number="editData.speed" class="form-input w-full" /></div>
         </div>
         <div class="grid grid-cols-3 gap-3">
           <div><label class="field-label">MS Rate (₹/L)</label><input type="number" step="0.01" v-model.number="editData.rateMS" class="form-input w-full" /></div>
           <div><label class="field-label">HSD Rate (₹/L)</label><input type="number" step="0.01" v-model.number="editData.rateHSD" class="form-input w-full" /></div>
-          <div><label class="field-label">Speed Rate (₹/L)</label><input type="number" step="0.01" v-model.number="editData.rateSpeed" class="form-input w-full" /></div>
+          <div><label class="field-label">Power Rate (₹/L)</label><input type="number" step="0.01" v-model.number="editData.rateSpeed" class="form-input w-full" /></div>
         </div>
         <div class="grid grid-cols-3 gap-3">
           <div><label class="field-label">Cash (₹)</label><input type="number" step="0.01" v-model.number="editData.cash" class="form-input w-full" /></div>
@@ -289,14 +289,14 @@ async function confirmDelete() {
 
 // ── Export / Print ───────────────────────────────────────────────
 function doExport() {
-  const headers = ['Date', 'Shift', 'MS(L)', 'HSD(L)', 'Speed(L)', 'Revenue', 'Cash', 'PhonePe', 'Card', 'Expenses', 'Balance', 'Narration']
+  const headers = ['Date', 'Shift', 'MS(L)', 'HSD(L)', 'Power(L)', 'Revenue', 'Cash', 'PhonePe', 'Card', 'Expenses', 'Balance', 'Narration']
   const rows = store.records.map(r => [r.date, r.shift, r.ms, r.hsd, r.speed, r.revenue, r.cash, r.phonepay, r.card, r.exp, r.balance, r.narration])
   exportCSV(`Petrol_Sales_${selectedMonth.value}`, headers, rows)
   ui.success('CSV exported!')
 }
 
 function doPrint() {
-  const headers = ['Date', 'MS(L)', 'HSD(L)', 'Speed(L)', 'Revenue', 'Cash', 'PhonePe', 'Expenses', 'Balance']
+  const headers = ['Date', 'MS(L)', 'HSD(L)', 'Power(L)', 'Revenue', 'Cash', 'PhonePe', 'Expenses', 'Balance']
   const rows = filtered.value.map(r => [formatDate(r.date), fmt(r.ms), fmt(r.hsd), fmt(r.speed), '₹' + fmt(r.revenue), '₹' + fmt(r.cash), '₹' + fmt(r.phonepay), '₹' + fmt(r.exp), '₹' + fmt(r.balance)])
   printTable(`Petrol Sales Register — ${monthLabel.value}`, headers, rows)
 }

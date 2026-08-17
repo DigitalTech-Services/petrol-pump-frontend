@@ -34,11 +34,11 @@ const routes = [
     path: '/admin/login',
     name: 'AdminLogin',
     component: AdminLoginView,
-    meta: { public: true, title: 'Admin Login — Kailas Petromines' }
+    meta: { public: true, title: 'Admin Login — Digital Tech' }
   },
   {
     path: '/admin/users',
-    name: 'AdminUsers',
+    name: 'AdminUsers', 
     component: AdminUsersView,
     meta: { requiresAdminAuth: true, title: 'Manage Users — Admin' }
   },

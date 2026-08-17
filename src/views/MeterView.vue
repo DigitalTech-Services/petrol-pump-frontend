@@ -11,7 +11,7 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <KpiCard label="MS Nozzles"    :value="`${nozzleCount('MS')} Active`"    :icon="Gauge" color="#f59e0b" sub="From Nozzle Config"/>
       <KpiCard label="HSD Nozzles"   :value="`${nozzleCount('HSD')} Active`"   :icon="Gauge" color="#10b981" sub="From Nozzle Config"/>
-      <KpiCard label="Speed Nozzles" :value="`${nozzleCount('Speed')} Active`" :icon="Gauge" color="#3b82f6" sub="From Nozzle Config"/>
+      <KpiCard label="Power Nozzles" :value="`${nozzleCount('Speed')} Active`" :icon="Gauge" color="#3b82f6" sub="From Nozzle Config"/>
       <KpiCard label="Total Fuel Used" :value="fmt(store.totalUsed) + ' L'" :icon="BarChart3" color="#6366f1" sub="All nozzles, selected month"/>
     </div>
 
@@ -21,13 +21,13 @@
       <div class="tab-bar">
         <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='MS'}"    @click="tab='MS'"><Fuel :size="14" /> MS (Petrol)</button>
         <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='HSD'}"   @click="tab='HSD'"><Fuel :size="14" class="text-[#10b981]" /> HSD (Diesel)</button>
-        <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='Speed'}" @click="tab='Speed'"><Fuel :size="14" class="text-[#3b82f6]" /> Speed (Premium)</button>
+        <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='Speed'}" @click="tab='Speed'"><Fuel :size="14" class="text-[#3b82f6]" /> Power (Premium)</button>
       </div>
     </div>
 
     <div class="card">
       <div class="card-header">
-        <div class="font-display font-bold text-[15px] text-[var(--text)]">{{ tab }} Nozzle Meter</div>
+        <div class="font-display font-bold text-[15px] text-[var(--text)]">{{ tabLabel }} Nozzle Meter</div>
         <span class="badge ml-2" :class="badgeClass(tab)">{{ tabReadings.length }} entries</span>
       </div>
 
@@ -39,7 +39,7 @@
 
       <!-- No nozzles configured for this fuel type -->
       <div v-else-if="!tabNozzles.length" class="p-8 text-center text-[var(--text-3)] text-[13px]">
-        No active {{ tab }} nozzles configured. Add one in Settings → Nozzle Configuration.
+        No active {{ tabLabel }} nozzles configured. Add one in Settings → Nozzle Configuration.
       </div>
 
       <div v-else class="overflow-x-auto">
@@ -50,12 +50,12 @@
               <template v-for="n in tabNozzles" :key="n.nozzleId">
                 <th>{{ n.nozzleId }} Open</th><th>{{ n.nozzleId }} Close</th><th>{{ n.nozzleId }} Used</th>
               </template>
-              <th>{{ tab }} Day Total</th><th>Actions</th>
+              <th>{{ tabLabel }} Day Total</th><th>Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="tabReadings.length === 0">
-              <td :colspan="2 + tabNozzles.length * 3 + 2" class="text-center text-[var(--text-3)] py-6 text-[13px]">No {{ tab }} readings found. Add the first one.</td>
+              <td :colspan="2 + tabNozzles.length * 3 + 2" class="text-center text-[var(--text-3)] py-6 text-[13px]">No {{ tabLabel }} readings found. Add the first one.</td>
             </tr>
             <tr v-for="(r, i) in tabReadings" :key="r.id ?? r.date">
               <td class="font-mono-custom text-[11px] text-[var(--text-3)]">{{ i + 1 }}</td>
@@ -183,6 +183,7 @@ const store           = useMeterStore()
 const selectedStation = useSelectedStationStore()
 
 const tab = ref('MS')
+const tabLabel = computed(() => (tab.value === 'Speed' ? 'Power' : tab.value))
 
 const BADGE_CLASS = { MS: 'badge-ms', HSD: 'badge-hsd', Speed: 'badge-speed' }
 function badgeClass(fuel) { return BADGE_CLASS[fuel] ?? 'badge-gray' }
@@ -372,7 +373,7 @@ function doExport() {
     ]),
     fmt(tabTotal(r)),
   ])
-  exportCSV(`${tab.value}_Meter_Readings_${selectedMonth.value}`, headers, rows)
+  exportCSV(`${tabLabel.value}_Meter_Readings_${selectedMonth.value}`, headers, rows)
   ui.success('CSV exported!')
 }
 
@@ -383,7 +384,7 @@ function doPrint() {
     ...tabNozzles.value.map((n) => fmt(r.nozzles[n.nozzleId]?.used ?? 0)),
     fmt(tabTotal(r)),
   ])
-  printTable(`${tab.value} Meter Readings`, headers, rows)
+  printTable(`${tabLabel.value} Meter Readings`, headers, rows)
 }
 </script>
 

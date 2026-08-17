@@ -12,7 +12,7 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <KpiCard label="MS Received"    :value="`${fmt(tankwiseFor('MS').total_received)} L`"    :icon="Fuel"     color="#f59e0b" sub="This month" />
       <KpiCard label="HSD Received"   :value="`${fmt(tankwiseFor('HSD').total_received)} L`"    :icon="Fuel"     color="#10b981" sub="This month" />
-      <KpiCard label="Speed Received" :value="`${fmt(tankwiseFor('Speed').total_received)} L`"   :icon="Fuel"     color="#3b82f6" sub="This month" />
+      <KpiCard label="Power Received" :value="`${fmt(tankwiseFor('Speed').total_received)} L`"   :icon="Fuel"     color="#3b82f6" sub="This month" />
       <KpiCard :label="`Avg ${tabLabel} Variation`" :value="`${tankwiseFor(tabFuelType).avg_variation >= 0 ? '+' : ''}${tankwiseFor(tabFuelType).avg_variation} L/day`" :icon="BarChart3" color="#6366f1" sub="Over/Short avg" />
     </div>
 
@@ -22,7 +22,7 @@
       <div class="tab-bar">
         <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='ms'}"    @click="tab='ms'"><Fuel :size="14" /> MS (Petrol)</button>
         <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='hsd'}"   @click="tab='hsd'"><Fuel :size="14" class="text-[#10b981]" /> HSD (Diesel)</button>
-        <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='speed'}" @click="tab='speed'"><Fuel :size="14" class="text-[#3b82f6]" /> Speed (Premium)</button>
+        <button class="tab-btn flex items-center gap-1.5" :class="{active:tab==='speed'}" @click="tab='speed'"><Fuel :size="14" class="text-[#3b82f6]" /> Power (Premium)</button>
       </div>
     </div>
 
@@ -106,7 +106,7 @@
             <select v-model="form.fuelType" class="form-select w-full">
               <option value="MS">MS (Petrol)</option>
               <option value="HSD">HSD (Diesel)</option>
-              <option value="Speed">Speed (Premium)</option>
+              <option value="Speed">Power (Premium)</option>
             </select>
           </div>
         </div>
@@ -236,7 +236,7 @@ const monthLabel = computed(() => {
   return new Date(y, m - 1).toLocaleString('en-IN', { month: 'long', year: 'numeric' })
 })
 
-const tabLabel    = computed(() => ({ ms:'MS Petrol', hsd:'HSD Diesel', speed:'Speed Premium' }[tab.value]))
+const tabLabel    = computed(() => ({ ms:'MS Petrol', hsd:'HSD Diesel', speed:'Power Premium' }[tab.value]))
 const tabFuelType = computed(() => ({ ms:'MS', hsd:'HSD', speed:'Speed' }[tab.value]))
 
 function tankwiseFor(fuelType) {

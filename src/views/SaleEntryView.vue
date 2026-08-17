@@ -64,15 +64,15 @@
             </div>
             <div class="grid grid-cols-3 gap-3">
               <div>
-                <label class="field-label">Speed Volume (L) <span class="text-[#3b82f6]">●</span></label>
+                <label class="field-label">Power Volume (L) <span class="text-[#3b82f6]">●</span></label>
                 <input type="number" step="0.01" v-model.number="form.speedVolume" class="form-input w-full" placeholder="0.00" />
               </div>
               <div>
-                <label class="field-label">Speed Testing Volume (L)</label>
+                <label class="field-label">Power Testing Volume (L)</label>
                 <input type="number" step="0.01" v-model.number="form.speedTestingVolume" class="form-input w-full" placeholder="0.00" />
               </div>
               <div>
-                <label class="field-label">Speed Rate (₹/L)</label>
+                <label class="field-label">Power Rate (₹/L)</label>
                 <input type="number" step="0.01" v-model.number="form.speedRate" class="form-input w-full" placeholder="0.00" @input="ratesAutoFilled.speed = false" />
               </div>
             </div>
@@ -128,7 +128,7 @@
               <span class="amt text-[#10b981]">₹{{ fmt(calc_hsdRev) }}</span>
             </div>
             <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:var(--bg-3); border:1px solid var(--bg-4)">
-              <span class="text-[13px] text-[var(--text-2)]">Speed Revenue</span>
+              <span class="text-[13px] text-[var(--text-2)]">Power Revenue</span>
               <span class="amt text-[#3b82f6]">₹{{ fmt(calc_speedRev) }}</span>
             </div>
             <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:var(--bg-3); border:1px solid var(--border-2)">

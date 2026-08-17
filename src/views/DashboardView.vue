@@ -24,7 +24,7 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <KpiCard label="MS Sold (L)"    :value="kpi('msSold')"        :icon="Fuel"       color="#f59e0b" sub="Petrol volume"     :loading="store.loading" valueSize="20px" />
       <KpiCard label="HSD Sold (L)"   :value="kpi('hsdSold')"       :icon="Fuel"       color="#10b981" sub="Diesel volume"     :loading="store.loading" valueSize="20px" />
-      <KpiCard label="Speed (L)"      :value="kpi('speedSold')"     :icon="Fuel"       color="#3b82f6" sub="Premium fuel"      :loading="store.loading" valueSize="20px" />
+      <KpiCard label="Power (L)"      :value="kpi('speedSold')"     :icon="Fuel"       color="#3b82f6" sub="Premium fuel"      :loading="store.loading" valueSize="20px" />
       <KpiCard label="Total Cash"     :value="kpi('totalCash')"     :icon="Banknote"   color="#10b981" sub="Cash receipts"     :loading="store.loading" valueSize="20px" />
       <KpiCard label="PhonePe / UPI"  :value="kpi('totalPhonePe')"  :icon="Smartphone" color="#6366f1" sub="UPI payments"      :loading="store.loading" valueSize="20px" />
       <KpiCard label="Total Expenses" :value="kpi('totalExpenses')" :icon="Receipt"    color="#ef4444" sub="Operating costs"   :loading="store.loading" valueSize="20px" />
@@ -52,7 +52,7 @@
         <div class="card-header">
           <div>
             <div class="font-display font-bold text-[15px] text-[var(--text)]">Fuel Volume Mix</div>
-            <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">MS vs HSD vs Speed (litres) — {{ monthLabel }}</div>
+            <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">MS vs HSD vs Power (litres) — {{ monthLabel }}</div>
           </div>
         </div>
         <div class="card-body">
@@ -168,7 +168,7 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>Date</th><th>MS (L)</th><th>HSD (L)</th><th>Speed (L)</th>
+              <th>Date</th><th>MS (L)</th><th>HSD (L)</th><th>Power (L)</th>
               <th>Revenue</th><th>Cash</th><th>PhonePe</th><th>Expenses</th><th>Balance</th>
             </tr>
           </thead>
@@ -249,7 +249,7 @@ const kpi = (key) => store.kpis?.[key] ?? '—'
 const STOCK_FUEL_META = {
   ms:    { label: 'MS',    color: '#f59e0b', badge: 'badge-ms' },
   hsd:   { label: 'HSD',   color: '#10b981', badge: 'badge-hsd' },
-  speed: { label: 'Speed', color: '#3b82f6', badge: 'badge-speed' },
+  speed: { label: 'Power', color: '#3b82f6', badge: 'badge-speed' },
 }
 
 const stockRows = computed(() =>
@@ -330,7 +330,7 @@ const fuelMixChartData = computed(() => ({
   datasets: [
     { label: 'MS (L)',    data: store.fuelMix.map(d => d.ms),    borderColor: chartColors.ms,    backgroundColor: 'rgba(245,158,11,0.08)', tension: 0.4, fill: true, pointRadius: 2 },
     { label: 'HSD (L)',   data: store.fuelMix.map(d => d.hsd),   borderColor: chartColors.hsd,   backgroundColor: 'rgba(16,185,129,0.06)',  tension: 0.4, fill: true, pointRadius: 2 },
-    { label: 'Speed (L)', data: store.fuelMix.map(d => d.speed), borderColor: chartColors.speed, backgroundColor: 'rgba(59,130,246,0.06)',  tension: 0.4, fill: true, pointRadius: 2 },
+    { label: 'Power (L)', data: store.fuelMix.map(d => d.speed), borderColor: chartColors.speed, backgroundColor: 'rgba(59,130,246,0.06)',  tension: 0.4, fill: true, pointRadius: 2 },
   ],
 }))
 
