@@ -48,7 +48,7 @@
         <h2 class="font-display font-bold text-[20px] text-[var(--text)] mb-0.5">Sign In</h2>
         <p class="text-[13px] text-[var(--text-3)] mb-5">Enter your credentials</p>
 
-        <form @submit.prevent="handleLogin">
+        <form @submit.prevent="handleLogin" autocomplete="off">
 
           <!-- Email -->
           <div class="mb-4">
@@ -58,7 +58,7 @@
               type="text"
               class="form-input w-full"
               placeholder="admin@petromines.com"
-              autocomplete="username"
+              autocomplete="off"
               required
             />
           </div>
@@ -72,7 +72,7 @@
                 :type="showPass ? 'text' : 'password'"
                 class="form-input w-full pr-10"
                 placeholder="••••••••"
-                autocomplete="current-password"
+                autocomplete="new-password"
                 required
               />
               <button
