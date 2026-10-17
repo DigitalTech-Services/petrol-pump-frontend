@@ -10,11 +10,11 @@
 
     <!-- KPIs -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <KpiCard label="Total Transferred" :value="fmtCr(summary.total)"      :icon="CreditCard"  color="#3b82f6" :sub="monthLabel"/>
+      <KpiCard label="Total Transferred" :value="fmtCompact(summary.total)" :exact="fmtINR(summary.total)"      :icon="CreditCard"  color="#3b82f6" :sub="monthLabel"/>
       <KpiCard label="Transactions"      :value="String(summary.count)"           :icon="Hash"        color="#10b981" sub="All settlements"/>
-      <KpiCard label="Avg Per Day"       :value="fmtCr(summary.avg_per_day)" :icon="BarChart3"   color="#f59e0b" :sub="monthLabel"/>
+      <KpiCard label="Avg Per Day"       :value="fmtCompact(summary.avg_per_day)" :exact="fmtINR(summary.avg_per_day)" :icon="BarChart3"   color="#f59e0b" :sub="monthLabel"/>
       <KpiCard label="Highest Day"
-        :value="summary.highest ? fmt(summary.highest.amount) : '—'"
+        :value="summary.highest ? fmtCompact(summary.highest.amount) : '—'" :exact="summary.highest ? fmtINR(summary.highest.amount) : ''"
         :icon="Award" color="#6366f1"
         :sub="summary.highest ? fmtDate(summary.highest.date) : '—'" />
     </div>
@@ -229,7 +229,7 @@ import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard    from '@/components/ui/KpiCard.vue'
 import AppModal   from '@/components/ui/AppModal.vue'
 import BaseChart  from '@/components/charts/BaseChart.vue'
-import { fmt, fmtCr } from '@/utils/format'
+import { fmt, fmtINR, fmtCompact } from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'

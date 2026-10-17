@@ -123,6 +123,25 @@ export const expenseApi = {
 }
 
 // ──────────────────────────────────────────────────────────────────
+// CREDIT (fuel given on credit)
+// ──────────────────────────────────────────────────────────────────
+export const creditApi = {
+  getSummary:     (params)   => api.get('/credit/summary',              { params }),
+  getCustomers:   (params)   => api.get('/credit/customers',            { params }),
+  getHistory:     (id, params) => api.get(`/credit/customers/${id}`,    { params }),
+  createCustomer: (data)     => api.post('/credit/customers',             data),
+  updateCustomer: (id, data) => api.put(`/credit/customers/${id}`,        data),
+  deleteCustomer: (id)       => api.delete(`/credit/customers/${id}`),
+  payAll:         (id, data) => api.post(`/credit/customers/${id}/pay-all`, data),
+  getEntries:     (params)   => api.get('/credit/entries',              { params }),
+  createEntry:    (data)     => api.post('/credit/entries',               data),
+  updateEntry:    (id, data) => api.put(`/credit/entries/${id}`,          data),
+  deleteEntry:    (id)       => api.delete(`/credit/entries/${id}`),
+  markPaid:       (id, data) => api.post(`/credit/entries/${id}/pay`,     data),
+  markUnpaid:     (id)       => api.post(`/credit/entries/${id}/unpay`),
+}
+
+// ──────────────────────────────────────────────────────────────────
 // STAFF
 // ──────────────────────────────────────────────────────────────────
 export const staffApi = {

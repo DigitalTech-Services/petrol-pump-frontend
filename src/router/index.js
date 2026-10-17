@@ -13,6 +13,7 @@ const StockView       = () => import('@/views/StockView.vue')
 const MeterView       = () => import('@/views/MeterView.vue')
 const TransactionsView= () => import('@/views/TransactionsView.vue')
 const ExpensesView    = () => import('@/views/ExpensesView.vue')
+const CreditView      = () => import('@/views/CreditView.vue')
 const StaffView       = () => import('@/views/StaffView.vue')
 const TimesheetView   = () => import('@/views/TimesheetView.vue')
 const ReportsView     = () => import('@/views/ReportsView.vue')
@@ -94,6 +95,12 @@ const routes = [
         name: 'Expenses',
         component: ExpensesView,
         meta: { title: 'Expenses', breadcrumb: ['Expenses'], role: 'manager' }
+      },
+      {
+        path: 'credit',
+        name: 'Credit',
+        component: CreditView,
+        meta: { title: 'Credit Customers', breadcrumb: ['Credit Customers'], role: 'manager' }
       },
       {
         path: 'staff',

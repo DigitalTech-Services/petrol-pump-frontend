@@ -3,13 +3,28 @@ export const fmt = (n, decimals = 2) => {
   return Number(n).toLocaleString('en-IN', { maximumFractionDigits: decimals })
 }
 
-export const fmtCr = (n) => {
-  if (!n) return '₹0'
-  if (n >= 10000000) return `₹${(n / 10000000).toFixed(2)}Cr`
-  if (n >= 100000)   return `₹${(n / 100000).toFixed(2)}L`
-  if (n >= 1000)     return `₹${(n / 1000).toFixed(1)}K`
-  return `₹${fmt(n, 0)}`
+// Short Indian-style amount for KPI cards, e.g. ₹860588.68 → "₹8.61L".
+// Thousand (K) → Lakh (L) → Crore (Cr); negatives keep a leading "−".
+const COMPACT_UNITS = [[1e3, 'K'], [1e5, 'L'], [1e7, 'Cr']]
+
+export const fmtCompact = (n) => {
+  if (n === null || n === undefined || n === '' || isNaN(Number(n))) return '—'
+  const v    = Number(n)
+  const sign = v < 0 ? '−' : ''
+  const abs  = Math.abs(v)
+  if (abs < 1000) return `${sign}₹${fmt(abs, 0)}`
+
+  let i = COMPACT_UNITS.findLastIndex(([div]) => abs >= div)
+  let scaled = Math.round((abs / COMPACT_UNITS[i][0]) * 100) / 100
+  // 99,999 would round to "100K" — promote it to "1L" (same for L → Cr)
+  if (scaled >= 100 && i < COMPACT_UNITS.length - 1) {
+    i++
+    scaled = Math.round((abs / COMPACT_UNITS[i][0]) * 100) / 100
+  }
+  return `${sign}₹${fmt(scaled, 2)}${COMPACT_UNITS[i][1]}`
 }
+
+export const fmtCr = fmtCompact
 
 export const fmtINR = (n) => `₹${fmt(n)}`
 

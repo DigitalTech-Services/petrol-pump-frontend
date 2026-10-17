@@ -25,10 +25,10 @@
     <!-- ===== SUMMARY TAB ===== -->
     <template v-if="tab === 'summary'">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <KpiCard label="Gross Revenue"   :value="fmtINR(monthly?.kpis?.gross_revenue)"        :icon="Banknote" color="#f59e0b" :sub="`${monthly?.days ?? 0} days`" />
+        <KpiCard label="Gross Revenue"   :value="fmtCompact(monthly?.kpis?.gross_revenue)" :exact="fmtINR(monthly?.kpis?.gross_revenue)"        :icon="Banknote" color="#f59e0b" :sub="`${monthly?.days ?? 0} days`" />
         <KpiCard label="Total Fuel Sold" :value="fmt(monthly?.kpis?.total_fuel) + ' L'"        :icon="Fuel"    color="#10b981" sub="All fuel types" />
-        <KpiCard label="Total Expenses"  :value="fmtINR(monthly?.kpis?.total_expenses)"        :icon="Receipt" color="#ef4444" sub="Operational" />
-        <KpiCard label="Net Payroll"     :value="fmtINR(monthly?.kpis?.net_payroll)"           :icon="Users"   color="#6366f1" :sub="`${monthly?.kpis?.staff_count ?? 0} staff`" />
+        <KpiCard label="Total Expenses"  :value="fmtCompact(monthly?.kpis?.total_expenses)" :exact="fmtINR(monthly?.kpis?.total_expenses)"        :icon="Receipt" color="#ef4444" sub="Operational" />
+        <KpiCard label="Net Payroll"     :value="fmtCompact(monthly?.kpis?.net_payroll)" :exact="fmtINR(monthly?.kpis?.net_payroll)"           :icon="Users"   color="#6366f1" :sub="`${monthly?.kpis?.staff_count ?? 0} staff`" />
       </div>
 
       <!-- P&L Summary Card -->
@@ -223,7 +223,7 @@ import { useSelectedStationStore } from '@/stores/selectedStation'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard    from '@/components/ui/KpiCard.vue'
 import BaseChart  from '@/components/charts/BaseChart.vue'
-import { fmt, fmtINR, formatDate } from '@/utils/format'
+import { fmt, fmtINR, fmtCompact, formatDate } from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { reportsApi } from '@/services/api'
 import {

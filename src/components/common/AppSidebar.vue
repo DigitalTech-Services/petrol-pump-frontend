@@ -50,6 +50,8 @@
         <NavItem to="/transactions" :icon="CreditCard" label="Card Transactions" />
 
         <NavItem to="/expenses" :icon="Receipt" label="Expenses" />
+
+        <NavItem to="/credit" :icon="HandCoins" label="Credit Customers" />
       </div>
 
       <div v-if="auth.isManager" class="mb-1">
@@ -122,6 +124,7 @@ import {
   Gauge,
   CreditCard,
   Receipt,
+  HandCoins,
   Users,
   Clock3,
   BarChart3,

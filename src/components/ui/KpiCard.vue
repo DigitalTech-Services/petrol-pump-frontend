@@ -1,7 +1,7 @@
 <template>
   <div class="kpi-card" :style="{ '--kpi-accent': color }">
     <div class="text-[11px] text-[var(--text-3)] uppercase tracking-[0.08em] mb-2">{{ label }}</div>
-    <div class="font-display font-bold text-[var(--text)] leading-none mb-1.5" :style="{ fontSize: valueSize }">
+    <div class="font-display font-bold text-[var(--text)] leading-none mb-1.5" :style="{ fontSize: valueSize }" :title="exact || undefined">
       <template v-if="loading">
         <div class="skeleton h-8 w-24" />
       </template>
@@ -22,6 +22,7 @@
 defineProps({
   label:     { type: String, required: true },
   value:     { type: [String, Number], default: '—' },
+  exact:     { type: String, default: '' },      // full amount shown on hover when value is abbreviated
   sub:       { type: String, default: '' },
   trend:     { type: Number, default: null },
   color:     { type: String, default: '#f59e0b' },

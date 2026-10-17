@@ -31,6 +31,76 @@
       <KpiCard label="Staff Payroll"  :value="kpi('staffPayroll')"  :icon="Users"      color="#8b5cf6" sub="Staff salary"      :loading="store.loading" valueSize="20px" />
     </div>
 
+    <!-- Credit — owner: all stations (+ per-station breakdown); manager: their station -->
+    <div class="flex items-center justify-between mb-2">
+      <div class="text-[11px] font-semibold text-[var(--text-3)] uppercase tracking-[0.1em]">Fuel on Credit</div>
+      <RouterLink v-if="auth.isManager" to="/credit" class="text-[12px] text-[#f59e0b] hover:underline">Manage credit →</RouterLink>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+      <KpiCard label="Outstanding Credit" :value="fmtCompact(credit.outstanding)" :exact="fmtINR(credit.outstanding)" :icon="HandCoins" color="#ef4444" :sub="`${credit.pending_entries} unpaid entries`" :loading="creditLoading" valueSize="20px" />
+      <KpiCard label="Customers With Dues" :value="credit.customers_with_dues" :icon="Users" color="#f59e0b" sub="Unpaid credit" :loading="creditLoading" valueSize="20px" />
+      <KpiCard label="Credit Given" :value="fmtCompact(credit.given_this_month)" :exact="fmtINR(credit.given_this_month)" :icon="Fuel" color="#3b82f6" :sub="monthLabel" :loading="creditLoading" valueSize="20px" />
+      <KpiCard label="Credit Collected" :value="fmtCompact(credit.collected_this_month)" :exact="fmtINR(credit.collected_this_month)" :icon="BadgeCheck" color="#10b981" :sub="monthLabel" :loading="creditLoading" valueSize="20px" />
+    </div>
+    <div v-if="credit.by_station.length || credit.top_dues.length" class="grid grid-cols-1 gap-4 mb-6" :class="credit.by_station.length ? 'lg:grid-cols-2' : ''">
+      <!-- Per-station credit (owner, all stations) -->
+      <div v-if="credit.by_station.length" class="card">
+        <div class="card-header">
+          <div>
+            <div class="font-display font-bold text-[15px] text-[var(--text)]">Credit by Station</div>
+            <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">Outstanding dues across all your stations</div>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="data-table w-full">
+            <thead><tr><th>Station</th><th>Outstanding</th><th>Customers With Dues</th><th>Given — {{ monthLabel }}</th></tr></thead>
+            <tbody>
+              <tr v-for="st in credit.by_station" :key="st.station_id ?? 'none'">
+                <td class="font-medium text-[var(--text)]">{{ st.station_name }}</td>
+                <td class="amt" :class="st.outstanding > 0 ? 'text-negative' : 'text-positive'">₹{{ fmt(st.outstanding) }}</td>
+                <td>{{ st.customers_with_dues }}</td>
+                <td class="amt">₹{{ fmt(st.given_this_month) }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td>TOTAL</td>
+                <td>₹{{ fmt(credit.outstanding) }}</td>
+                <td>{{ credit.customers_with_dues }}</td>
+                <td>₹{{ fmt(credit.given_this_month) }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      <!-- Biggest dues -->
+      <div v-if="credit.top_dues.length" class="card">
+        <div class="card-header">
+          <div>
+            <div class="font-display font-bold text-[15px] text-[var(--text)]">Top Outstanding Dues</div>
+            <div class="text-[11.5px] text-[var(--text-3)] mt-0.5">Customers who owe the most</div>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="data-table w-full">
+            <thead><tr><th>Customer</th><th v-if="credit.by_station.length">Station</th><th>Outstanding</th><th>Unpaid Since</th></tr></thead>
+            <tbody>
+              <tr v-for="d in credit.top_dues" :key="d.customer_id">
+                <td>
+                  <div class="font-medium text-[var(--text)]">{{ d.name }}</div>
+                  <div class="text-[11px] text-[var(--text-3)] font-mono-custom">{{ d.mobile }}</div>
+                </td>
+                <td v-if="credit.by_station.length" class="text-[12px] text-[var(--text-2)]">{{ d.station_name || '—' }}</td>
+                <td class="amt text-negative font-semibold">₹{{ fmt(d.outstanding) }}</td>
+                <td class="text-[12px] text-[var(--text-2)]">{{ formatDate(d.oldest_date) }} <span class="text-[var(--text-3)]">({{ d.entries }})</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div v-else class="mb-6" />
+
     <!-- Charts Row 1 -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
       <div class="card">
@@ -210,11 +280,13 @@ import { useSelectedStationStore } from '@/stores/selectedStation'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard   from '@/components/ui/KpiCard.vue'
 import BaseChart from '@/components/charts/BaseChart.vue'
-import { fmt, fmtINR, formatDate, chartColors } from '@/utils/format'
+import { fmt, fmtINR, fmtCompact, formatDate, chartColors } from '@/utils/format'
 import {
   Banknote, Fuel, Smartphone, Receipt, Users,
-  Calendar, TrendingUp, Award, CreditCard, BarChart3, RotateCw, Wallet
+  Calendar, TrendingUp, Award, CreditCard, BarChart3, RotateCw, Wallet,
+  HandCoins, BadgeCheck
 } from 'lucide-vue-next'
+import { creditApi } from '@/services/api'
 
 const auth            = useAuthStore()
 const store           = useDashboardStore()
@@ -235,10 +307,31 @@ const periods = Array.from({ length: 6 }, (_, i) => {
 const selectedPeriod = ref(periods[0].value)
 const monthLabel = computed(() => periods.find(p => p.value === selectedPeriod.value)?.label ?? selectedPeriod.value)
 
-const refresh = () => store.fetchAll({
-  period: selectedPeriod.value,
-  ...(selectedStation.selectedStationId ? { station_id: selectedStation.selectedStationId } : {}),
-})
+// ── Credit summary — loaded alongside the main dashboard data ────────
+const EMPTY_CREDIT  = { outstanding: 0, pending_entries: 0, customers_with_dues: 0, given_this_month: 0, collected_this_month: 0, by_station: [], top_dues: [] }
+const credit        = ref({ ...EMPTY_CREDIT })
+const creditLoading = ref(false)
+
+async function loadCredit(params) {
+  creditLoading.value = true
+  try {
+    const res = await creditApi.getSummary(params)
+    credit.value = { ...EMPTY_CREDIT, ...(res.data?.summary ?? {}) }
+  } catch {
+    credit.value = { ...EMPTY_CREDIT }   // non-critical — the rest of the dashboard still loads
+  } finally {
+    creditLoading.value = false
+  }
+}
+
+const refresh = () => {
+  const params = {
+    period: selectedPeriod.value,
+    ...(selectedStation.selectedStationId ? { station_id: selectedStation.selectedStationId } : {}),
+  }
+  loadCredit(params)
+  return store.fetchAll(params)
+}
 onMounted(refresh)
 watch(() => selectedStation.selectedStationId, refresh)
 
@@ -273,8 +366,7 @@ const fuelProfitTotal = computed(() => store.profitLoss?.total ?? null)
 
 const fuelProfitDisplay = computed(() => {
   if (fuelProfitTotal.value === null) return '—'
-  const amt = Math.abs(fuelProfitTotal.value)
-  return (fuelProfitTotal.value < 0 ? '−' : '') + fmtINR(amt)
+  return fmtCompact(fuelProfitTotal.value)
 })
 
 const fuelProfitColor = computed(() => {
@@ -292,8 +384,7 @@ const actualProfitTotal = computed(() => store.actualProfit?.total ?? null)
 
 const actualProfitDisplay = computed(() => {
   if (actualProfitTotal.value === null) return '—'
-  const amt = Math.abs(actualProfitTotal.value)
-  return (actualProfitTotal.value < 0 ? '−' : '') + fmtINR(amt)
+  return fmtCompact(actualProfitTotal.value)
 })
 
 const actualProfitColor = computed(() => {

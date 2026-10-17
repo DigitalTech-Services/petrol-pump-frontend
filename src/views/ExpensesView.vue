@@ -10,10 +10,10 @@
 
     <!-- KPI Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <KpiCard label="Total Expenses"  :value="'₹'+fmt(summary.total)"      :icon="Receipt"       color="#ef4444" :sub="monthLabel"/>
-      <KpiCard label="Avg Per Day"     :value="'₹'+fmt(summary.avg_per_day)" :icon="BarChart3"     color="#f59e0b" :sub="monthLabel"/>
-      <KpiCard label="Lowest Day"      :value="summary.min ? '₹'+fmt(summary.min.amount) : '—'" :icon="CheckCircle2" color="#10b981" :sub="summary.min ? fmtDate(summary.min.date) : '—'"/>
-      <KpiCard label="Highest Day"     :value="summary.max ? '₹'+fmt(summary.max.amount) : '—'" :icon="AlertTriangle" color="#ef4444" :sub="summary.max ? fmtDate(summary.max.date) : '—'"/>
+      <KpiCard label="Total Expenses"  :value="fmtCompact(summary.total)" :exact="fmtINR(summary.total)"      :icon="Receipt"       color="#ef4444" :sub="monthLabel"/>
+      <KpiCard label="Avg Per Day"     :value="fmtCompact(summary.avg_per_day)" :exact="fmtINR(summary.avg_per_day)" :icon="BarChart3"     color="#f59e0b" :sub="monthLabel"/>
+      <KpiCard label="Lowest Day"      :value="summary.min ? fmtCompact(summary.min.amount) : '—'" :exact="summary.min ? fmtINR(summary.min.amount) : ''" :icon="CheckCircle2" color="#10b981" :sub="summary.min ? fmtDate(summary.min.date) : '—'"/>
+      <KpiCard label="Highest Day"     :value="summary.max ? fmtCompact(summary.max.amount) : '—'" :exact="summary.max ? fmtINR(summary.max.amount) : ''" :icon="AlertTriangle" color="#ef4444" :sub="summary.max ? fmtDate(summary.max.date) : '—'"/>
     </div>
 
     <!-- Filters -->
@@ -187,7 +187,7 @@ import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard    from '@/components/ui/KpiCard.vue'
 import AppModal   from '@/components/ui/AppModal.vue'
 import BaseChart  from '@/components/charts/BaseChart.vue'
-import { fmt }    from '@/utils/format'
+import { fmt, fmtINR, fmtCompact } from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'

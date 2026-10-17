@@ -9,6 +9,7 @@
         </button>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doExport"><Download :size="14" /> Export CSV</button>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doPrint"><Printer :size="14" /> Print</button>
+        <button class="btn btn-ghost flex items-center gap-1.5" @click="openHistory()"><History :size="14" /> Attendance History</button>
         <button v-if="auth.canWrite" class="btn btn-primary flex items-center gap-1.5" @click="openAddStaff"><Plus :size="14" /> Add Staff</button>
       </template>
     </PageHeader>
@@ -16,9 +17,9 @@
     <!-- KPIs -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <KpiCard label="Total Staff"    :value="staffList.length"                                   :icon="Users"        color="#f59e0b" sub="Active employees" />
-      <KpiCard label="Total Payroll"  :value="'₹'+fmt(staffList.reduce((a,s)=>a+s.workingSalary,0))" :icon="Banknote"  color="#ef4444" sub="Working salaries" />
-      <KpiCard label="Final Payout"   :value="'₹'+fmt(staffList.reduce((a,s)=>a+Math.max(0,s.finalPayout),0))" :icon="CheckCircle2" color="#10b981" sub="After advances" />
-      <KpiCard label="Total Advances" :value="'₹'+fmt(staffList.reduce((a,s)=>a+s.totalAdvance,0))" :icon="Upload"    color="#6366f1" sub="All staff combined" />
+      <KpiCard label="Total Payroll"  :value="fmtCompact(totalWorkingSalary)" :exact="fmtINR(totalWorkingSalary)" :icon="Banknote"  color="#ef4444" sub="Working salaries" />
+      <KpiCard label="Final Payout"   :value="fmtCompact(totalFinalPayout)" :exact="fmtINR(totalFinalPayout)" :icon="CheckCircle2" color="#10b981" sub="After advances" />
+      <KpiCard label="Total Advances" :value="fmtCompact(totalAdvances)" :exact="fmtINR(totalAdvances)" :icon="Upload"    color="#6366f1" sub="All staff combined" />
     </div>
 
     <!-- Loading -->
@@ -41,10 +42,13 @@
                 <div class="font-display font-bold text-[15px] text-[var(--text)] leading-tight">{{ s.name }}</div>
                 <div class="text-[11.5px] text-[var(--text-3)]">{{ s.role }}</div>
               </div>
-              <div v-if="auth.canWrite" class="flex gap-1">
-                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-3)] hover:text-[#f59e0b] hover:bg-[var(--bg-4)] transition-all" @click="openEditStaff(s)" title="Edit"><Pencil :size="13" /></button>
-                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-3)] hover:text-[#f59e0b] hover:bg-[var(--bg-4)] transition-all" @click="openAddAdvance(s)" title="Add Advance"><Banknote :size="13" /></button>
-                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-3)] hover:text-[#ef4444] hover:bg-[var(--bg-4)] transition-all" @click="deleteStaff(s)" title="Delete"><Trash2 :size="13" /></button>
+              <div class="flex gap-1">
+                <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-3)] hover:text-[#f59e0b] hover:bg-[var(--bg-4)] transition-all" @click="openHistory(s)" title="Attendance History"><History :size="13" /></button>
+                <template v-if="auth.canWrite">
+                  <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-3)] hover:text-[#f59e0b] hover:bg-[var(--bg-4)] transition-all" @click="openEditStaff(s)" title="Edit"><Pencil :size="13" /></button>
+                  <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-3)] hover:text-[#f59e0b] hover:bg-[var(--bg-4)] transition-all" @click="openAddAdvance(s)" title="Add Advance"><Banknote :size="13" /></button>
+                  <button class="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-3)] hover:text-[#ef4444] hover:bg-[var(--bg-4)] transition-all" @click="deleteStaff(s)" title="Delete"><Trash2 :size="13" /></button>
+                </template>
               </div>
             </div>
             <div class="grid grid-cols-3 gap-2 pt-3" style="border-top:1px solid var(--bg-4)">
@@ -54,11 +58,11 @@
               </div>
               <div class="text-center">
                 <div class="text-[9.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Salary</div>
-                <div class="font-display font-bold text-[14px] text-positive">₹{{ fmtK(s.workingSalary) }}</div>
+                <div class="font-display font-bold text-[14px] text-positive">{{ fmtCompact(s.workingSalary) }}</div>
               </div>
               <div class="text-center">
                 <div class="text-[9.5px] text-[var(--text-3)] uppercase tracking-wide mb-1">Net</div>
-                <div class="font-display font-bold text-[14px]" :style="{color:s.finalPayout<0?'#ef4444':'#f59e0b'}">₹{{ fmtK(s.finalPayout) }}</div>
+                <div class="font-display font-bold text-[14px]" :style="{color:s.finalPayout<0?'#ef4444':'#f59e0b'}">{{ fmtCompact(s.finalPayout) }}</div>
               </div>
             </div>
             <div class="mt-3 text-[10px] text-[var(--text-3)]">₹{{ s.ratePerHour }}/hr — {{ monthLabel }}</div>
@@ -103,12 +107,14 @@
                 <td><span class="font-display font-bold text-[15px]" :class="s.finalPayout<0?'text-negative':'text-[#f59e0b]'">₹{{ fmt(s.finalPayout) }}</span></td>
                 <td><span class="badge" :class="s.finalPayout<0?'badge-red':'badge-green'">{{ s.finalPayout<0?'Overpaid':'Due' }}</span></td>
                 <td>
-                  <div v-if="auth.canWrite" class="flex gap-1.5">
-                    <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditStaff(s)"><Pencil :size="11" /> Edit</button>
-                    <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openAddAdvance(s)" style="color:#f59e0b"><Banknote :size="11" /> Adv</button>
-                    <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="deleteStaff(s)" style="color:#ef4444"><Trash2 :size="11" /></button>
+                  <div class="flex gap-1.5">
+                    <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openHistory(s)"><History :size="11" /> History</button>
+                    <template v-if="auth.canWrite">
+                      <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openEditStaff(s)"><Pencil :size="11" /> Edit</button>
+                      <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" @click="openAddAdvance(s)" style="color:#f59e0b"><Banknote :size="11" /> Adv</button>
+                      <button class="btn btn-ghost py-0.5 px-2 text-[11px]" @click="deleteStaff(s)" style="color:#ef4444"><Trash2 :size="11" /></button>
+                    </template>
                   </div>
-                  <span v-else class="text-[11px] text-[var(--text-3)]">—</span>
                 </td>
               </tr>
             </tbody>
@@ -204,8 +210,8 @@
           <div>
             <label class="field-label">Shift Hours</label>
             <select v-model="staffForm.shiftHours" class="form-select w-full" :class="{ 'input-error': staffFormErrors.shiftHours }">
-              <option value="8">8 Hours</option><option value="10">10 Hours</option>
-              <option value="12">12 Hours</option><option value="14">14 Hours</option>
+              <option value="" disabled>Select shift</option>
+              <option value="8">8 Hours</option><option value="24">24 Hours</option>
             </select>
             <p v-if="staffFormErrors.shiftHours" class="field-error">{{ staffFormErrors.shiftHours }}</p>
           </div>
@@ -226,6 +232,10 @@
     </AppModal>
 
     <!-- ═══ EDIT STAFF MODAL ═══ -->
+    <!-- ═══ ATTENDANCE HISTORY MODAL ═══ -->
+    <AttendanceHistoryModal v-model="showHistory" :month="selectedMonth" :staff-id="historyStaffId"
+      :staff-list="staffList" :station-id="selectedStation.selectedStationId" />
+
     <AppModal v-model="showEditStaff" title="Edit Staff Member" :icon="Pencil" max-width="560px">
       <div class="space-y-4" v-if="editStaffData">
         <div class="grid grid-cols-2 gap-4">
@@ -251,8 +261,8 @@
           <div>
             <label class="field-label">Shift Hours</label>
             <select v-model="editStaffData.shiftHours" class="form-select w-full" :class="{ 'input-error': editStaffErrors.shiftHours }">
-              <option value="8">8 Hours</option><option value="10">10 Hours</option>
-              <option value="12">12 Hours</option><option value="14">14 Hours</option>
+              <option value="" disabled>Select shift</option>
+              <option value="8">8 Hours</option><option value="24">24 Hours</option>
             </select>
             <p v-if="editStaffErrors.shiftHours" class="field-error">{{ editStaffErrors.shiftHours }}</p>
           </div>
@@ -312,7 +322,8 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import KpiCard    from '@/components/ui/KpiCard.vue'
 import AppModal   from '@/components/ui/AppModal.vue'
-import { fmt }    from '@/utils/format'
+import AttendanceHistoryModal from '@/components/ui/AttendanceHistoryModal.vue'
+import { fmt, fmtINR, fmtCompact } from '@/utils/format'
 import { exportCSV, printTable } from '@/utils/export'
 import { useUiStore } from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'
@@ -320,7 +331,7 @@ import { useSelectedStationStore } from '@/stores/selectedStation'
 import { staffApi } from '@/services/api'
 import {
   Users, Banknote, CheckCircle2, Upload, RotateCw, Save,
-  Pencil, Trash2, Plus, Download, Printer, List, LayoutGrid, User
+  Pencil, Trash2, Plus, Download, Printer, List, LayoutGrid, User, History
 } from 'lucide-vue-next'
 
 const ui              = useUiStore()
@@ -354,7 +365,6 @@ const monthLabel = computed(() => {
   return new Date(y, m - 1).toLocaleString('en-IN', { month: 'long', year: 'numeric' })
 })
 
-const fmtK = n => Math.abs(n)>=1000 ? (n/1000).toFixed(1)+'K' : String(n)
 
 // Live preview of the hourly rate the backend will derive: salary ÷ days in the
 // reference month (join date if set, else current month) ÷ shift hours.
@@ -369,6 +379,9 @@ const previewRatePerHour = computed(() => {
 const COLORS = ['#f59e0b','#10b981','#3b82f6','#8b5cf6','#ef4444','#06b6d4','#ec4899','#f97316','#84cc16','#14b8a6','#6366f1','#78716c']
 
 const staffList   = reactive([])
+const totalWorkingSalary = computed(() => staffList.reduce((a, s) => a + s.workingSalary, 0))
+const totalFinalPayout   = computed(() => staffList.reduce((a, s) => a + Math.max(0, s.finalPayout), 0))
+const totalAdvances      = computed(() => staffList.reduce((a, s) => a + s.totalAdvance, 0))
 const allAdvances = reactive([]) // raw advances from API for the tracker table
 
 // Derive advance-tracker columns from loaded advances
@@ -397,7 +410,7 @@ function mapStaff(s) {
     hoursWorked:  s.hours_worked ?? 0,
     ratePerHour:  s.rate_per_hour,
     monthlySalary:s.monthly_salary ?? 0,
-    shiftHours:   String(s.shift_hours ?? 8),
+    shiftHours:   [8, 24].includes(Number(s.shift_hours ?? 8)) ? String(s.shift_hours ?? 8) : '',
     workingSalary:s.working_salary ?? 0,
     totalAdvance: s.total_advance ?? 0,
     finalPayout:  s.final_payout  ?? ((s.working_salary ?? 0) - (s.total_advance ?? 0)),
@@ -425,7 +438,7 @@ function validateStaffFields(form) {
 
   if (!form.monthlySalary || Number(form.monthlySalary) <= 0) errors.monthlySalary = 'Monthly salary must be greater than 0'
 
-  if (!form.shiftHours || Number(form.shiftHours) < 1 || Number(form.shiftHours) > 24) errors.shiftHours = 'Shift hours must be between 1 and 24'
+  if (![8, 24].includes(Number(form.shiftHours))) errors.shiftHours = 'Shift hours must be 8 or 24'
 
   return errors
 }
@@ -436,6 +449,15 @@ function hasErrors(errors) {
 
 function firstError(errors) {
   return Object.values(errors).find(Boolean) || ''
+}
+
+// ── Attendance History — for everyone, or one staff member ──────────
+const showHistory    = ref(false)
+const historyStaffId = ref('')
+
+function openHistory(staff = null) {
+  historyStaffId.value = staff?.id ?? ''
+  showHistory.value    = true
 }
 
 function stationParam() {
