@@ -135,10 +135,10 @@ export const creditApi = {
   payAll:         (id, data) => api.post(`/credit/customers/${id}/pay-all`, data),
   getEntries:     (params)   => api.get('/credit/entries',              { params }),
   createEntry:    (data)     => api.post('/credit/entries',               data),
-  updateEntry:    (id, data) => api.put(`/credit/entries/${id}`,          data),
   deleteEntry:    (id)       => api.delete(`/credit/entries/${id}`),
   markPaid:       (id, data) => api.post(`/credit/entries/${id}/pay`,     data),
   markUnpaid:     (id)       => api.post(`/credit/entries/${id}/unpay`),
+  getTotalForDate: (params) => api.get('/credit/total-for-date',       { params }),
 }
 
 // ──────────────────────────────────────────────────────────────────

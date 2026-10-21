@@ -135,12 +135,12 @@
       </template>
     </AppModal>
 
-    <!-- ═══ ADD / EDIT CREDIT ENTRY ═══ -->
-    <AppModal v-model="showEntry" :title="entryForm.id ? 'Edit Credit Entry' : 'Give Fuel on Credit'" subtitle="Amount = litres × rate" :icon="Fuel" max-width="520px">
+    <!-- ═══ ADD CREDIT ENTRY ═══ -->
+    <AppModal v-model="showEntry" title="Give Fuel on Credit" subtitle="Enter the amount — litres & rate are optional. Entries can't be edited once saved." :icon="Fuel" max-width="520px">
       <div class="space-y-4">
         <div>
           <label class="field-label">Customer *</label>
-          <select v-model.number="entryForm.credit_customer_id" class="form-select w-full" :disabled="!!entryForm.id">
+          <select v-model.number="entryForm.credit_customer_id" class="form-select w-full">
             <option :value="null" disabled>Select customer</option>
             <option v-for="c in customers" :key="c.id" :value="c.id">{{ c.name }} — {{ c.mobile }}</option>
           </select>
@@ -157,16 +157,21 @@
             </select>
           </div>
         </div>
+        <div>
+          <label class="field-label">Credit Amount (₹) *</label>
+          <input type="number" step="0.01" min="0" v-model.number="entryForm.amount" class="form-input w-full" placeholder="0.00" @input="onAmountInput" />
+        </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="field-label">Litres *</label>
-            <input type="number" step="0.01" min="0" v-model.number="entryForm.litres" class="form-input w-full" placeholder="0.00" />
+            <label class="field-label">Litres</label>
+            <input type="number" step="0.01" min="0" v-model.number="entryForm.litres" class="form-input w-full" placeholder="Optional" @input="onLitresInput" />
           </div>
           <div>
-            <label class="field-label">Rate / Litre (₹) *</label>
-            <input type="number" step="0.01" min="0" v-model.number="entryForm.rate" class="form-input w-full" placeholder="0.00" @input="rateTouched = true" />
+            <label class="field-label">Rate / Litre (₹)</label>
+            <input type="number" step="0.01" min="0" v-model.number="entryForm.rate" class="form-input w-full" placeholder="Optional" @input="onRateInput" />
           </div>
         </div>
+        <div class="text-[11px] text-[var(--text-3)] -mt-2">Rate is pre-filled from Settings → Fuel Rates. Fill any two of amount, litres and rate and the third is calculated.</div>
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="field-label">Vehicle Number</label>
@@ -177,16 +182,12 @@
             <input v-model="entryForm.notes" class="form-input w-full" placeholder="Optional" />
           </div>
         </div>
-        <div class="p-3 rounded-lg flex justify-between items-center" style="background:var(--bg-3);border:1px solid var(--bg-4)">
-          <span class="text-[var(--text-2)] text-[13px]">Credit Amount</span>
-          <span class="font-display font-bold text-[20px] text-[#f59e0b]">₹{{ fmt(entryAmount) }}</span>
-        </div>
       </div>
       <template #footer>
         <div class="flex justify-end gap-3">
           <button class="btn btn-ghost px-6" @click="showEntry = false">Cancel</button>
           <button class="btn btn-primary px-8 flex items-center gap-1.5" :disabled="saving" @click="saveEntry">
-            <RotateCw v-if="saving" :size="14" class="animate-spin" /><Save v-else :size="14" /> {{ entryForm.id ? 'Update' : 'Save Credit' }}
+            <RotateCw v-if="saving" :size="14" class="animate-spin" /><Save v-else :size="14" /> Save Credit
           </button>
         </div>
       </template>
@@ -230,8 +231,8 @@
             <tr v-for="e in history.entries" :key="e.id">
               <td><span class="font-mono-custom text-[12px] text-[#f59e0b]">{{ formatDate(e.date) }}</span></td>
               <td><span class="badge" :class="FUEL_BADGES[e.fuel_type]">{{ FUEL_LABELS[e.fuel_type] }}</span></td>
-              <td class="amt">{{ fmt(e.litres) }} L</td>
-              <td class="amt text-[var(--text-2)]">₹{{ fmt(e.rate) }}</td>
+              <td class="amt">{{ e.litres != null ? `${fmt(e.litres)} L` : '—' }}</td>
+              <td class="amt text-[var(--text-2)]">{{ e.rate != null ? `₹${fmt(e.rate)}` : '—' }}</td>
               <td class="amt font-semibold">₹{{ fmt(e.amount) }}</td>
               <td class="text-[12px] text-[var(--text-2)]">{{ e.vehicle_number || '—' }}</td>
               <td><span class="badge" :class="e.status === 'paid' ? 'badge-green' : 'badge-red'">{{ e.status === 'paid' ? 'Paid' : 'Unpaid' }}</span></td>
@@ -243,7 +244,6 @@
                 <div class="flex gap-1.5">
                   <template v-if="e.status === 'pending'">
                     <button class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1 text-positive" @click="openPay({ entry: e })"><BadgeCheck :size="11" /> Mark Paid</button>
-                    <button class="btn btn-ghost py-0.5 px-2 text-[11px]" title="Edit" @click="openEditEntry(e)"><Pencil :size="11" /></button>
                     <button class="btn btn-danger py-0.5 px-2 text-[11px]" title="Delete" @click="deleteEntry(e)"><Trash2 :size="11" /></button>
                   </template>
                   <button v-else class="btn btn-ghost py-0.5 px-2 text-[11px] flex items-center gap-1" title="Undo payment" @click="markUnpaid(e)"><Undo2 :size="11" /> Undo</button>
@@ -257,7 +257,7 @@
           <tfoot v-if="history.entries.length">
             <tr>
               <td colspan="2">TOTAL</td>
-              <td>{{ fmt(history.entries.reduce((a, e) => a + e.litres, 0)) }} L</td>
+              <td>{{ fmt(history.entries.reduce((a, e) => a + (e.litres || 0), 0)) }} L</td>
               <td>—</td>
               <td>₹{{ fmt(history.entries.reduce((a, e) => a + e.amount, 0)) }}</td>
               <td :colspan="auth.canWrite ? 4 : 3">—</td>
@@ -451,12 +451,45 @@ async function confirmDeleteCustomer() {
   }
 }
 
-// ── Give fuel on credit (add / edit entry) ────────────────────────
+// ── Give fuel on credit (add only — entries are not editable) ──
 const showEntry   = ref(false)
 const rateTouched = ref(false)
-const entryForm   = reactive({ id: null, credit_customer_id: null, date: today, fuel_type: 'hsd', litres: null, rate: null, vehicle_number: '', notes: '' })
+const entryForm   = reactive({ credit_customer_id: null, date: today, fuel_type: 'hsd', amount: null, litres: null, rate: null, vehicle_number: '', notes: '' })
 
-const entryAmount = computed(() => Math.round((entryForm.litres || 0) * (entryForm.rate || 0) * 100) / 100)
+// The amount is what's actually owed; litres and rate are optional detail.
+// Any two of the three fill in the third. Once the amount is typed by hand it
+// stays fixed and litres/rate are derived from it; otherwise amount = litres × rate.
+const amountTyped = ref(false)
+const pos   = v => (Number(v) > 0 ? Number(v) : null)
+const round2 = v => Math.round(v * 100) / 100
+
+function onAmountInput() {
+  const amount = pos(entryForm.amount), rate = pos(entryForm.rate), litres = pos(entryForm.litres)
+  amountTyped.value = !!amount
+  if (rate)                  entryForm.litres = amount ? round2(amount / rate) : null
+  else if (litres && amount) { entryForm.rate = round2(amount / litres); rateTouched.value = true }
+}
+
+function onLitresInput() {
+  const amount = pos(entryForm.amount), rate = pos(entryForm.rate), litres = pos(entryForm.litres)
+  if (amountTyped.value && amount) {
+    if (litres) { entryForm.rate = round2(amount / litres); rateTouched.value = true }
+  } else if (rate) {
+    entryForm.amount = litres ? round2(litres * rate) : null
+  }
+}
+
+function applyRate() {
+  const amount = pos(entryForm.amount), rate = pos(entryForm.rate), litres = pos(entryForm.litres)
+  if (!rate) return
+  if (amountTyped.value && amount) entryForm.litres = round2(amount / rate)
+  else if (litres)                 entryForm.amount = round2(litres * rate)
+}
+
+function onRateInput() {
+  rateTouched.value = true
+  applyRate()
+}
 
 // Pre-fill the rate from Settings → Fuel Rates in effect on that date (still editable)
 async function seedRate() {
@@ -464,51 +497,42 @@ async function seedRate() {
   try {
     const res   = await settingsApi.getFuelRates({ date: entryForm.date })
     const rate  = (res.data?.fuel_rates ?? []).find(r => r.fuel_key === entryForm.fuel_type)?.rate
-    if (rate && !rateTouched.value) entryForm.rate = Number(rate)
+    if (rate && !rateTouched.value) { entryForm.rate = Number(rate); applyRate() }
   } catch { /* non-critical */ }
 }
 watch(() => [entryForm.date, entryForm.fuel_type], () => { if (showEntry.value) seedRate() })
 
 function openAddEntry(customer = null) {
   Object.assign(entryForm, {
-    id: null, credit_customer_id: customer?.id ?? null, date: today, fuel_type: 'hsd',
-    litres: null, rate: null, vehicle_number: customer?.vehicle_number || '', notes: '',
+    credit_customer_id: customer?.id ?? null, date: today, fuel_type: 'hsd',
+    amount: null, litres: null, rate: null, vehicle_number: customer?.vehicle_number || '', notes: '',
   })
   rateTouched.value = false
+  amountTyped.value = false
   showEntry.value   = true
   seedRate()
-}
-
-function openEditEntry(e) {
-  Object.assign(entryForm, {
-    id: e.id, credit_customer_id: e.credit_customer_id, date: e.date, fuel_type: e.fuel_type,
-    litres: e.litres, rate: e.rate, vehicle_number: e.vehicle_number || '', notes: e.notes || '',
-  })
-  rateTouched.value = true
-  showEntry.value   = true
 }
 
 async function saveEntry() {
   if (!entryForm.credit_customer_id) return ui.error('Select a customer')
   if (!entryForm.date)               return ui.error('Date is required')
-  if (!(entryForm.litres > 0))       return ui.error('Litres must be more than 0')
-  if (!(entryForm.rate > 0))         return ui.error('Rate must be more than 0')
+  if (!(entryForm.amount > 0))       return ui.error('Amount must be more than 0')
 
   const payload = {
     credit_customer_id: entryForm.credit_customer_id,
     date:               entryForm.date,
     fuel_type:          entryForm.fuel_type,
-    litres:             entryForm.litres,
-    rate:               entryForm.rate,
+    amount:             round2(entryForm.amount),
+    litres:             pos(entryForm.litres),
+    rate:               pos(entryForm.rate),
     vehicle_number:     entryForm.vehicle_number.trim().toUpperCase() || null,
     notes:              entryForm.notes.trim() || null,
   }
   saving.value = true
   try {
-    if (entryForm.id) await creditApi.updateEntry(entryForm.id, payload)
-    else              await creditApi.createEntry(payload)
+    await creditApi.createEntry(payload)
     showEntry.value = false
-    ui.success(entryForm.id ? 'Credit entry updated!' : `Credit of ₹${fmt(entryAmount.value)} recorded`)
+    ui.success(`Credit of ₹${fmt(payload.amount)} recorded`)
     await refreshAfterChange()
   } catch (e) {
     ui.error(e?.message || 'Failed to save credit entry.')

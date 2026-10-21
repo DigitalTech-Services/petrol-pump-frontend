@@ -101,9 +101,10 @@
               </div>
               <div>
                 <label class="field-label">Credit Sale (₹)</label>
-                <input type="number" step="0.01" v-model.number="form.creditSale" class="form-input w-full" placeholder="0.00" />
+                <input type="number" step="0.01" v-model.number="form.creditSale" class="form-input w-full" placeholder="0.00" @input="creditAutoFilled = false" />
               </div>
             </div>
+            <div class="text-[11px] text-[var(--text-3)] -mt-2">Credit Sale is pre-filled from Credit Customers entries for this date — edit if needed.</div>
             <div>
               <label class="field-label">Expenses (₹)</label>
               <input type="number" step="0.01" v-model.number="form.expenses" class="form-input w-full" placeholder="0.00" @input="markExpensesEdited" />
@@ -167,7 +168,7 @@ import { useSalesStore } from '@/stores/sales'
 import { useUiStore }    from '@/stores/ui'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import { fmt } from '@/utils/format'
-import { expenseApi, settingsApi } from '@/services/api'
+import { expenseApi, settingsApi, creditApi } from '@/services/api'
 import { Calendar, Fuel, Banknote, Calculator, RotateCw, Save } from 'lucide-vue-next'
 
 const store  = useSalesStore()
@@ -230,6 +231,21 @@ function markExpensesEdited() {
 
 onMounted(() => seedExpensesForDate(form.saleDate))
 watch(() => form.saleDate, (newDate) => seedExpensesForDate(newDate))
+
+// Same idea for Credit Sale: seeded from all fuel given on credit that day
+// (Credit Customers), until the user edits the field by hand.
+const creditAutoFilled = ref(true)
+
+async function seedCreditForDate(date) {
+  if (!date || !creditAutoFilled.value) return
+  try {
+    const res = await creditApi.getTotalForDate({ date })
+    if (creditAutoFilled.value) form.creditSale = res.data?.total || null
+  } catch { /* non-critical */ }
+}
+
+onMounted(() => seedCreditForDate(form.saleDate))
+watch(() => form.saleDate, (newDate) => seedCreditForDate(newDate))
 
 // Testing volume (fuel dispensed for meter calibration) isn't sold, so it's
 // deducted from the entered volume before revenue is calculated.
