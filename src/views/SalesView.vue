@@ -117,7 +117,7 @@
         <div class="grid grid-cols-3 gap-3">
           <div><label class="field-label">Card (₹)</label><input type="number" step="0.01" v-model.number="editData.card" class="form-input w-full" /></div>
           <div><label class="field-label">PhonePe (₹)</label><input type="number" step="0.01" v-model.number="editData.phonepay" class="form-input w-full" /></div>
-          <div><label class="field-label">Credit Sale (₹)</label><input type="number" step="0.01" v-model.number="editData.credit" class="form-input w-full" /></div>
+          <div><label class="field-label">Credit Sale (₹)</label><input type="number" step="0.01" :value="editData.credit" class="form-input w-full opacity-60 cursor-not-allowed" readonly tabindex="-1" title="Credit Sale comes from Credit Customers entries and can't be edited here" /></div>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div><label class="field-label">Expenses (₹)</label><input type="number" step="0.01" v-model.number="editData.exp" class="form-input w-full" /></div>

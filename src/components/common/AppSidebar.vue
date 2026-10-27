@@ -47,7 +47,7 @@
       <div v-if="auth.isManager" class="mb-1">
         <div class="nav-label">Finance</div>
 
-        <NavItem to="/transactions" :icon="CreditCard" label="Card Transactions" />
+        <!-- <NavItem to="/transactions" :icon="CreditCard" label="Card Transactions" /> -->
 
         <NavItem to="/expenses" :icon="Receipt" label="Expenses" />
 

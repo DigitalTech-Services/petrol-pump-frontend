@@ -6,154 +6,109 @@
       </template>
     </PageHeader>
 
-    <form @submit.prevent="handleSubmit">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    <form @submit.prevent="handleSubmit" class="space-y-4">
 
-        <!-- Date & Shift -->
-        <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-[var(--text)] flex items-center gap-2"><Calendar :size="16" /> Basic Details</div></div>
-          <div class="card-body space-y-4">
-            <div>
-              <label class="field-label">Sale Date *</label>
-              <input type="date" v-model="form.saleDate" class="form-input w-full" required />
-            </div>
-            <div>
-              <label class="field-label">Shift</label>
-              <select v-model="form.shift" class="form-select w-full">
-                <option>Morning</option><option>Evening</option><option>Night</option><option>Full Day</option>
-              </select>
-            </div>
-            <div>
-              <label class="field-label">Narration / Notes</label>
-              <textarea v-model="form.narration" class="form-input w-full" rows="3" placeholder="Expenses description, special notes..." />
-            </div>
+      <!-- Basic Details (secondary — compact strip) -->
+      <div class="card">
+        <div class="px-4 py-3 grid grid-cols-2 md:grid-cols-[170px_150px_1fr] gap-3 items-end">
+          <div>
+            <label class="field-label-sm"><Calendar :size="11" class="inline -mt-0.5" /> Sale Date *</label>
+            <input type="date" v-model="form.saleDate" class="form-input form-input-sm w-full" required />
+          </div>
+          <div>
+            <label class="field-label-sm">Shift</label>
+            <select v-model="form.shift" class="form-select form-input-sm w-full">
+              <option>Morning</option><option>Evening</option><option>Night</option><option>Full Day</option>
+            </select>
+          </div>
+          <div class="col-span-2 md:col-span-1">
+            <label class="field-label-sm">Narration / Notes</label>
+            <input type="text" v-model="form.narration" class="form-input form-input-sm w-full" placeholder="Expenses description, special notes..." />
           </div>
         </div>
+      </div>
+
+      <!-- Primary inputs: Fuel Volumes + Collections side by side -->
+      <div class="grid grid-cols-1 xl:grid-cols-5 gap-4">
 
         <!-- Fuel Volumes -->
-        <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-[var(--text)] flex items-center gap-2"><Fuel :size="16" /> Fuel Volumes</div></div>
-          <div class="card-body space-y-4">
-            <div class="grid grid-cols-3 gap-3">
-              <div>
-                <label class="field-label">MS Volume (L) <span class="text-[#f59e0b]">●</span></label>
-                <input type="number" step="0.01" v-model.number="form.msVolume" class="form-input w-full" placeholder="0.00" />
-              </div>
-              <div>
-                <label class="field-label">MS Testing Volume (L)</label>
-                <input type="number" step="0.01" v-model.number="form.msTestingVolume" class="form-input w-full" placeholder="0.00" />
-              </div>
-              <div>
-                <label class="field-label">MS Rate (₹/L)</label>
-                <input type="number" step="0.01" v-model.number="form.msRate" class="form-input w-full" placeholder="0.00" @input="ratesAutoFilled.ms = false" />
-              </div>
+        <div class="card card-primary xl:col-span-3">
+          <div class="card-header py-3">
+            <div class="font-display font-bold text-[16px] text-[var(--text)] flex items-center gap-2"><Fuel :size="17" /> Fuel Volumes</div>
+          </div>
+          <div class="card-body">
+            <div class="grid grid-cols-[72px_1fr_1fr_1fr] gap-x-3 gap-y-3 items-center">
+              <div></div>
+              <div class="field-label !mb-0">Volume (L)</div>
+              <div class="field-label !mb-0 opacity-70">Testing (L)</div>
+              <div class="field-label !mb-0">Rate (₹/L)</div>
+
+              <template v-for="f in fuels" :key="f.key">
+                <div class="text-[13px] font-semibold text-[var(--text)] flex items-center gap-1.5">
+                  <span :style="{ color: f.color }">●</span>{{ f.label }}
+                </div>
+                <input type="number" step="0.01" v-model.number="form[f.key + 'Volume']" class="form-input form-input-lg w-full" placeholder="0.00" />
+                <input type="number" step="0.01" v-model.number="form[f.key + 'TestingVolume']" class="form-input w-full" placeholder="0.00" />
+                <input type="number" step="0.01" v-model.number="form[f.key + 'Rate']" class="form-input form-input-lg w-full" placeholder="0.00" @input="ratesAutoFilled[f.key] = false" />
+              </template>
             </div>
-            <div class="grid grid-cols-3 gap-3">
-              <div>
-                <label class="field-label">HSD Volume (L) <span class="text-[#10b981]">●</span></label>
-                <input type="number" step="0.01" v-model.number="form.hsdVolume" class="form-input w-full" placeholder="0.00" />
-              </div>
-              <div>
-                <label class="field-label">HSD Testing Volume (L)</label>
-                <input type="number" step="0.01" v-model.number="form.hsdTestingVolume" class="form-input w-full" placeholder="0.00" />
-              </div>
-              <div>
-                <label class="field-label">HSD Rate (₹/L)</label>
-                <input type="number" step="0.01" v-model.number="form.hsdRate" class="form-input w-full" placeholder="0.00" @input="ratesAutoFilled.hsd = false" />
-              </div>
-            </div>
-            <div class="grid grid-cols-3 gap-3">
-              <div>
-                <label class="field-label">Power Volume (L) <span class="text-[#3b82f6]">●</span></label>
-                <input type="number" step="0.01" v-model.number="form.speedVolume" class="form-input w-full" placeholder="0.00" />
-              </div>
-              <div>
-                <label class="field-label">Power Testing Volume (L)</label>
-                <input type="number" step="0.01" v-model.number="form.speedTestingVolume" class="form-input w-full" placeholder="0.00" />
-              </div>
-              <div>
-                <label class="field-label">Power Rate (₹/L)</label>
-                <input type="number" step="0.01" v-model.number="form.speedRate" class="form-input w-full" placeholder="0.00" @input="ratesAutoFilled.speed = false" />
-              </div>
-            </div>
-            <div class="text-[11.5px] text-[var(--text-3)] px-1">Rates are pre-filled from Settings → Fuel Rates for this date — edit if needed. Testing volume (fuel dispensed for meter calibration) is deducted before revenue is calculated.</div>
+            <div class="text-[11px] text-[var(--text-3)] mt-3">Rates are pre-filled from Settings → Fuel Rates for this date — edit if needed. Testing volume (meter calibration) is deducted before revenue is calculated.</div>
           </div>
         </div>
 
         <!-- Collections -->
-        <div class="card">
-          <div class="card-header"><div class="font-display font-bold text-[15px] text-[var(--text)] flex items-center gap-2"><Banknote :size="16" /> Collections</div></div>
-          <div class="card-body space-y-4">
+        <div class="card card-primary xl:col-span-2">
+          <div class="card-header py-3">
+            <div class="font-display font-bold text-[16px] text-[var(--text)] flex items-center gap-2"><Banknote :size="17" /> Collections</div>
+          </div>
+          <div class="card-body">
             <div class="grid grid-cols-2 gap-3">
               <div>
+                <label class="field-label">Cash (₹)</label>
+                <input type="number" step="0.01" v-model.number="form.cash" class="form-input form-input-lg w-full" placeholder="0.00" />
+              </div>
+              <div>
                 <label class="field-label">Card / Pine Labs (₹)</label>
-                <input type="number" step="0.01" v-model.number="form.card" class="form-input w-full" placeholder="0.00" />
+                <input type="number" step="0.01" v-model.number="form.card" class="form-input form-input-lg w-full" placeholder="0.00" />
               </div>
               <div>
                 <label class="field-label">PhonePe / UPI (₹)</label>
-                <input type="number" step="0.01" v-model.number="form.phonePe" class="form-input w-full" placeholder="0.00" />
+                <input type="number" step="0.01" v-model.number="form.phonePe" class="form-input form-input-lg w-full" placeholder="0.00" />
+              </div>
+              <div>
+                <label class="field-label" title="Pre-filled from Credit Customers entries for this date — edit if needed.">Credit Sale (₹) <span class="normal-case tracking-normal text-[var(--text-3)]">· auto</span></label>
+                <input type="number" step="0.01" v-model.number="form.creditSale" class="form-input form-input-lg w-full" placeholder="0.00" @input="creditAutoFilled = false" />
+              </div>
+              <div class="col-span-2">
+                <label class="field-label" title="Pre-filled from Expenses logged for this date — edit if needed.">Expenses (₹) <span class="normal-case tracking-normal text-[var(--text-3)]">· auto</span></label>
+                <input type="number" step="0.01" v-model.number="form.expenses" class="form-input form-input-lg w-full" placeholder="0.00" @input="markExpensesEdited" />
               </div>
             </div>
-            <div>
-              <label class="field-label">Credit Sale (₹)</label>
-              <input type="number" step="0.01" v-model.number="form.creditSale" class="form-input w-full" placeholder="0.00" @input="creditAutoFilled = false" />
-              <div class="text-[11px] text-[var(--text-3)] mt-1">Pre-filled from Credit Customers entries for this date — edit if needed.</div>
-            </div>
-            <div>
-              <label class="field-label">Expenses (₹)</label>
-              <input type="number" step="0.01" v-model.number="form.expenses" class="form-input w-full" placeholder="0.00" @input="markExpensesEdited" />
-              <div class="text-[11px] text-[var(--text-3)] mt-1">Pre-filled from Expenses logged for this date — edit if needed.</div>
-            </div>
-            <div>
-              <label class="field-label">Cash (₹)</label>
-              <input type="number" step="0.01" v-model.number="form.cash" class="form-input w-full" placeholder="0.00" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Auto Calculated -->
-        <div class="card">
-          <div class="card-header">
-            <div class="font-display font-bold text-[15px] text-[var(--text)] flex items-center gap-2"><Calculator :size="16" /> Auto Calculated</div>
-            <span class="ml-auto badge badge-green text-[11px]">Live Preview</span>
-          </div>
-          <div class="card-body space-y-3">
-            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:var(--bg-3); border:1px solid var(--bg-4)">
-              <span class="text-[13px] text-[var(--text-2)]">MS Revenue</span>
-              <span class="amt text-[#f59e0b]">₹{{ fmt(calc_msRev) }}</span>
-            </div>
-            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:var(--bg-3); border:1px solid var(--bg-4)">
-              <span class="text-[13px] text-[var(--text-2)]">HSD Revenue</span>
-              <span class="amt text-[#10b981]">₹{{ fmt(calc_hsdRev) }}</span>
-            </div>
-            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:var(--bg-3); border:1px solid var(--bg-4)">
-              <span class="text-[13px] text-[var(--text-2)]">Power Revenue</span>
-              <span class="amt text-[#3b82f6]">₹{{ fmt(calc_speedRev) }}</span>
-            </div>
-            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:var(--bg-3); border:1px solid var(--border-2)">
-              <span class="text-[14px] font-semibold text-[var(--text)]">Gross Revenue</span>
-              <span class="amt-lg text-[#f59e0b]">₹{{ fmt(calc_revenue) }}</span>
-            </div>
-            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:var(--bg-3); border:1px solid var(--bg-4)">
-              <span class="text-[13px] text-[var(--text-2)]">Total Collection</span>
-              <span class="amt text-positive">₹{{ fmt(calc_collection) }}</span>
-            </div>
-            <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:var(--bg-3); border:1px solid var(--bg-4)">
-              <span class="text-[14px] font-semibold text-[var(--text)]">Cash Balance</span>
-              <span class="amt-lg" :class="calc_balance >= 0 ? 'text-positive' : 'text-negative'">₹{{ fmt(calc_balance) }}</span>
-            </div>
+            <div class="text-[11px] text-[var(--text-3)] mt-3">Credit Sale and Expenses are pre-filled from this date's entries — edit if needed.</div>
           </div>
         </div>
 
       </div>
 
-      <!-- Submit -->
-      <div class="flex gap-3 mt-5 justify-end">
-        <RouterLink to="/sales" class="btn btn-ghost px-8">Cancel</RouterLink>
-        <button type="submit" class="btn btn-primary px-10 py-2.5 text-[14px] flex items-center gap-1.5" :disabled="saving">
-          <RotateCw v-if="saving" :size="14" class="animate-spin" /><Save v-else :size="14" />
-          {{ saving ? 'Saving…' : 'Save Sale Entry' }}
-        </button>
+      <!-- Auto Calculated (secondary — compact summary) + Submit -->
+      <div class="card">
+        <div class="px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <div class="flex items-center gap-1.5 text-[12px] text-[var(--text-3)]"><Calculator :size="13" /> Live</div>
+          <div class="summary-item"><span>MS</span><span class="amt text-[#f59e0b]">₹{{ fmt(calc_msRev) }}</span></div>
+          <div class="summary-item"><span>HSD</span><span class="amt text-[#10b981]">₹{{ fmt(calc_hsdRev) }}</span></div>
+          <div class="summary-item"><span>Power</span><span class="amt text-[#3b82f6]">₹{{ fmt(calc_speedRev) }}</span></div>
+          <div class="summary-item"><span>Gross Revenue</span><span class="amt-lg text-[#f59e0b]">₹{{ fmt(calc_revenue) }}</span></div>
+          <div class="summary-item"><span>Total Collection</span><span class="amt-lg text-positive">₹{{ fmt(calc_collection) }}</span></div>
+          <div class="summary-item"><span>Cash Balance</span><span class="amt-lg" :class="calc_balance >= 0 ? 'text-positive' : 'text-negative'">₹{{ fmt(calc_balance) }}</span></div>
+
+          <div class="flex gap-3 ml-auto">
+            <RouterLink to="/sales" class="btn btn-ghost px-6">Cancel</RouterLink>
+            <button type="submit" class="btn btn-primary px-8 py-2.5 text-[14px] flex items-center gap-1.5" :disabled="saving">
+              <RotateCw v-if="saving" :size="14" class="animate-spin" /><Save v-else :size="14" />
+              {{ saving ? 'Saving…' : 'Save Sale Entry' }}
+            </button>
+          </div>
+        </div>
       </div>
     </form>
   </div>
@@ -192,6 +147,12 @@ const form = reactive({
 // A fuel with no saved rate yet stays blank, prompting real entry instead of a
 // fabricated placeholder.
 const ratesAutoFilled = reactive({ ms: true, hsd: true, speed: true })
+
+const fuels = [
+  { key: 'ms',    label: 'MS',    color: '#f59e0b' },
+  { key: 'hsd',   label: 'HSD',   color: '#10b981' },
+  { key: 'speed', label: 'Power', color: '#3b82f6' },
+]
 
 async function seedRatesForDate(date) {
   if (!date) return
@@ -270,4 +231,10 @@ async function handleSubmit() {
 
 <style scoped>
 .field-label { display:block; font-size:11.5px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; }
+.field-label-sm { display:block; font-size:10.5px; color:var(--text-3); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px; }
+.form-input-sm { padding:5px 10px; font-size:12.5px; }
+.form-input-lg { padding:10px 12px; font-size:15px; font-family:'DM Mono',monospace; }
+.card-primary { border-top:2px solid #f59e0b; }
+.summary-item { display:flex; flex-direction:column; gap:2px; }
+.summary-item > span:first-child { font-size:10.5px; color:var(--text-3); text-transform:uppercase; letter-spacing:0.06em; }
 </style>
