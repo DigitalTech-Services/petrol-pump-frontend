@@ -54,6 +54,12 @@
         <NavItem to="/credit" :icon="HandCoins" label="Credit Customers" />
       </div>
 
+      <div class="mb-1">
+        <div class="nav-label">Accounts</div>
+
+        <NavItem to="/accounts" :icon="Landmark" label="Bank & Tax (CA)" />
+      </div>
+
       <div v-if="auth.isManager" class="mb-1">
         <div class="nav-label">HR</div>
 
@@ -125,6 +131,7 @@ import {
   CreditCard,
   Receipt,
   HandCoins,
+  Landmark,
   Users,
   Clock3,
   BarChart3,

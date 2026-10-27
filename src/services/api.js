@@ -81,6 +81,7 @@ export const stockApi = {
   delete:     (id)       => api.delete(`/stock/${id}`),
   getSummary: (params)   => api.get('/stock/summary',   { params }),
   getTankwise:(params)   => api.get('/stock/tankwise',  { params }),
+  getLastClosing:(params)=> api.get('/stock/last-closing', { params }),
 }
 
 // ──────────────────────────────────────────────────────────────────
@@ -139,6 +140,29 @@ export const creditApi = {
   markPaid:       (id, data) => api.post(`/credit/entries/${id}/pay`,     data),
   markUnpaid:     (id)       => api.post(`/credit/entries/${id}/unpay`),
   getTotalForDate: (params) => api.get('/credit/total-for-date',       { params }),
+}
+
+// ──────────────────────────────────────────────────────────────────
+// ACCOUNTS / CA (bank statements, bank charges, tax payments)
+// ──────────────────────────────────────────────────────────────────
+export const accountsApi = {
+  getOptions:      (params)   => api.get('/accounts/options',           { params }),
+  getSummary:      (params)   => api.get('/accounts/summary',           { params }),
+
+  getStatements:   (params)   => api.get('/accounts/statements',        { params }),
+  createStatement: (data)     => api.post('/accounts/statements',         data),
+  updateStatement: (id, data) => api.put(`/accounts/statements/${id}`,    data),
+  deleteStatement: (id)       => api.delete(`/accounts/statements/${id}`),
+
+  getCharges:      (params)   => api.get('/accounts/charges',           { params }),
+  createCharge:    (data)     => api.post('/accounts/charges',            data),
+  updateCharge:    (id, data) => api.put(`/accounts/charges/${id}`,       data),
+  deleteCharge:    (id)       => api.delete(`/accounts/charges/${id}`),
+
+  getTaxes:        (params)   => api.get('/accounts/taxes',             { params }),
+  createTax:       (data)     => api.post('/accounts/taxes',              data),
+  updateTax:       (id, data) => api.put(`/accounts/taxes/${id}`,         data),
+  deleteTax:       (id)       => api.delete(`/accounts/taxes/${id}`),
 }
 
 // ──────────────────────────────────────────────────────────────────

@@ -86,29 +86,27 @@
           <div class="card-body space-y-4">
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="field-label">Cash (₹)</label>
-                <input type="number" step="0.01" v-model.number="form.cash" class="form-input w-full" placeholder="0.00" />
-              </div>
-              <div>
                 <label class="field-label">Card / Pine Labs (₹)</label>
                 <input type="number" step="0.01" v-model.number="form.card" class="form-input w-full" placeholder="0.00" />
               </div>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="field-label">PhonePe / UPI (₹)</label>
                 <input type="number" step="0.01" v-model.number="form.phonePe" class="form-input w-full" placeholder="0.00" />
               </div>
-              <div>
-                <label class="field-label">Credit Sale (₹)</label>
-                <input type="number" step="0.01" v-model.number="form.creditSale" class="form-input w-full" placeholder="0.00" @input="creditAutoFilled = false" />
-              </div>
             </div>
-            <div class="text-[11px] text-[var(--text-3)] -mt-2">Credit Sale is pre-filled from Credit Customers entries for this date — edit if needed.</div>
+            <div>
+              <label class="field-label">Credit Sale (₹)</label>
+              <input type="number" step="0.01" v-model.number="form.creditSale" class="form-input w-full" placeholder="0.00" @input="creditAutoFilled = false" />
+              <div class="text-[11px] text-[var(--text-3)] mt-1">Pre-filled from Credit Customers entries for this date — edit if needed.</div>
+            </div>
             <div>
               <label class="field-label">Expenses (₹)</label>
               <input type="number" step="0.01" v-model.number="form.expenses" class="form-input w-full" placeholder="0.00" @input="markExpensesEdited" />
               <div class="text-[11px] text-[var(--text-3)] mt-1">Pre-filled from Expenses logged for this date — edit if needed.</div>
+            </div>
+            <div>
+              <label class="field-label">Cash (₹)</label>
+              <input type="number" step="0.01" v-model.number="form.cash" class="form-input w-full" placeholder="0.00" />
             </div>
           </div>
         </div>

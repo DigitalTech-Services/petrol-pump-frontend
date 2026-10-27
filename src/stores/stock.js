@@ -13,6 +13,8 @@ function normalize(entry) {
     close:     entry.close ?? 0,
     sale:      entry.sale ?? 0,
     var:       entry.variation ?? 0,
+    varPct:    entry.variation_pct ?? null,
+    varAlert:  !!entry.variation_alert,
     remarks:   entry.remarks ?? '',
   }
 }

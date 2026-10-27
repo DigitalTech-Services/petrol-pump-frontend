@@ -14,6 +14,7 @@ const MeterView       = () => import('@/views/MeterView.vue')
 const TransactionsView= () => import('@/views/TransactionsView.vue')
 const ExpensesView    = () => import('@/views/ExpensesView.vue')
 const CreditView      = () => import('@/views/CreditView.vue')
+const AccountsView    = () => import('@/views/AccountsView.vue')
 const StaffView       = () => import('@/views/StaffView.vue')
 const TimesheetView   = () => import('@/views/TimesheetView.vue')
 const ReportsView     = () => import('@/views/ReportsView.vue')
@@ -101,6 +102,13 @@ const routes = [
         name: 'Credit',
         component: CreditView,
         meta: { title: 'Credit Customers', breadcrumb: ['Credit Customers'], role: 'manager' }
+      },
+      {
+        // Owner + manager — owner reviews the CA pack read-only.
+        path: 'accounts',
+        name: 'Accounts',
+        component: AccountsView,
+        meta: { title: 'Accounts & Tax (CA)', breadcrumb: ['Accounts & Tax'] }
       },
       {
         path: 'staff',

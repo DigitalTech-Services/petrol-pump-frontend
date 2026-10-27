@@ -115,13 +115,13 @@
           <div><label class="field-label">Power Rate (₹/L)</label><input type="number" step="0.01" v-model.number="editData.rateSpeed" class="form-input w-full" /></div>
         </div>
         <div class="grid grid-cols-3 gap-3">
-          <div><label class="field-label">Cash (₹)</label><input type="number" step="0.01" v-model.number="editData.cash" class="form-input w-full" /></div>
+          <div><label class="field-label">Card (₹)</label><input type="number" step="0.01" v-model.number="editData.card" class="form-input w-full" /></div>
           <div><label class="field-label">PhonePe (₹)</label><input type="number" step="0.01" v-model.number="editData.phonepay" class="form-input w-full" /></div>
-          <div><label class="field-label">Expenses (₹)</label><input type="number" step="0.01" v-model.number="editData.exp" class="form-input w-full" /></div>
+          <div><label class="field-label">Credit Sale (₹)</label><input type="number" step="0.01" v-model.number="editData.credit" class="form-input w-full" /></div>
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <div><label class="field-label">Card (₹)</label><input type="number" step="0.01" v-model.number="editData.card" class="form-input w-full" /></div>
-          <div><label class="field-label">Credit Sale (₹)</label><input type="number" step="0.01" v-model.number="editData.credit" class="form-input w-full" /></div>
+          <div><label class="field-label">Expenses (₹)</label><input type="number" step="0.01" v-model.number="editData.exp" class="form-input w-full" /></div>
+          <div><label class="field-label">Cash (₹)</label><input type="number" step="0.01" v-model.number="editData.cash" class="form-input w-full" /></div>
         </div>
         <div class="grid grid-cols-2 gap-3 p-3 rounded-lg" style="background:var(--bg-3)">
           <div>

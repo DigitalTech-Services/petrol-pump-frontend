@@ -68,6 +68,10 @@
                 <span class="badge" :class="Number(r.var) >= 0 ? 'badge-green' : 'badge-red'">
                   {{ Number(r.var) >= 0 ? '+' : '' }}{{ r.var }}
                 </span>
+                <span v-if="r.varAlert" class="ml-1 inline-flex items-center gap-0.5 text-[10.5px] font-semibold text-[#ef4444]" :title="`Above the allowed ${thresholdPct}% of sale`">
+                  <AlertTriangle :size="11" /> {{ r.varPct }}%
+                </span>
+                <span v-else-if="r.varPct !== null" class="ml-1 text-[10.5px] text-[var(--text-3)]">{{ r.varPct }}%</span>
               </td>
               <td>
                 <div v-if="auth.canWrite" class="flex gap-1.5">
@@ -113,7 +117,14 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="field-label">Opening Stock (L) *</label>
-            <input type="number" step="0.01" v-model.number="form.open" class="form-input w-full" placeholder="0.00" />
+            <input type="number" step="0.01" v-model.number="form.open" class="form-input w-full" placeholder="0.00" @input="openTouched = true" />
+            <p v-if="lastClosing.date && form.open === lastClosing.closing" class="text-[11px] text-[var(--text-3)] mt-1">
+              Prefilled from closing on {{ formatDate(lastClosing.date) }}
+            </p>
+            <p v-else-if="lastClosing.date" class="text-[11px] text-[var(--text-3)] mt-1">
+              Last closing ({{ formatDate(lastClosing.date) }}): {{ fmt(lastClosing.closing) }} L ·
+              <button class="text-[#f59e0b] underline" @click="form.open = lastClosing.closing; openTouched = false">Use</button>
+            </p>
           </div>
           <div>
             <label class="field-label">Received (L)</label>
@@ -145,6 +156,17 @@
           </div>
         </div>
 
+        <div v-if="formVariationAlert" class="p-3 rounded-lg flex items-start gap-2 text-[12.5px]" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.35);color:#ef4444">
+          <AlertTriangle :size="16" class="flex-shrink-0 mt-0.5" />
+          <div>
+            <div class="font-semibold">Variation {{ fmt(formVariationPct, 3) }}% of sale — above the allowed {{ thresholdPct }}%</div>
+            <div class="text-[11.5px] opacity-90">Please re-check the dip readings. If you save, the owner will be notified by email.</div>
+          </div>
+        </div>
+        <p v-else-if="formSaleBase === 0 && form.close !== null" class="text-[11.5px] text-[var(--text-3)]">
+          No sale recorded for this date yet — variation % can't be checked.
+        </p>
+
         <div>
           <label class="field-label">Remarks</label>
           <textarea v-model="form.remarks" class="form-input w-full" rows="2" placeholder="Tanker number, supplier, notes…" />
@@ -174,6 +196,13 @@
         <div>
           <label class="field-label">Actual Sale (L)</label>
           <input type="number" step="0.01" v-model.number="editRow.sale" class="form-input w-full" />
+        </div>
+        <div v-if="editVariationAlert" class="p-3 rounded-lg flex items-start gap-2 text-[12.5px]" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.35);color:#ef4444">
+          <AlertTriangle :size="16" class="flex-shrink-0 mt-0.5" />
+          <div>
+            <div class="font-semibold">Variation {{ fmt(editVariationPct, 3) }}% of sale — above the allowed {{ thresholdPct }}%</div>
+            <div class="text-[11.5px] opacity-90">If you save this change, the owner will be notified by email.</div>
+          </div>
         </div>
       </div>
       <template #footer>
@@ -219,6 +248,7 @@ import { useUiStore } from '@/stores/ui'
 import { useAuthStore } from '@/stores/auth'
 import { useStockStore } from '@/stores/stock'
 import { useSelectedStationStore } from '@/stores/selectedStation'
+import { stockApi } from '@/services/api'
 import { Download, Printer, Plus, Fuel, BarChart3, Package, Pencil, RotateCw, Save, Trash2, AlertTriangle } from 'lucide-vue-next'
 
 const ui              = useUiStore()
@@ -268,14 +298,60 @@ const form = reactive({
 })
 
 const calcNetStock  = computed(() => (form.open||0) + (form.recv||0))
-const calcVariation = computed(() => (form.sale||0) - (calcNetStock.value - (form.close||0)))
+// Blank "Actual Sale" means the server uses the sale already recorded for the day
+const formSaleBase  = computed(() => (form.sale !== null && form.sale !== '') ? Number(form.sale) : Number(lastClosing.recordedSale || 0))
+const calcVariation = computed(() => formSaleBase.value - (calcNetStock.value - (form.close||0)))
+
+// ── Variation alert: |variation| above this % of the day's sale ──
+const thresholdPct = ref(0.06)
+const pctOf        = (variation, sale) => sale > 0 ? Math.abs(variation) / sale * 100 : null
+
+const formVariationPct   = computed(() => form.close === null ? null : pctOf(calcVariation.value, formSaleBase.value))
+const formVariationAlert = computed(() => formVariationPct.value !== null && formVariationPct.value > thresholdPct.value)
+
+const editVariationPct   = computed(() => {
+  const r = editRow.value
+  if (!r) return null
+  return pctOf(Number(r.sale || 0) - ((r.open || 0) + (r.recv || 0) - (r.close || 0)), Number(r.sale || 0))
+})
+const editVariationAlert = computed(() => editVariationPct.value !== null && editVariationPct.value > thresholdPct.value)
+
+function warnIfAlert(entry) {
+  if (entry?.varAlert) ui.error(`⚠ Variation ${entry.varPct}% of sale exceeds ${thresholdPct.value}% — owner has been notified by email.`)
+}
+
+// Opening defaults to the previous entry's closing (same fuel, any earlier date,
+// including last month) — still editable; a value the user typed is never overwritten.
+const lastClosing = reactive({ date: null, closing: null, recordedSale: 0 })
+const openTouched = ref(false)
+let lastClosingReq = 0
+
+async function prefillOpening() {
+  const req = ++lastClosingReq
+  lastClosing.date = lastClosing.closing = null
+  lastClosing.recordedSale = 0
+  if (!form.date || !form.fuelType) return
+  try {
+    const res = await stockApi.getLastClosing({ fuel_type: form.fuelType, before: form.date, ...stationParam() })
+    if (req !== lastClosingReq) return  // a newer date/fuel change superseded this one
+    lastClosing.date    = res?.data?.date ?? null
+    lastClosing.closing = res?.data?.closing ?? null
+    lastClosing.recordedSale = res?.data?.recorded_sale ?? 0
+    if (res?.data?.threshold_pct != null) thresholdPct.value = res.data.threshold_pct
+    if (!openTouched.value && lastClosing.closing !== null) form.open = lastClosing.closing
+  } catch (_) { /* prefill is a convenience — the field stays manual */ }
+}
+
+watch(() => [form.date, form.fuelType], () => { if (showAdd.value) prefillOpening() })
 
 function openAddModal() {
   form.date = new Date().toISOString().split('T')[0]
   form.fuelType = tabFuelType.value
   form.open = form.recv = form.close = form.sale = null
   form.remarks = ''
+  openTouched.value = false
   showAdd.value = true
+  prefillOpening()
 }
 
 async function saveStock() {
@@ -283,9 +359,10 @@ async function saveStock() {
     ui.error('Date, opening stock and closing stock are required'); return
   }
   try {
-    await store.create({ ...form })
+    const entry = await store.create({ ...form })
     showAdd.value = false
-    ui.success('Stock entry added successfully!')
+    if (entry.varAlert) warnIfAlert(entry)
+    else ui.success('Stock entry added successfully!')
     store.fetchTankwise({ month: selectedMonth.value }).catch(() => {})
   } catch (e) {
     ui.error(e?.message || 'Failed to save stock entry.')
@@ -304,9 +381,10 @@ function openEditModal(r) {
 async function saveEdit() {
   if (!editRow.value?.id) return
   try {
-    await store.update(editRow.value.id, { ...editRow.value, fuelType: tabFuelType.value })
+    const entry = await store.update(editRow.value.id, { ...editRow.value, fuelType: tabFuelType.value })
     showEdit.value = false
-    ui.success('Stock entry updated!')
+    if (entry.varAlert) warnIfAlert(entry)
+    else ui.success('Stock entry updated!')
     store.fetchTankwise({ month: selectedMonth.value }).catch(() => {})
   } catch (e) {
     ui.error(e?.message || 'Failed to update stock entry.')

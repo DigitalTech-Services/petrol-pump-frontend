@@ -379,7 +379,7 @@ const fuelProfitSub = computed(() => {
   return fuelProfitTotal.value >= 0 ? 'Profit this month' : 'Loss this month'
 })
 
-// ── Actual Profit — fuel margin − expenses − staff payroll ────────────
+// ── Actual Profit — fuel margin − expenses − staff payroll − bank charges ─
 const actualProfitTotal = computed(() => store.actualProfit?.total ?? null)
 
 const actualProfitDisplay = computed(() => {
@@ -393,7 +393,7 @@ const actualProfitColor = computed(() => {
 })
 
 const actualProfitSub = computed(() => {
-  if (actualProfitTotal.value === null) return 'Fuel margin − expenses − payroll'
+  if (actualProfitTotal.value === null) return 'Fuel margin − expenses − payroll − bank charges'
   return actualProfitTotal.value >= 0 ? 'Net profit this month' : 'Net loss this month'
 })
 
