@@ -4,7 +4,7 @@
       <template #actions>
         <button class="btn btn-ghost flex items-center gap-1.5" @click="doExport"><Download :size="14" /> Export CSV</button>
         <button v-if="auth.canWrite" class="btn btn-ghost flex items-center gap-1.5" @click="openAddCustomer"><UserPlus :size="14" /> Add Customer</button>
-        <button v-if="auth.canWrite" class="btn btn-primary flex items-center gap-1.5" :disabled="!customers.length" @click="openAddEntry()"><Plus :size="14" /> Give Fuel on Credit</button>
+        <button v-if="auth.canWrite" class="btn btn-primary flex items-center gap-1.5" @click="openAddEntry()"><Plus :size="14" /> Give Fuel on Credit</button>
       </template>
     </PageHeader>
 
@@ -503,6 +503,13 @@ async function seedRate() {
 watch(() => [entryForm.date, entryForm.fuel_type], () => { if (showEntry.value) seedRate() })
 
 function openAddEntry(customer = null) {
+  // Credit is always recorded against a customer — explain the missing
+  // dependency instead of opening a form with an empty customer list
+  if (!customer && !customers.value.length) {
+    if (loadError.value) return ui.error(`Customers could not be loaded: ${loadError.value}`)
+    ui.info('Add a credit customer first — fuel on credit is recorded against a customer.')
+    return openAddCustomer()
+  }
   Object.assign(entryForm, {
     credit_customer_id: customer?.id ?? null, date: today, fuel_type: 'hsd',
     amount: null, litres: null, rate: null, vehicle_number: customer?.vehicle_number || '', notes: '',

@@ -15,8 +15,9 @@ export const useUiStore = defineStore('ui', () => {
     setTimeout(() => { toasts.value = toasts.value.filter(t => t.id !== id) }, ms)
   }
   const success = (m) => addToast(m, 'success')
-  const error   = (m) => addToast(m, 'error')
-  const info    = (m) => addToast(m, 'info')
+  // Errors and hints stay up longer — they usually need to be read, not glanced at
+  const error   = (m) => addToast(m || 'Something went wrong.', 'error', 6000)
+  const info    = (m) => addToast(m, 'info', 5000)
 
   return { sidebarOpen, toasts, toggleSidebar, closeSidebar, success, error, info }
 })

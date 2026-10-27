@@ -11,6 +11,8 @@ export const useAuthStore = defineStore('auth', () => {
   const isOwner     = computed(() => user.value?.type === 'user')
   const isManager   = computed(() => user.value?.type === 'sub_user')
   const canWrite    = computed(() => isManager.value)
+  // A manager can't record anything until the owner assigns them a station
+  const needsStation = computed(() => isManager.value && !user.value?.station_id)
   const role        = computed(() => user.value?.type === 'sub_user' ? 'Manager' : 'Owner')
   const stationName = computed(() => user.value?.business_name || 'My Business')
   const fullName    = computed(() => user.value?.name || 'Account')
@@ -45,11 +47,8 @@ export const useAuthStore = defineStore('auth', () => {
       
       throw { message: 'Invalid credentials!' }
     } catch (e) {
-      // If API not reachable AND not a demo user → show helpful error
-      // if (!demo) {
-      throw { message: 'Invalid credentials!' }
-      // }
-      // throw e
+      // Pass the real cause through (wrong password, server unreachable, …)
+      throw { message: e?.message || 'Invalid credentials!' }
     }
   }
 
@@ -74,5 +73,15 @@ export const useAuthStore = defineStore('auth', () => {
     throw { message: res.message || 'Failed to update profile.' }
   }
 
-  return { token, user, isLoggedIn, isOwner, isManager, canWrite, role, stationName, fullName, login, logout, updateProfile }
+  // Re-read the profile so changes made by the owner since login (e.g. a
+  // station being assigned) take effect without logging out.
+  async function refreshProfile() {
+    const res = await authApi.me()
+    if (res.success && res.data) {
+      user.value = { ...user.value, ...res.data }
+      localStorage.setItem('pm_user', JSON.stringify(user.value))
+    }
+  }
+
+  return { token, user, isLoggedIn, isOwner, isManager, canWrite, needsStation, role, stationName, fullName, login, logout, updateProfile, refreshProfile }
 })

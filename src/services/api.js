@@ -18,16 +18,79 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+// ── Request interceptor: unassigned manager can't write station data ─
+// Mirrors the backend `station.assigned` middleware so the cause is shown
+// immediately instead of after a round-trip. Notification preferences are
+// personal, so they stay writable.
+export const STATION_NOT_ASSIGNED = 'Your account is not assigned to a station yet. Ask the owner to assign one from the Managers page.'
+const STATION_WRITE_PATHS = ['/settings', '/credit', '/expenses', '/accounts', '/sales', '/stock', '/meters', '/transactions', '/staff']
+
+api.interceptors.request.use((config) => {
+  const method = (config.method || 'get').toLowerCase()
+  if (method === 'get') return config
+
+  let user = null
+  try { user = JSON.parse(localStorage.getItem('pm_user') || 'null') } catch { /* treat as unknown */ }
+
+  const url = config.url || ''
+  const isStationWrite = STATION_WRITE_PATHS.some(p => url.startsWith(p)) && !url.startsWith('/settings/notifications')
+
+  if (isStationWrite && user?.type === 'sub_user' && !user.station_id) {
+    return Promise.reject({ __stationBlocked: true })
+  }
+  return config
+})
+
+// ── Error normalisation ───────────────────────────────────────────
+// Every rejected call resolves to { message, status, errors } so views can
+// show `e.message` and always get a readable cause — never "Network Error"
+// or an empty toast.
+const STATUS_MESSAGES = {
+  403: "You don't have permission to do this.",
+  404: 'The requested record or page was not found.',
+  413: 'The upload is too large.',
+  419: 'Your session expired. Please log in again.',
+  429: 'Too many requests. Please wait a moment and try again.',
+  500: 'Something went wrong on the server. Please try again.',
+  502: 'The server is unreachable right now. Please try again shortly.',
+  503: 'The server is temporarily unavailable. Please try again shortly.',
+  504: 'The server took too long to respond. Please try again.',
+}
+
+export function normalizeError(err) {
+  if (err?.__stationBlocked) return { status: 409, message: STATION_NOT_ASSIGNED, code: 'station_not_assigned' }
+
+  const res = err.response
+
+  if (!res) {
+    if (err.code === 'ECONNABORTED') return { status: 0, message: 'The request timed out. Check your connection and try again.' }
+    if (!navigator.onLine)           return { status: 0, message: 'You are offline. Check your internet connection.' }
+    return { status: 0, message: 'Cannot reach the server. Check your internet connection or try again later.' }
+  }
+
+  const body    = (res.data && typeof res.data === 'object') ? res.data : {}
+  const errors  = body.errors ?? body.data?.errors ?? null
+  const firstFieldError = errors ? Object.values(errors).flat()[0] : null
+
+  return {
+    ...body,
+    status:  res.status,
+    errors,
+    message: body.message || firstFieldError || STATUS_MESSAGES[res.status] || `Request failed (HTTP ${res.status}).`,
+  }
+}
+
 // ── Response interceptor: unwrap data, redirect on 401 ───────────
 api.interceptors.response.use(
   (res) => res.data,
   (err) => {
-    if (err.response?.status === 401) {
+    // A 401 from the login call itself is just wrong credentials — let the form show it
+    if (err.response?.status === 401 && !err.config?.url?.endsWith('/login')) {
       localStorage.removeItem('pm_token')
       localStorage.removeItem('pm_user')
       window.location.href = '/login'
     }
-    return Promise.reject(err.response?.data || { message: err.message })
+    return Promise.reject(normalizeError(err))
   }
 )
 
@@ -270,12 +333,12 @@ adminAxios.interceptors.request.use((config) => {
 adminAxios.interceptors.response.use(
   (res) => res.data,
   (err) => {
-    if (err.response?.status === 401) {
+    if (err.response?.status === 401 && !err.config?.url?.endsWith('/login')) {
       localStorage.removeItem('pm_admin_token')
       localStorage.removeItem('pm_admin')
       window.location.href = '/admin/login'
     }
-    return Promise.reject(err.response?.data || { message: err.message })
+    return Promise.reject(normalizeError(err))
   }
 )
 

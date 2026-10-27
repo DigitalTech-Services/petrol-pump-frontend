@@ -409,6 +409,7 @@ watch(selectedMonth, loadTimesheet)
 watch(() => selectedStation.selectedStationId, loadTimesheet)
 
 function openMarkAttendance() {
+  if (!timesheetData.length) return ui.info('Add staff members first (Staff page) — attendance is marked per staff member.')
   attendanceDate.value = new Date().toISOString().split('T')[0]
   timesheetData.forEach(s => {
     attendanceMap[s.id]     = true

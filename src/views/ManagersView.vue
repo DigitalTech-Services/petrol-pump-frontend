@@ -139,7 +139,7 @@ const stations = useStationsStore()
 
 onMounted(() => {
   store.fetchAll().catch(() => {})
-  stations.fetchAll().catch(() => {})
+  stations.fetchAll().catch((e) => ui.error(`Stations could not be loaded — the Station list will be empty: ${e?.message ?? ''}`))
 })
 
 // ── Add modal ────────────────────────────────────────────────────
