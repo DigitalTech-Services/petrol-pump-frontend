@@ -27,24 +27,31 @@ function normalize(sale) {
 
 // Convert any incoming form shape → snake_case API payload
 // Handles both SaleEntryView (msVolume/phonePe) and SalesView (ms/phonepay) naming
+// First filled-in value as a number. A cleared number input gives '' (not null),
+// which `??` would pass through and the API rejects as non-numeric — so blanks count as 0.
+function num(...values) {
+  const v = values.find(x => x !== null && x !== undefined && x !== '')
+  return Number(v) || 0
+}
+
 function toPayload(data) {
   return {
     date:         data.saleDate    || data.date,
     shift:        data.shift       || 'Full Day',
-    ms_volume:    data.msVolume    ?? data.ms       ?? 0,
-    hsd_volume:   data.hsdVolume   ?? data.hsd      ?? 0,
-    speed_volume: data.speedVolume ?? data.speed    ?? 0,
-    ms_testing_volume:    data.msTestingVolume    ?? 0,
-    hsd_testing_volume:   data.hsdTestingVolume   ?? 0,
-    speed_testing_volume: data.speedTestingVolume ?? 0,
-    rate_ms:      data.msRate      ?? data.rateMS   ?? 0,
-    rate_hsd:     data.hsdRate     ?? data.rateHSD  ?? 0,
-    rate_speed:   data.speedRate   ?? data.rateSpeed ?? 0,
-    cash:         data.cash        ?? 0,
-    card:         data.card        ?? 0,
-    phone_pe:     data.phonePe     ?? data.phonepay ?? 0,
-    credit_sale:  data.creditSale  ?? data.credit   ?? 0,
-    expenses:     data.expenses    ?? data.exp      ?? 0,
+    ms_volume:    num(data.msVolume,    data.ms),
+    hsd_volume:   num(data.hsdVolume,   data.hsd),
+    speed_volume: num(data.speedVolume, data.speed),
+    ms_testing_volume:    num(data.msTestingVolume),
+    hsd_testing_volume:   num(data.hsdTestingVolume),
+    speed_testing_volume: num(data.speedTestingVolume),
+    rate_ms:      num(data.msRate,      data.rateMS),
+    rate_hsd:     num(data.hsdRate,     data.rateHSD),
+    rate_speed:   num(data.speedRate,   data.rateSpeed),
+    cash:         num(data.cash),
+    card:         num(data.card),
+    phone_pe:     num(data.phonePe,     data.phonepay),
+    credit_sale:  num(data.creditSale,  data.credit),
+    expenses:     num(data.expenses,    data.exp),
     narration:    data.narration   ?? '',
   }
 }

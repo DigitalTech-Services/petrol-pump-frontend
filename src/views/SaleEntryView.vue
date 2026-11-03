@@ -16,45 +16,49 @@
             <div class="grid grid-cols-3 gap-3">
               <div>
                 <label class="field-label">MS Volume (L) <span class="text-[#f59e0b]">●</span></label>
-                <input type="number" step="0.01" v-model.number="form.msVolume" class="form-input w-full" placeholder="0.00" />
+                <input type="number" step="0.01" v-model.number="form.msVolume" min="0" class="form-input w-full" :class="{ 'input-error': err.fuel }" placeholder="0.00" />
               </div>
               <div>
                 <label class="field-label">MS Testing Volume (L)</label>
-                <input type="number" step="0.01" v-model.number="form.msTestingVolume" class="form-input w-full" placeholder="0.00" />
+                <input type="number" step="0.01" v-model.number="form.msTestingVolume" min="0" class="form-input w-full" :class="{ 'input-error': err.msTesting }" placeholder="0.00" />
               </div>
               <div>
                 <label class="field-label">MS Rate (₹/L)</label>
-                <input type="number" step="0.01" v-model.number="form.msRate" class="form-input w-full" placeholder="0.00" @input="ratesAutoFilled.ms = false" />
+                <input type="number" step="0.01" v-model.number="form.msRate" min="0" class="form-input w-full" :class="{ 'input-error': err.msRate }" placeholder="0.00" @input="ratesAutoFilled.ms = false" />
               </div>
             </div>
+            <p v-if="err.msTesting || err.msRate" class="field-error -mt-2">{{ err.msTesting || err.msRate }}</p>
             <div class="grid grid-cols-3 gap-3">
               <div>
                 <label class="field-label">HSD Volume (L) <span class="text-[#10b981]">●</span></label>
-                <input type="number" step="0.01" v-model.number="form.hsdVolume" class="form-input w-full" placeholder="0.00" />
+                <input type="number" step="0.01" v-model.number="form.hsdVolume" min="0" class="form-input w-full" :class="{ 'input-error': err.fuel }" placeholder="0.00" />
               </div>
               <div>
                 <label class="field-label">HSD Testing Volume (L)</label>
-                <input type="number" step="0.01" v-model.number="form.hsdTestingVolume" class="form-input w-full" placeholder="0.00" />
+                <input type="number" step="0.01" v-model.number="form.hsdTestingVolume" min="0" class="form-input w-full" :class="{ 'input-error': err.hsdTesting }" placeholder="0.00" />
               </div>
               <div>
                 <label class="field-label">HSD Rate (₹/L)</label>
-                <input type="number" step="0.01" v-model.number="form.hsdRate" class="form-input w-full" placeholder="0.00" @input="ratesAutoFilled.hsd = false" />
+                <input type="number" step="0.01" v-model.number="form.hsdRate" min="0" class="form-input w-full" :class="{ 'input-error': err.hsdRate }" placeholder="0.00" @input="ratesAutoFilled.hsd = false" />
               </div>
             </div>
+            <p v-if="err.hsdTesting || err.hsdRate" class="field-error -mt-2">{{ err.hsdTesting || err.hsdRate }}</p>
             <div class="grid grid-cols-3 gap-3">
               <div>
                 <label class="field-label">Power Volume (L) <span class="text-[#3b82f6]">●</span></label>
-                <input type="number" step="0.01" v-model.number="form.speedVolume" class="form-input w-full" placeholder="0.00" />
+                <input type="number" step="0.01" v-model.number="form.speedVolume" min="0" class="form-input w-full" :class="{ 'input-error': err.fuel }" placeholder="0.00" />
               </div>
               <div>
                 <label class="field-label">Power Testing Volume (L)</label>
-                <input type="number" step="0.01" v-model.number="form.speedTestingVolume" class="form-input w-full" placeholder="0.00" />
+                <input type="number" step="0.01" v-model.number="form.speedTestingVolume" min="0" class="form-input w-full" :class="{ 'input-error': err.speedTesting }" placeholder="0.00" />
               </div>
               <div>
                 <label class="field-label">Power Rate (₹/L)</label>
-                <input type="number" step="0.01" v-model.number="form.speedRate" class="form-input w-full" placeholder="0.00" @input="ratesAutoFilled.speed = false" />
+                <input type="number" step="0.01" v-model.number="form.speedRate" min="0" class="form-input w-full" :class="{ 'input-error': err.speedRate }" placeholder="0.00" @input="ratesAutoFilled.speed = false" />
               </div>
             </div>
+            <p v-if="err.speedTesting || err.speedRate" class="field-error -mt-2">{{ err.speedTesting || err.speedRate }}</p>
+            <p v-if="err.fuel" class="field-error">{{ err.fuel }}</p>
             <div class="text-[11.5px] text-[var(--text-3)] px-1">Rates are pre-filled from Settings → Fuel Rates for this date — edit if needed. Testing volume (fuel dispensed for meter calibration) is deducted before revenue is calculated.</div>
           </div>
         </div>
@@ -66,17 +70,17 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="field-label">Cash (₹)</label>
-                <input type="number" step="0.01" v-model.number="form.cash" class="form-input w-full" placeholder="0.00" />
+                <input type="number" step="0.01" v-model.number="form.cash" min="0" class="form-input w-full" :class="{ 'input-error': err.collection }" placeholder="0.00" />
               </div>
               <div>
                 <label class="field-label">Card / Pine Labs (₹)</label>
-                <input type="number" step="0.01" v-model.number="form.card" class="form-input w-full" placeholder="0.00" />
+                <input type="number" step="0.01" v-model.number="form.card" min="0" class="form-input w-full" :class="{ 'input-error': err.collection }" placeholder="0.00" />
               </div>
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="field-label">PhonePe / UPI (₹)</label>
-                <input type="number" step="0.01" v-model.number="form.phonePe" class="form-input w-full" placeholder="0.00" />
+                <input type="number" step="0.01" v-model.number="form.phonePe" min="0" class="form-input w-full" :class="{ 'input-error': err.collection }" placeholder="0.00" />
               </div>
               <div>
                 <label class="field-label">Credit Sale (₹)</label>
@@ -84,9 +88,10 @@
                 <div class="text-[11px] text-[var(--text-3)] mt-1">Auto-filled from Credit Customers for this date.</div>
               </div>
             </div>
+            <p v-if="err.collection" class="field-error -mt-2">{{ err.collection }}</p>
             <div>
               <label class="field-label">Expenses (₹)</label>
-              <input type="number" step="0.01" v-model.number="form.expenses" class="form-input w-full" placeholder="0.00" @input="markExpensesEdited" />
+              <input type="number" step="0.01" v-model.number="form.expenses" min="0" class="form-input w-full" placeholder="0.00" @input="markExpensesEdited" />
               <div class="text-[11px] text-[var(--text-3)] mt-1">Pre-filled from Expenses logged for this date — edit if needed.</div>
             </div>
           </div>
@@ -98,7 +103,8 @@
           <div class="card-body space-y-4">
             <div>
               <label class="field-label">Sale Date *</label>
-              <input type="date" v-model="form.saleDate" class="form-input w-full" required />
+              <input type="date" v-model="form.saleDate" :max="todayLocal" class="form-input w-full" :class="{ 'input-error': err.date }" required />
+              <p v-if="err.date" class="field-error">{{ err.date }}</p>
             </div>
             <div>
               <label class="field-label">Shift</label>
@@ -255,7 +261,44 @@ const calc_revenue  = computed(() => calc_msRev.value + calc_hsdRev.value + calc
 const calc_collection = computed(() => (form.cash||0) + (form.card||0) + (form.phonePe||0) + (form.creditSale||0))
 const calc_balance  = computed(() => calc_collection.value - (form.expenses || 0))
 
+// ── Validation ── shown once Save is pressed, then live as fields are fixed
+const pad        = (n) => String(n).padStart(2, '0')
+const now        = new Date()
+const todayLocal = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+
+const FUELS = [['ms', 'MS'], ['hsd', 'HSD'], ['speed', 'Power']]
+
+const errors = computed(() => {
+  const e = {}
+  if (!form.saleDate)                    e.date = 'Select the sale date.'
+  else if (form.saleDate > todayLocal)   e.date = "Sale date can't be in the future."
+
+  let sold = false
+  for (const [key, label] of FUELS) {
+    const volume  = Number(form[key + 'Volume'] || 0)
+    const testing = Number(form[key + 'TestingVolume'] || 0)
+    if (testing > volume)    e[key + 'Testing'] = `${label} testing volume can't be more than the volume dispensed.`
+    else if (volume - testing > 0) {
+      sold = true
+      if (!(Number(form[key + 'Rate']) > 0)) e[key + 'Rate'] = `Enter the ${label} rate.`
+    }
+  }
+  if (!sold && !FUELS.some(([k]) => e[k + 'Testing'])) e.fuel = 'Enter the volume sold for at least one fuel.'
+
+  if (calc_collection.value <= 0) e.collection = 'Enter at least one collection — cash, card or UPI (or credit sales for this date).'
+  return e
+})
+
+const submitted = ref(false)
+const err       = computed(() => submitted.value ? errors.value : {})
+
 async function handleSubmit() {
+  submitted.value = true
+  const messages = Object.values(errors.value)
+  if (messages.length) {
+    ui.error(messages.length === 1 ? messages[0] : `Please fix ${messages.length} highlighted fields.`)
+    return
+  }
   saving.value = true
   try {
     await store.create({ ...form, revenue: calc_revenue.value, balance: calc_balance.value })
@@ -270,5 +313,7 @@ async function handleSubmit() {
 </script>
 
 <style scoped>
+.field-error { font-size:11.5px; color:#ef4444; }
+.input-error { border-color:#ef4444 !important; }
 .field-label { display:block; font-size:11.5px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; }
 </style>
